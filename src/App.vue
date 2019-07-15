@@ -1,18 +1,21 @@
 <template>
-  <v-app dark>
+  <v-app dark class="app">
     <Header/>
-    <v-content>
+    <v-content fluid>
       <router-view></router-view>
     </v-content>
+    <Footer/>
   </v-app>
 </template>
 
 <script>
+import Footer from './components/Footer';
 import Header from './components/Header';
 
 export default {
   name: 'App',
   components: {
+    Footer,
     Header,
   },
   data () {
@@ -22,3 +25,9 @@ export default {
   }
 }
 </script>
+
+<style>
+.app {
+  flex: 1;
+}
+</style>

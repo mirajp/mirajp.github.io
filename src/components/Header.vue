@@ -1,25 +1,32 @@
 <template>
   <v-toolbar dense>
-    <a class="toolbar-logo" href="/">
+    <router-link class="toolbar-logo" to="/" exact>
       <img
         :src="require('../assets/mp_logo.svg')"
         height="32"
       />
-    </a>
+    </router-link>
     <v-toolbar-title class="headline">
       <span class="title font-weight-light">MIRAJ PATEL</span>
     </v-toolbar-title>
     <v-tabs
+        v-model="activeTab"
         align-with-title
         color="#212121"
         :mandatory="false"
         right
-        slider-color="blue"
       >
+        <v-tabs-slider v-show="showSlider" color="red"></v-tabs-slider>
+        <v-tab
+          key="Home"
+          style="visibility: hidden;"
+          to="/"
+        />
         <v-tab
           v-for="tab in tabs"
           :key="tab.name"
-          :to="tab.href"
+          :to="tab"
+          exact
           ripple
         >
           {{ tab.name }}
@@ -29,23 +36,25 @@
 </template>
 
 <script>
+  const tabs = [
+    { name: 'About', href: '/about' },
+    // { name: 'Blog', href: '/blog' },
+    // { name: 'Experiences', href: '/experiences' },
+    // { name: 'Contact', href: '/contact' },
+  ];
+  const activeTab = tabs.find((tab) => window.location.pathname.includes(tab.href));
+    
   export default {
     // color="#f5f5f5" = light tabs
     data() {
       return {
-        activeTab: 'About',
-        tabs: [
-          { name: 'Home', href: '/' },
-          { name: 'About', href: '/about' },
-          { name: 'Blog', href: '/blog' },
-          { name: 'Experiences', href: '/experiences' },
-          { name: 'Contact', href: '/contact' },
-        ]
+        tabs,
+        activeTab: activeTab && activeTab.name || 'Home',
       }
     },
-    methods: {
-      goHome: function() {
-        this.$router.push('/');
+    computed: {
+      showSlider: function() {
+        return this.activeTab !== 'Home' && this.activeTab !== '/';
       }
     }
   }

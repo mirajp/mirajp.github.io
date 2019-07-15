@@ -2,10 +2,10 @@ module.exports = {
     assetsDir: 'static',
     devServer: {
         overlay: {
-            warnings: true,
+            warnings: false,
             errors: true,
         },
     },
-    outputDir: 'docs',
+    outputDir: 'dist',
     publicPath: '/',
 };

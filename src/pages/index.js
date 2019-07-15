@@ -4,8 +4,8 @@ import About from './About';
 import Home from './Home';
 
 const routes = [
-    { path: '/', exact: true, component: Home },
-    { path: '/about', exact: true, component: About },
+    { path: '/', exact: true, component: Home, name: 'Home' },
+    { path: '/about', exact: true, component: About, name: 'About' },
     { path: '*', redirect: '/' },
 ];
 
