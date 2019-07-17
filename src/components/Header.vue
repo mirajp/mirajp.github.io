@@ -16,7 +16,7 @@
         :mandatory="false"
         right
       >
-        <v-tabs-slider v-show="showSlider" color="red"></v-tabs-slider>
+        <v-tabs-slider v-show="showSlider" color="#82B1FF"></v-tabs-slider>
         <v-tab
           key="Home"
           style="visibility: hidden;"

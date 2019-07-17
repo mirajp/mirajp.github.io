@@ -27,6 +27,17 @@ export default {
 </script>
 
 <style>
+html {
+  overflow: auto !important;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  font-size: 1.15rem;
+  min-height: 100vh;
+}
+
 .app {
   flex: 1;
 }
