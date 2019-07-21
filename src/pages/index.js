@@ -3,9 +3,9 @@ import VueRouter from 'vue-router';
 import About from './About';
 import Home from './Home';
 
-const routes = [
-    { path: '/', exact: true, component: Home, name: 'Home' },
-    { path: '/about', exact: true, component: About, name: 'About' },
+export const routes = [
+    { path: '/', exact: true, component: Home, icon: 'dashboard', name: 'Home' },
+    { path: '/about', exact: true, component: About, icon: 'question_answer', name: 'About' },
     { path: '*', redirect: '/' },
 ];
 

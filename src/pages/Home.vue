@@ -11,7 +11,8 @@
             Hello, I'm Miraj Patel.
           </p>
           <vue-typed-js @preStringTyped="updateArticle()" :backDelay="1000" :backSpeed="50" :loop="true" :strings="titles">
-            <p class="display-2 ma-3"> I'm {{ article }}
+            <p class="display-2 ma-1"> I'm {{ article }}
+              <br>
               <span class="typing"></span>
             </p>
           </vue-typed-js>
@@ -36,7 +37,7 @@
         'software engineer.',
         'fullstack developer.',
         'system architect.',
-        '(amateur) UX designer.',
+        '(novice) UX designer.',
         'electrical engineer.',
         'ML/NLP enthusiast.',
       ],
