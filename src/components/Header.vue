@@ -9,54 +9,22 @@
     <v-toolbar-title class="headline">
       <span class="title font-weight-light">MIRAJ PATEL</span>
     </v-toolbar-title>
-    <v-tabs
-        v-model="activeTab"
-        align-with-title
-        color="#212121"
-        :mandatory="false"
-        right
-      >
-        <v-tabs-slider v-show="showSlider" color="#82B1FF"></v-tabs-slider>
-        <v-tab
-          key="Home"
-          style="visibility: hidden;"
-          to="/"
-        />
-        <v-tab
-          v-for="tab in tabs"
-          :key="tab.name"
-          :to="tab"
-          exact
-          ripple
-        >
-          {{ tab.name }}
-        </v-tab>
-    </v-tabs>
+    <mq-layout mq="mobile">
+      <v-toolbar-side-icon @click.stop="$emit('set-drawer', true)"/>
+    </mq-layout>
+    <mq-layout mq="tablet+">
+      <NavTabs/>
+    </mq-layout>
   </v-toolbar>
 </template>
 
 <script>
-  const tabs = [
-    { name: 'About', href: '/about' },
-    // { name: 'Blog', href: '/blog' },
-    // { name: 'Experiences', href: '/experiences' },
-    // { name: 'Contact', href: '/contact' },
-  ];
-  const activeTab = tabs.find((tab) => window.location.pathname.includes(tab.href));
-    
+  import NavTabs from './NavTabs';
+  
   export default {
-    // color="#f5f5f5" = light tabs
-    data() {
-      return {
-        tabs,
-        activeTab: activeTab && activeTab.name || 'Home',
-      }
+    components: {
+      NavTabs,
     },
-    computed: {
-      showSlider: function() {
-        return this.activeTab !== 'Home' && this.activeTab !== '/';
-      }
-    }
   }
 </script>
 

@@ -1,17 +1,17 @@
 <template>
   <v-footer class="footer">
-    <div class="pull-center">
+    <div class="social-icons">
       <v-btn
         v-for="social in socials"
-        :key="social"
+        :key="social.link"
         :href="social.link"
-        class="mx-3 white--text"
+        class="mx-1 white--text"
         icon
       >
         <v-icon size="24px">{{ social.icon }}</v-icon>
       </v-btn>
     </div>
-    <div class="pull-right">
+    <div class="copyright">
       &copy; Miraj Patel {{ new Date().getFullYear() }}
     </div>
   </v-footer>
@@ -45,13 +45,19 @@
   padding-left: 1rem;
 }
 
-.pull-center {
+.social-icons {
   left: 0%;
   right: 0%;
   text-align: center;
 }
 
-.pull-right {
+@media only screen and (max-width: 768px) {
+  .social-icons {
+    text-align: initial;
+  }
+}
+
+.copyright {
   right: 0px;
   padding-right: 1rem;
 }

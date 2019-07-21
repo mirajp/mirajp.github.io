@@ -1,5 +1,6 @@
 import Vue from 'vue';
 
+import './plugins/mq';
 import './plugins/router';
 import './plugins/vuetify';
 
