@@ -33,7 +33,7 @@
 </template>
 
 <script>
-  import { routes as items } from '../pages';
+  import { routes as items } from '@/pages';
   
   export default {
     props: ['isVisible'],

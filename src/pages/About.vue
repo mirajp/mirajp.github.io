@@ -43,8 +43,11 @@
 </template>
 
 <script>
+  import AboutB from './AboutB.md';
+  
   export default {
     data: () => ({
+      html: AboutB.html
     }),
   }
 </script>

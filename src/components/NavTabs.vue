@@ -26,7 +26,7 @@
 </template>
 
 <script>
-  import { routes as tabs } from '../pages';
+  import { routes as tabs } from '@/pages';
 
   const activeTab = tabs.find((tab) => window.location.pathname.includes(tab.href || tab.path));  
 
