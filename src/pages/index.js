@@ -1,12 +1,9 @@
-// import Vue from 'vue';
-// import * as Vue from 'vue/dist/vue.js';
-
 import VueRouter from 'vue-router';
 
 import Article from '../components/Article';
 
-import About from './About';
-import AboutB from './AboutB.md';
+// import About from './About';
+import AboutMd from './About.md';
 import Home from './Home';
 
 function createMarkdownArticle(md) {
@@ -18,7 +15,7 @@ function createMarkdownArticle(md) {
             return {
                 meta,
                 title: meta.title || '',
-                rawHtml: md.html
+                rawHtml: md.html,
             };
         },
     };
@@ -26,8 +23,8 @@ function createMarkdownArticle(md) {
 
 export const routes = [
     { path: '/', exact: true, component: Home, icon: 'dashboard', name: 'Home' },
-    { path: '/about', exact: true, component: About, icon: 'question_answer', name: 'About' },
-    { path: '/aboutB', exact: true, component: createMarkdownArticle(AboutB), icon: 'question_answer', name: 'AboutB' },
+    // { path: '/about', exact: true, component: About, icon: 'question_answer', name: 'About' },
+    { path: '/about', exact: true, component: createMarkdownArticle(AboutMd), icon: 'question_answer', name: 'About' },
     { path: '*', redirect: '/' },
 ];
 
