@@ -101,22 +101,36 @@ body {
     }
 }
 
+@media only screen and (min-width: 1900px) {
+    html {
+        font-size: 22px;
+    }
+}
+*/ @media (min-width: 48rem) {
+    :root {
+        font-size: calc(1rem + ((1vw - 0.55rem)));
+    }
+
+    [class^="v-"] {
+        font-size: 97%;
+    }
+}
+
 .app {
-  flex: 1;
+    flex: 1;
 }
 
 @media only screen and (max-width: 768px) {
-  .display-2 {
-    font-size: 2.4rem !important;
-  }
+    .display-2 {
+        font-size: 2.4rem !important;
+    }
 
-  .display-3 {
-    font-size: 2.6rem !important;
-  }
+    .display-3 {
+        font-size: 2.6rem !important;
+    }
 
-  .display-4 {
-    font-size: 6rem !important;
-  }
+    .display-4 {
+        font-size: 6rem !important;
+    }
 }
-
 </style>
