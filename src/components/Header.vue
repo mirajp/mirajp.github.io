@@ -19,27 +19,33 @@
 </template>
 
 <script>
-  import NavTabs from './NavTabs';
-  
-  export default {
+import NavTabs from "./NavTabs";
+
+export default {
     components: {
-      NavTabs,
-    },
-  }
+        NavTabs
+    }
+};
 </script>
 
 <style>
-.title, .v-toolbar .v-toolbar__title  {
-  width: stretch;
+.title {
+    font-size: 90% !important;
+}
+
+.title,
+.v-toolbar .v-toolbar__title {
+    width: stretch;
 }
 
 .toolbar-logo {
-  display: grid;
-  vertical-align: middle;
+    display: grid;
+    vertical-align: middle;
 }
 
 .toolbar-logo img {
-  /* White */
-  filter: invert(99%) sepia(6%) saturate(327%) hue-rotate(196deg) brightness(114%) contrast(100%);
+    /* White */
+    filter: invert(99%) sepia(6%) saturate(327%) hue-rotate(196deg)
+        brightness(114%) contrast(100%);
 }
 </style>
