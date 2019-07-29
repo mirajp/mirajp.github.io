@@ -4,6 +4,7 @@ import Article from '../components/Article';
 
 // import About from './About';
 import AboutMd from './About.md';
+import Experiences from './Experiences';
 import Home from './Home';
 
 function createMarkdownArticle(md) {
@@ -25,6 +26,7 @@ export const routes = [
     { path: '/', exact: true, component: Home, icon: 'dashboard', name: 'Home' },
     // { path: '/about', exact: true, component: About, icon: 'question_answer', name: 'About' },
     { path: '/about', exact: true, component: createMarkdownArticle(AboutMd), icon: 'question_answer', name: 'About' },
+    // { path: '/experiences', exact: true, component: Experiences, icon: 'question_answer', name: 'Experiences' },
     { path: '*', redirect: '/' },
 ];
 
