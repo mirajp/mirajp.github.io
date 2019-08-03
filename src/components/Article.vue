@@ -17,11 +17,10 @@
 </template>
 
 <script>
-  export default {
-    props: ['meta', 'title', 'rawHtml'],
-  }
+export default {
+    props: ["meta", "title", "rawHtml"]
+};
 </script>
 
 <style>
-
 </style>

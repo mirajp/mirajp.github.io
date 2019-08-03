@@ -26,26 +26,27 @@
 </template>
 
 <script>
-  import { routes as tabs } from '@/pages';
+import { routes as tabs } from "@/pages";
 
-  const activeTab = tabs.find((tab) => window.location.pathname.includes(tab.href || tab.path));  
+const activeTab = tabs.find(tab =>
+    window.location.pathname.includes(tab.href || tab.path)
+);
 
-  export default {
+export default {
     // color="#f5f5f5" = light tabs
     data() {
-      return {
-        activeTab: activeTab && activeTab.name || 'Home',
-        tabs: tabs.filter((tab) => tab.name !== 'Home'),
-      }
+        return {
+            activeTab: (activeTab && activeTab.name) || "Home",
+            tabs: tabs.filter(tab => tab.name !== "Home")
+        };
     },
     computed: {
-      showSlider: function() {
-        return this.activeTab !== 'Home' && this.activeTab !== '/';
-      }
+        showSlider: function() {
+            return this.activeTab !== "Home" && this.activeTab !== "/";
+        }
     }
-  }
+};
 </script>
 
 <style>
-
 </style>

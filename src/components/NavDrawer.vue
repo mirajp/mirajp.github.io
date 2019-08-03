@@ -33,36 +33,36 @@
 </template>
 
 <script>
-  import { routes as items } from '@/pages';
-  
-  export default {
-    props: ['isVisible'],
+import { routes as items } from "@/pages";
+
+export default {
+    props: ["isVisible"],
     data() {
-      return {
-        drawer: this.isVisible,
-        items: items.filter((item) => !!item.name),
-      }
+        return {
+            drawer: this.isVisible,
+            items: items.filter(item => !!item.name)
+        };
     },
     methods: {
-      onClick(item) {
-        this.$router.push(item.href || item.path);
-      },
+        onClick(item) {
+            this.$router.push(item.href || item.path);
+        }
     },
     watch: {
-      drawer(newVal) {
-        if (this.isVisible !== this.drawer) {
-          this.$emit('set-drawer', newVal);
+        drawer(newVal) {
+            if (this.isVisible !== this.drawer) {
+                this.$emit("set-drawer", newVal);
+            }
+        },
+        isVisible(newVal) {
+            this.drawer = newVal;
         }
-      },
-      isVisible(newVal) {
-        this.drawer = newVal;
-      }
     }
-  }
+};
 </script>
 
 <style>
 .v-avatar {
-  background-color: darkgray;
+    background-color: darkgray;
 }
 </style>

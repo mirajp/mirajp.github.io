@@ -106,7 +106,8 @@ body {
         font-size: 22px;
     }
 }
-*/ @media (min-width: 48rem) {
+
+@media (min-width: 48rem) {
     :root {
         font-size: calc(1rem + ((1vw - 0.55rem)));
     }

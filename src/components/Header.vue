@@ -48,4 +48,16 @@ export default {
     filter: invert(99%) sepia(6%) saturate(327%) hue-rotate(196deg)
         brightness(114%) contrast(100%);
 }
+
+@media (min-width: 48rem) {
+    nav.v-toolbar {
+        font-size: calc(1rem + ((1vw - 0.55rem))) !important;
+    }
+}
+
+@media (min-width: 64rem) {
+    nav.v-toolbar {
+        font-size: calc(1rem + ((1vw - 0.75rem))) !important;
+    }
+}
 </style>

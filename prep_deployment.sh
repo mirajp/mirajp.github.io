@@ -1,7 +1,8 @@
 #!/bin/bash
 
 echo "Removing old static files"
-rm -r ./static
+rm -r ./static/js
+rm -r ./static/css
 
 
 echo "Building app..."
