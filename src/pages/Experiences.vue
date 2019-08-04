@@ -10,7 +10,7 @@
         <div>
             <v-layout justify-center wrap>
                 <v-flex mx-3 px-1 class="experiences-content" :class="$mq | mq({mobile: 'xs11', tablet: 'xs7'})">
-                    <v-expansion-panel v-model="selected" @input="onSelectionChange" :dark="false" focusable inset mandatory popout>
+                    <v-expansion-panel v-model="selected" @input="onSelectionChange" :dark="false" focusable popout>
                         <v-expansion-panel-content v-for="experience in experiences" :key="experience.title">
                             <template v-slot:header>
                                 <v-layout>
@@ -68,7 +68,7 @@ const experiences = [
         location: locations.highbridge
     },
     {
-        title: "Cooper Union",
+        title: "Cooper Union (Master of Engineering)",
         start: "Sep 2016",
         end: "Dec 2017",
         icon: "fas fa-chalkboard-teacher",
@@ -96,7 +96,7 @@ const experiences = [
         location: locations.high5
     },
     {
-        title: "Cooper Union",
+        title: "Cooper Union (Bachelor of Engineering)",
         start: "Sep 2012",
         end: "May 2016",
         icon: "fas fa-graduation-cap",
