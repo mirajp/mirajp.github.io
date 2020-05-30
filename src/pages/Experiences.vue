@@ -3,7 +3,7 @@
         <v-container>
             <v-layout justify-center wrap>
                 <v-flex text-xs-center mb-3 xs12>
-                    <div class="display-2 font-weight-bold">Experiences</div>
+                    <h1 class="display-2 font-weight-bold">Experiences</h1>
                 </v-flex>
             </v-layout>
         </v-container>
@@ -55,6 +55,15 @@ const locations = {
         lat: 40.734074,
         lng: -73.987904,
         placeId: "ChIJ6xMfG81KwokRmS2aPAToHOc",
+        zoom: 16.75
+    },
+    google: {
+        image:
+            "https://lh5.googleusercontent.com/p/AF1QipNKhKHnqfkXPp2WKUMsipDpezAz9GB05P-hHwMP=s1016-k-no",
+        imageSize: [64, 64],
+        lat: 37.403498,
+        lng: -122.035999,
+        placeId: "ChIJXz2lB6e3j4ARSDB210CbuE0",
         zoom: 16.75
     },
     high5: {
@@ -115,12 +124,23 @@ const locations = {
 
 const experiences = [
     {
-        title: "Microsoft",
-        location: locations.microsoft,
-        start: "Jun 2018",
+        title: "Google",
+        location: locations.google,
+        start: "May 2020",
         end: "Present",
         icon: "fas fa-spinner fa-spin",
         iconColor: "primary",
+        description: `
+            - Organize the world's information and make it universally accessible and useful
+        `
+    },
+    {
+        title: "Microsoft",
+        location: locations.microsoft,
+        start: "Jun 2018",
+        end: "April 2020",
+        icon: "fab fa-windows",
+        iconColor: "success",
         description: `
             - Revamp legacy Knockout web application as a React SPA conforming to Fluent UI company standard using modern open source guidelines and frameworks (e.g. Office Fabric UI and React Json Schema Form) <br>
             - Published (internal) documentation for ramping up to company standards and the team's development, testing, and deployment practices, as well as user-level technical documentation for application components <br>

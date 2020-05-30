@@ -57,11 +57,11 @@ body {
     }
 
     .display-3 {
-        font-size: 2.6rem !important;
+        font-size: 2.8rem !important;
     }
 
     .display-4 {
-        font-size: 6rem !important;
+        font-size: 3.2rem !important;
     }
 }
 
@@ -127,11 +127,11 @@ body {
     }
 
     .display-3 {
-        font-size: 2.6rem !important;
+        font-size: 2.8rem !important;
     }
 
     .display-4 {
-        font-size: 6rem !important;
+        font-size: 3.2rem !important;
     }
 }
 </style>

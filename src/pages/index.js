@@ -23,10 +23,10 @@ function createMarkdownArticle(md) {
 }
 
 export const routes = [
-    { path: '/', exact: true, component: Home, icon: 'dashboard', name: 'Home' },
+    { path: '/', exact: true, component: Home, icon: 'home', name: 'Home' },
     // { path: '/about', exact: true, component: About, icon: 'question_answer', name: 'About' },
-    { path: '/about', exact: true, component: createMarkdownArticle(AboutMd), icon: 'question_answer', name: 'About' },
-    { path: '/experiences', exact: true, component: Experiences, icon: 'question_answer', name: 'Experiences' },
+    { path: '/about', exact: true, component: createMarkdownArticle(AboutMd), icon: 'assignment_ind', name: 'About' },
+    { path: '/experiences', exact: true, component: Experiences, icon: 'psychology', name: 'Experiences' },
     { path: '*', redirect: '/' },
 ];
 

@@ -10,7 +10,8 @@ module.exports = {
             .options({
                 vue: true,
             })
-            .tap(options => {
+            // eslint-disable-next-line no-unused-vars
+            .tap((options) => {
                 return {
                     vue: {
                         root: 'markdown-body',

@@ -30,7 +30,7 @@ export default {
             if (this.i === -1) return "a";
             return (
                 (vowels.includes(
-                    this.titles[this.i].replace("(", "").substr(0, 1)
+                    this.titles[this.i].replace("(", "").substr(0, 1).toLowerCase() // Not totally accurate (should be syllable based)
                 ) &&
                     "an") ||
                 "a"
@@ -41,11 +41,9 @@ export default {
         i: -1,
         titles: [
             "software engineer.",
-            "fullstack developer.",
-            "system architect.",
-            "(novice) UX designer.",
-            "electrical engineer.",
-            "ML/NLP enthusiast."
+            "frontend developer\n(Vue and React).",
+            "AI (ML/NLP) enthusiast.",
+            "New Yorker."
         ],
         updater: undefined
     }),
@@ -88,5 +86,9 @@ div.background-img > div.v-image__image.v-image__image--cover {
 
 .typed-element > p {
     width: 100%;
+}
+
+.typing {
+  white-space: pre-wrap;
 }
 </style>
