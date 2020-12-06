@@ -77,7 +77,7 @@ const locations = {
     },
     highbridge: {
         image:
-            "https://upload.wikimedia.org/wikipedia/en/7/71/Highbridge_Capital_Management.png",
+            "https://www.martingroupservices.com/wp-content/uploads/2019/01/Picture-2-e1459806839343.jpg",
         imageSize: [64, 32],
         lat: 40.76373,
         lng: -73.976326,
@@ -86,7 +86,7 @@ const locations = {
     },
     microsoft: {
         image:
-            "http://northshoreext.com/main/projects/pphotos/MicrosoftBuilding50.jpg",
+            "https://lh3.googleusercontent.com/proxy/GUVCiZfdxPl2196mcdeneotY98WaLsKLZEuLKVzf47HU2T8t8RtQSn23bAWybz_An3GefGHyC6g4gyJM5cqmlMY4fSPkQK283XF27ElPH5zvtCNbx3PMppiozSmuFQ",
         imageSize: [64, 48],
         lat: 47.646849,
         lng: -122.133132,
@@ -104,7 +104,7 @@ const locations = {
     },
     qhss: {
         image:
-            "https://lh5.googleusercontent.com/p/AF1QipPbdlXROyroeB6_7celh6QWP4ptKOHWVI7FbDjk=w203-h205-k-no",
+            "https://lh5.googleusercontent.com/p/AF1QipOE7XW9OvVlO8DCT6A1ecaEsagcuZQgkdXDrqDy=w203-h360-k-no",
         imageSize: [48, 48],
         lat: 40.700928,
         lng: -73.798312,
@@ -138,7 +138,7 @@ const experiences = [
         title: "Microsoft",
         location: locations.microsoft,
         start: "Jun 2018",
-        end: "April 2020",
+        end: "Apr 2020",
         icon: "fab fa-windows",
         iconColor: "success",
         description: `
@@ -224,8 +224,8 @@ const experiences = [
     {
         title: "NYC School Construction Authority",
         location: locations.nycsca,
-        start: "June 2014",
-        end: "Aug 2014",
+        start: "June 2012",
+        end: "Aug 2012",
         icon: "fas fa-tools",
         iconColor: "success",
         description: `
