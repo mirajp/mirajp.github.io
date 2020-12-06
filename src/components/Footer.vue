@@ -26,11 +26,6 @@ export default {
                 link: "https://www.linkedin.com/in/mirajp/"
             },
             { icon: "fab fa-github", link: "https://www.github.com/mirajp/" },
-            {
-                icon: "fas fa-paperclip",
-                link:
-                    "https://github.com/mirajp/mirajp.github.io/blob/master/PatelMiraj_Resume.pdf"
-            }
         ]
     })
 };
