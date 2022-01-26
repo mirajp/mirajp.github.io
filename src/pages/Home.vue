@@ -1,25 +1,29 @@
 <template>
-  <div style="height: 100%">
-    <div class="background-img" />
-    <v-container fluid class="centered-content">
-      <v-layout
-        text-xs-center
-        wrap
-      >
-        <v-flex xs12 style="align-self: center">
-          <p class="display-4 font-weight-bold ma-3">
-            Hello, I'm Miraj Patel.
-          </p>
-          <vue-typed-js @preStringTyped="updateArticle()" :backDelay="1000" :backSpeed="50" :loop="true" :strings="titles">
-            <p class="display-2 ma-1"> I'm {{ article }}
-              <br>
-              <span class="typing"></span>
-            </p>
-          </vue-typed-js>
-        </v-flex>
-      </v-layout>
-    </v-container>
-  </div>
+    <div style="height: 100%">
+        <div class="background-img" />
+        <v-container fluid class="centered-content">
+            <v-layout text-xs-center wrap>
+                <v-flex xs12 style="align-self: center">
+                    <p class="display-4 font-weight-bold ma-3">
+                        Hello, I'm Miraj Patel.
+                    </p>
+                    <vue-typed-js
+                        @preStringTyped="updateArticle()"
+                        :backDelay="1000"
+                        :backSpeed="50"
+                        :loop="true"
+                        :strings="titles"
+                    >
+                        <p class="display-2 ma-1">
+                            I'm {{ article }}
+                            <br />
+                            <span class="typing"></span>
+                        </p>
+                    </vue-typed-js>
+                </v-flex>
+            </v-layout>
+        </v-container>
+    </div>
 </template>
 
 <script>
@@ -30,7 +34,10 @@ export default {
             if (this.i === -1) return "a";
             return (
                 (vowels.includes(
-                    this.titles[this.i].replace("(", "").substr(0, 1).toLowerCase() // Not totally accurate (should be syllable based)
+                    this.titles[this.i]
+                        .replace("(", "")
+                        .substr(0, 1)
+                        .toLowerCase() // Not totally accurate (should be syllable based)
                 ) &&
                     "an") ||
                 "a"
@@ -57,7 +64,15 @@ export default {
 
 <style>
 div.background-img {
-    background-image: url("https://i.imgur.com/AmWThvw.jpg");
+    /* background-image: url("https://i.imgur.com/AmWThvw.jpg"); */
+    background-image: -webkit-image-set(
+        /* desktop */ url("https://i.imgur.com/AmWThvw.jpg") 1x,
+        url("https://i.imgur.com/kMuKTT7.png") 2x
+    );
+    background-image: image-set(
+        /* desktop */ url("https://i.imgur.com/AmWThvw.jpg") 1x,
+        url("https://i.imgur.com/kMuKTT7.png") 2x
+    );
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
@@ -89,6 +104,6 @@ div.background-img > div.v-image__image.v-image__image--cover {
 }
 
 .typing {
-  white-space: pre-wrap;
+    white-space: pre-wrap;
 }
 </style>
