@@ -9,20 +9,43 @@
         </v-container>
         <div>
             <v-layout justify-center wrap>
-                <v-flex mx-3 px-1 class="experiences-content" :class="$mq | mq({mobile: 'xs11', tablet: 'xs7'})">
-                    <v-expansion-panel v-model="selected" @input="onSelectionChange" :dark="false" focusable popout>
-                        <v-expansion-panel-content v-for="experience in experiences" :key="experience.title">
+                <v-flex
+                    mx-3
+                    px-1
+                    class="experiences-content"
+                    :class="$mq | mq({ mobile: 'xs11', tablet: 'xs7' })"
+                >
+                    <v-expansion-panel
+                        v-model="selected"
+                        @input="onSelectionChange"
+                        :dark="false"
+                        focusable
+                        popout
+                    >
+                        <v-expansion-panel-content
+                            v-for="experience in experiences"
+                            :key="experience.title"
+                        >
                             <template v-slot:header>
                                 <v-layout>
                                     <v-flex xs9>{{ experience.title }}</v-flex>
-                                    <v-flex xs3 class="text--secondary experience-time">{{ experience.start }} - {{ experience.end }}</v-flex>
+                                    <v-flex
+                                        xs3
+                                        class="text--secondary experience-time"
+                                        >{{ experience.start }} -
+                                        {{ experience.end }}</v-flex
+                                    >
                                 </v-layout>
                             </template>
                             <template v-slot:actions>
-                                <v-icon :color="experience.iconColor">{{ experience.icon }}</v-icon>
+                                <v-icon :color="experience.iconColor">{{
+                                    experience.icon
+                                }}</v-icon>
                             </template>
                             <v-card>
-                                <v-card-text v-html="experience.description"></v-card-text>
+                                <v-card-text
+                                    v-html="experience.description"
+                                ></v-card-text>
                             </v-card>
                         </v-expansion-panel-content>
                     </v-expansion-panel>
@@ -34,7 +57,7 @@
                 </v-flex>
             </v-layout>
         </div>
-    </div>    
+    </div>
 </template>
 
 <script>
@@ -42,7 +65,7 @@ const locations = {
     cooper: {
         image:
             "https://lh5.googleusercontent.com/p/AF1QipMUjWIFz0-EgjfIikStdNVRCLKTVe-ZmeEausc8=w203-h152-k-no",
-        imageSize: [64, 48],
+        imageSize: [96, 72],
         lat: 40.728676,
         lng: -73.990121,
         placeId: "ChIJw0Jyc5tZwokRiUlYgQpGE6A",
@@ -51,16 +74,25 @@ const locations = {
     conEd: {
         image:
             "https://www.coned.com/-/media/images/coned/07_about-coned/72_careers/about-us-cd.jpg",
-        imageSize: [48, 64],
+        imageSize: [64, 96],
         lat: 40.734074,
         lng: -73.987904,
         placeId: "ChIJ6xMfG81KwokRmS2aPAToHOc",
         zoom: 16.75
     },
-    google: {
+    googleNYC: {
+        image:
+            "https://lh5.googleusercontent.com/p/AF1QipOlFtHcOulnHluMr1Ji9GSjwwiFVOccTq2cD1kG=s481-k-no",
+        imageSize: [96, 96],
+        lat: 40.742521,
+        lng: -74.005956,
+        placeId: "ChIJw2lMFL9ZwokRosAtly52YX4",
+        zoom: 16.75
+    },
+    googleSVL: {
         image:
             "https://lh5.googleusercontent.com/p/AF1QipNKhKHnqfkXPp2WKUMsipDpezAz9GB05P-hHwMP=s1016-k-no",
-        imageSize: [64, 64],
+        imageSize: [72, 72],
         lat: 37.403498,
         lng: -122.035999,
         placeId: "ChIJXz2lB6e3j4ARSDB210CbuE0",
@@ -78,7 +110,7 @@ const locations = {
     highbridge: {
         image:
             "https://www.martingroupservices.com/wp-content/uploads/2019/01/Picture-2-e1459806839343.jpg",
-        imageSize: [64, 32],
+        imageSize: [96, 128],
         lat: 40.76373,
         lng: -73.976326,
         placeId: "ChIJMRtanfBYwokRGJCJs7Vdkfk",
@@ -86,8 +118,8 @@ const locations = {
     },
     microsoft: {
         image:
-            "https://lh3.googleusercontent.com/proxy/GUVCiZfdxPl2196mcdeneotY98WaLsKLZEuLKVzf47HU2T8t8RtQSn23bAWybz_An3GefGHyC6g4gyJM5cqmlMY4fSPkQK283XF27ElPH5zvtCNbx3PMppiozSmuFQ",
-        imageSize: [64, 48],
+            "https://lh5.googleusercontent.com/p/AF1QipNZMaYuw0mfluCLvuuaICC26_6lk1_SwmVvcmi3=w397-h298-k-no",
+        imageSize: [128, 96],
         lat: 47.646849,
         lng: -122.133132,
         placeId: "ChIJ3aK9H29tkFQRVxqMRoCeZCA",
@@ -104,8 +136,8 @@ const locations = {
     },
     qhss: {
         image:
-            "https://lh5.googleusercontent.com/p/AF1QipOE7XW9OvVlO8DCT6A1ecaEsagcuZQgkdXDrqDy=w203-h360-k-no",
-        imageSize: [48, 48],
+            "https://lh6.googleusercontent.com/-otY8gT31Rss/AAAAAAAAAAI/AAAAAAAAAAA/MwOe6uBhdvY/s44-p-k-no-ns-nd/photo.jpg",
+        imageSize: [64, 64],
         lat: 40.700928,
         lng: -73.798312,
         placeId: "ChIJcz3WsdlgwokRzh5TVkk0nTg",
@@ -114,7 +146,7 @@ const locations = {
     library: {
         image:
             "https://mir-s3-cdn-cf.behance.net/project_modules/max_1200/45393617730611.562be4fd42d0e.jpg",
-        imageSize: [64, 48],
+        imageSize: [128, 96],
         lat: 40.757789,
         lng: -73.828914,
         placeId: "ChIJmaf80mxgwokRbFh-95Kek3k",
@@ -124,14 +156,28 @@ const locations = {
 
 const experiences = [
     {
-        title: "Google",
-        location: locations.google,
-        start: "May 2020",
+        title: "Marketing @ Google",
+        location: locations.googleNYC,
+        start: "July 2021",
         end: "Present",
         icon: "fas fa-spinner fa-spin",
         iconColor: "primary",
         description: `
-            - Organize the world's information and make it universally accessible and useful
+            - UI/UX/API development @ <a href="https://www.thinkwithgoogle.com/">Think with Google</a> <br>
+        `
+    },
+    {
+        title: "Payments @ Google",
+        location: locations.googleSVL,
+        start: "May 2020",
+        end: "June 2021",
+        icon: "fab fa-google-pay",
+        iconColor: "success",
+        description: `
+            - Design next-gen UX components/flows in tandem with UX and motion designers <br>
+            - Develop next-gen UX components for Payments portal as well as various buy flows in first party services (e.g., Youtube, Ads, Store) <br>
+            - Integrate launch- and experiment- related telemetry for AB testing and launch analytics to ensure updates are well-received by users <br>
+            - Support legacy Payments web platform consumed by various integrators like Ads, Cloud, Stadia, and Google Home Assistant mobile apps <br>
         `
     },
     {
@@ -198,7 +244,6 @@ const experiences = [
         location: locations.high5,
         start: "Jun 2014",
         end: "Aug 2014",
-        // icon: "mdi-dice-multiple",
         icon: "fas fa-dice",
         iconColor: "success",
         description: `
@@ -264,25 +309,14 @@ const experiences = [
 function createMarker(map, place, locationRef, onClick) {
     const markerImage = {
         url: locationRef.image,
-        /*
-            (place.photos &&
-                place.photos.length &&
-                place.photos[0].getUrl({
-                    maxWidth: 128,
-                    maxHeight: 128
-                })) || place.icon */
-        // eslint-disable-next-line no-undef
         size: new google.maps.Size(...(locationRef.imageSize || [128, 128])),
-        // eslint-disable-next-line no-undef
         origin: new google.maps.Point(0, 0),
-        // eslint-disable-next-line no-undef
         anchor: new google.maps.Point(24, 24),
-        // eslint-disable-next-line no-undef
         scaledSize: new google.maps.Size(
             ...(locationRef.imageSize || [128, 128])
         )
     };
-    // eslint-disable-next-line no-undef
+
     const marker = new google.maps.Marker({
         map: map,
         icon: markerImage,
@@ -302,27 +336,17 @@ function createMarker(map, place, locationRef, onClick) {
 export default {
     mounted() {
         const selectedLocation = experiences[this.selected].location;
-        // eslint-disable-next-line no-undef
         this.map = new google.maps.Map(document.getElementById("map"), {
             center: selectedLocation,
             zoom: selectedLocation.zoom || 17.75
         });
 
-        // eslint-disable-next-line no-undef
         const service = new google.maps.places.PlacesService(this.map);
         this.placesService = service;
-        // eslint-disable-next-line no-undef
+
         const infoWindow = new google.maps.InfoWindow();
         this.infoWindow = infoWindow;
-        /*
-        this.markers = Object.keys(locations).map(location => {
-            // eslint-disable-next-line no-undef
-            return new google.maps.Marker({
-                position: locations[location],
-                map: this.map
-            });
-        });
-        */
+
         Object.keys(locations).map(location => {
             service.getDetails(
                 {
@@ -338,7 +362,6 @@ export default {
                     ]
                 },
                 (place, status) => {
-                    // eslint-disable-next-line no-undef
                     if (status == google.maps.places.PlacesServiceStatus.OK) {
                         createMarker(
                             this.map,
@@ -421,12 +444,6 @@ div.experiences-content
 .v-expansion-panel__header__icon {
     margin-left: 0.25rem;
 }
-
-/*
-.v-expansion-panel__header__icon > i.v-icon.mdi {
-    font-size: xx-large;
-}
-*/
 
 .v-expansion-panel__container--active
     > .v-expansion-panel__header
