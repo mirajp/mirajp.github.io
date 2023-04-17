@@ -93,7 +93,7 @@
         }
         const routes = ['/', '/about', '/experiences'];
         if (routes.includes(l.pathname)) {
-          updateCanonicalUrl(l.origin + l.pathname);
+            updateCanonicalUrl((l.origin + l.pathname).replace('http:', 'https:'));
         }
       }(window.location))
     </script>
