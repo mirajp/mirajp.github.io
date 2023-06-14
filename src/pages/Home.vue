@@ -50,6 +50,7 @@ export default {
       "(frontend) software engineer.",
       "CS education mentor.",
       "AI (ML/NLP) enthusiast.",
+      "Analytics investigator.",
       "Windows fanboy.",
       "Native NYer (and 🍕 connoisseur)."
     ]
@@ -64,14 +65,14 @@ export default {
 
 <style>
 div.background-img {
-  /* background-image: url("https://i.imgur.com/AmWThvw.jpg"); */
+  background-image: url("https://i.imgur.com/AmWThvw.jpg");
   background-image: -webkit-image-set(
-    /* desktop */ url("https://i.imgur.com/AmWThvw.jpg") 1x,
-    url("https://i.imgur.com/kMuKTT7.png") 2x
+    url("https://i.imgur.com/kMuKTT7.png") 400dpi,
+    url("https://i.imgur.com/AmWThvw.jpg") 2x
   );
   background-image: image-set(
-    /* desktop */ url("https://i.imgur.com/AmWThvw.jpg") 1x,
-    url("https://i.imgur.com/kMuKTT7.png") 2x
+    url("https://i.imgur.com/kMuKTT7.png") 400dpi,
+    url("https://i.imgur.com/AmWThvw.jpg") 2x
   );
   background-position: center;
   background-repeat: no-repeat;
