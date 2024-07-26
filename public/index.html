@@ -1,68 +1,104 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html lang="en-US">
-
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <!-- <meta name="viewport" content="width=device-width,initial-scale=1.0"> -->
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
-    <link rel="sitemap" type="application/xml" href="/sitemap.xml">
-    <link rel="icon" href="<%= BASE_URL %>favicon.ico">
-    <link rel="icon" type="image/png" sizes="32x32" href="<%= BASE_URL %>favicon-32x32.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="<%= BASE_URL %>apple-touch-icon-180.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="<%= BASE_URL %>android-chrome-192x192.png">
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui"
+    />
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
+    <link rel="icon" href="<%= BASE_URL %>favicon.ico" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="<%= BASE_URL %>favicon-32x32.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="<%= BASE_URL %>apple-touch-icon-180.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="192x192"
+      href="<%= BASE_URL %>android-chrome-192x192.png"
+    />
 
     <title>Miraj Patel | Software Engineer</title>
-    <meta name="description" content="Miraj Patel, frontend software engineer. Miraj Patel is a software engineer at Google, and
+    <meta
+      name="description"
+      content="Miraj Patel, frontend software engineer. Miraj Patel is a software engineer at Google, and
         has experience building frontend web apps, APIs, test frameworks, A/B testing platforms, CI/CD pipelines,
-        and ETL pipelines in the worlds of finance and cloud.">
-    <meta property="og:title" content="Miraj Patel">
-    <meta property="og:description" content="Miraj Patel, frontend software engineer. Miraj Patel is a software engineer at Google, and
+        and ETL pipelines in the worlds of finance and cloud."
+    />
+    <meta property="og:title" content="Miraj Patel - Software Engineer" />
+    <meta
+      property="og:description"
+      content="Miraj Patel, frontend software engineer. Miraj Patel is a software engineer at Google, and
         has experience building frontend web apps, APIs, test frameworks, A/B testing platforms, CI/CD pipelines,
-        and ETL pipelines in the worlds of finance and cloud.">
-    <meta property="og:type" content="website">
-    <meta property="og:image" content="<%= BASE_URL %>android-chrome-192x192.png">
+        and ETL pipelines in the worlds of finance and cloud."
+    />
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:image"
+      content="<%= BASE_URL %>android-chrome-192x192.png"
+    />
 
-    <link rel="canonical" href="https://miraj.dev">
-    <meta property="og:url" content="https://miraj.dev/">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Material+Icons">
+    <link rel="canonical" href="https://miraj.dev/" />
+    <meta property="og:url" content="https://miraj.dev/" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Material+Icons"
+    />
 
     <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@3.x/css/materialdesignicons.min.css"> -->
     <script src="https://use.fontawesome.com/releases/v5.14.0/js/all.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-144728300-1"></script>
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=UA-144728300-1"
+    ></script>
     <script>
       window.dataLayer = window.dataLayer || [];
 
       function gtag() {
         dataLayer.push(arguments);
       }
-      gtag('js', new Date());
+      gtag("js", new Date());
 
-      gtag('config', 'UA-144728300-1');
+      gtag("config", "UA-144728300-1");
     </script>
 
     <!-- Start Single Page Apps for GitHub Pages -->
     <script type="text/javascript">
       function updateCanonicalUrl(url) {
         // From https://www.tektutorialshub.com/angular/angular-canonical-url/
-        const head = window.document.getElementsByTagName('head')[0];
-        let element = window.document.querySelector(`link[rel='canonical']`) || null;
+        const head = window.document.getElementsByTagName("head")[0];
+        let element =
+          window.document.querySelector(`link[rel='canonical']`) || null;
         if (element == null) {
-          element = window.document.createElement('link');
+          element = window.document.createElement("link");
           head.appendChild(element);
         }
-        element.setAttribute('rel', 'canonical');
-        element.setAttribute('href', url);
+        element.setAttribute("rel", "canonical");
+        element.setAttribute("href", url);
 
-        let metaOgUrl = window.document.querySelector(`meta[property='og:url']`) || null;
+        let metaOgUrl =
+          window.document.querySelector(`meta[property='og:url']`) || null;
         if (metaOgUrl == null) {
-          metaOgUrl = window.document.createElement('meta');
+          metaOgUrl = window.document.createElement("meta");
           head.appendChild(metaOgUrl);
         }
-        metaOgUrl.setAttribute('content', url);
+        metaOgUrl.setAttribute("content", url);
       }
 
       // Single Page Apps for GitHub Pages
@@ -79,34 +115,46 @@
       (function(l) {
         if (l.search) {
           var q = {};
-          l.search.slice(1).split('&').forEach(function(v) {
-            var a = v.split('=');
-            q[a[0]] = a.slice(1).join('=').replace(/~and~/g, '&');
-          });
+          l.search
+            .slice(1)
+            .split("&")
+            .forEach(function(v) {
+              var a = v.split("=");
+              q[a[0]] = a
+                .slice(1)
+                .join("=")
+                .replace(/~and~/g, "&");
+            });
           if (q.p !== undefined) {
-            window.history.replaceState(null, null,
-              l.pathname.slice(0, -1) + (q.p || '') +
-              (q.q ? ('?' + q.q) : '') +
-              l.hash
+            window.history.replaceState(
+              null,
+              null,
+              l.pathname.slice(0, -1) +
+                (q.p || "") +
+                (q.q ? "?" + q.q : "") +
+                l.hash
             );
           }
         }
-        const routes = ['/', '/about', '/experiences'];
+        const routes = ["/", "/about", "/experiences"];
         if (routes.includes(l.pathname)) {
-            updateCanonicalUrl((l.origin + l.pathname).replace('http:', 'https:'));
+          updateCanonicalUrl(
+            (l.origin + l.pathname).replace("http:", "https:")
+          );
         }
-      }(window.location))
+      })(window.location);
     </script>
     <!-- End Single Page Apps for GitHub Pages -->
 
-    <style>
-    </style>
+    <style></style>
   </head>
 
   <body>
     <noscript>
-      <strong>We're sorry but this site doesn't work properly without JavaScript enabled. Please enable it to
-        continue.</strong>
+      <strong
+        >We're sorry but this site doesn't work properly without JavaScript
+        enabled. Please enable it to continue.</strong
+      >
     </noscript>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDKiZ-ltrQacBVMr6MwY5kty9y7iV0ghC4&libraries=places"></script>
     <div id="app">
@@ -114,5 +162,4 @@
     </div>
     <!-- built files will be auto injected -->
   </body>
-
 </html>
