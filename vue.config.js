@@ -19,7 +19,7 @@ module.exports = {
                 };
             });
     },
-    assetsDir: 'static',
+    assetsDir: 'web-static',
     devServer: {
         overlay: {
             warnings: false,
