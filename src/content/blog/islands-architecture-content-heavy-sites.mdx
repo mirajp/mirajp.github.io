@@ -1,0 +1,36 @@
+---
+title: "Islands Architecture for Content-Heavy Sites"
+description: "When most of a page is static content and a small part of it needs to be interactive, shipping a full SPA bundle is the wrong trade."
+publishDate: 2026-08-29T00:00
+tags: ["architecture", "performance", "frontend"]
+---
+
+import Callout from "../../components/Callout.astro";
+
+Most content-heavy pages — a marketing page, a CMS-driven landing page, a blog — are 90% static markup and 10% interactive widget: a filter, a carousel, a form. Shipping a full single-page-app bundle to hydrate the entire page for that 10% is the wrong trade. Islands architecture is the pattern for making the trade correctly: render everything to static HTML by default, and hydrate only the specific components that need interactivity.
+
+## What actually changes
+
+The mental model shifts from "the page is an app" to "the page is a document with a few embedded apps." Concretely, that means:
+
+- The bulk of the DOM ships as plain HTML with no attached JavaScript at all.
+- Each interactive component ("island") loads and hydrates independently — usually lazily, on visibility or on interaction, rather than all at once on page load.
+- Islands don't share a global client-side router or a global store by default. State that needs to cross islands has to be deliberately wired up (URL params, a small shared store, or custom events), which is a feature, not a limitation — it stops one island's bug or bundle size from taking down the rest of the page.
+
+## Where it earns its keep
+
+A CMS-driven page is the clearest case: editorial content, a hero, a grid of cards — all static — next to a personalization widget or a live pricing calculator that genuinely needs client-side JS. Rendering the whole thing as an SPA means every visitor downloads and executes the pricing calculator's dependencies just to read the editorial copy. With islands, that cost is paid only by the fraction of visitors who scroll to, or interact with, the calculator.
+
+<Callout type="tip">
+  Lazy-hydrating on visibility (an intersection observer, effectively) rather
+  than on page load is usually the single highest-leverage change — it defers
+  cost for anything below the fold instead of front-loading all of it.
+</Callout>
+
+## Where it doesn't
+
+Islands architecture assumes most of the page really is static. A page that's genuinely an application — a dashboard, an editor, anything where most of the DOM is state-driven and interactive — doesn't benefit from artificially splitting itself into islands; you'd just be re-adding a coordination layer between fragments that all needed to be one app anyway. The pattern is a good fit for content sites with pockets of interactivity, not a universal replacement for client-rendered apps.
+
+## The coordination tax is real
+
+The trade-off worth naming honestly: cross-island communication takes more deliberate design than it would inside a single app with one store. Passing state from a filter island to a results island means picking a mechanism — URL state, a tiny pub/sub layer, custom DOM events — and that's a decision you don't have to make in a monolithic SPA. For a handful of loosely coupled widgets, that's a small price. For a page that turns out to need five islands sharing state constantly, it's a sign the page might actually be an app in disguise, and a different architecture is more honest about what it is.

@@ -1,0 +1,122 @@
+---
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import { site } from "../data/site";
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+  description?: string;
+  ogType?: "website" | "article";
+  publishDate?: Date;
+  updatedDate?: Date;
+  noIndex?: boolean;
+}
+
+const {
+  title,
+  description = site.summary,
+  ogType = "website",
+  publishDate,
+  updatedDate,
+  noIndex = false,
+} = Astro.props;
+
+const pageTitle = title === site.name ? title : `${title} · ${site.name}`;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+
+const personSchema = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: site.name,
+  jobTitle: site.role,
+  url: site.url,
+  email: `mailto:${site.email}`,
+  sameAs: [site.github, site.linkedin],
+};
+
+const articleSchema =
+  ogType === "article"
+    ? {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        headline: title,
+        description,
+        author: { "@type": "Person", name: site.name },
+        datePublished: publishDate?.toISOString(),
+        dateModified: (updatedDate ?? publishDate)?.toISOString(),
+      }
+    : null;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <script is:inline>
+      (function () {
+        try {
+          var stored = localStorage.getItem("theme");
+          var theme =
+            stored || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+          document.documentElement.setAttribute("data-theme", theme);
+        } catch (e) {}
+      })();
+    </script>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+    {noIndex && <meta name="robots" content="noindex,nofollow" />}
+
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:image" content={new URL("/og-image.png", Astro.site)} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={new URL("/og-image.png", Astro.site)} />
+
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(personSchema)} />
+    {articleSchema && <script type="application/ld+json" is:inline set:html={JSON.stringify(articleSchema)} />}
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-VGCR2QJP07"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-VGCR2QJP07');
+    </script>
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to content</a>
+    <Header />
+    <main id="main-content">
+      <slot />
+    </main>
+    <Footer />
+    <script is:inline>
+      console.log(
+        "%cHey — you opened the console.",
+        "font-size:15px; font-weight:700; color:#0F6E5C;"
+      );
+      console.log(
+        "%cAstro + React islands + Tailwind, statically generated, hosted on GitHub Pages. Full breakdown at /colophon if you're curious how it's put together.",
+        "font-size:12px; color:#5E6A67; line-height:1.6;"
+      );
+    </script>
+  </body>
+</html>

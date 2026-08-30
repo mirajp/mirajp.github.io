@@ -1,0 +1,19 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PomodoroTimer from "../../components/tools/PomodoroTimer";
+---
+
+<BaseLayout title="Pomodoro Timer" description="A simple, configurable focus timer.">
+  <div class="mx-auto max-w-2xl px-4 py-16 sm:px-6 lg:px-8">
+    <a href="/tools/" class="text-sm text-foreground-muted hover:text-foreground">&larr; All tools</a>
+    <p class="mt-6 font-mono text-sm font-medium text-primary">Tools</p>
+    <h1 class="mt-2">Pomodoro Timer</h1>
+    <p class="mt-3 text-foreground-muted">
+      Work in focused intervals, then take a short break. Adjust the lengths below before you start.
+    </p>
+
+    <div class="mt-10">
+      <PomodoroTimer client:load />
+    </div>
+  </div>
+</BaseLayout>

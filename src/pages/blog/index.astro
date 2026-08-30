@@ -1,0 +1,118 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import BlogCard from "../../components/BlogCard.astro";
+import { getCollection } from "astro:content";
+import { getReadingTime } from "../../utils/readingTime";
+import { site } from "../../data/site";
+
+const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
+  (a, b) => +b.data.publishDate - +a.data.publishDate
+);
+
+const allTags = [...new Set(posts.flatMap((p) => p.data.tags))].sort();
+---
+
+<BaseLayout title="Blog" description={`Writing on frontend architecture, design systems, and AI tooling, from ${site.name}.`}>
+  <div class="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
+    <p class="font-mono text-sm font-medium text-primary">Blog</p>
+    <h1 class="mt-3">Just my 2¢</h1>
+
+    {
+      allTags.length > 0 && (
+        <div class="mt-8 flex flex-wrap gap-2" role="group" aria-label="Filter posts by tag">
+          <button
+            type="button"
+            data-tag-filter="all"
+            aria-pressed="true"
+            class="filter-pill rounded-full border border-primary bg-primary px-3.5 py-1.5 text-xs font-medium text-white"
+          >
+            All
+          </button>
+          {allTags.map((tag) => (
+            <button
+              type="button"
+              data-tag-filter={tag}
+              aria-pressed="false"
+              class="filter-pill rounded-full border border-border px-3.5 py-1.5 text-xs font-medium text-foreground-muted hover:border-primary hover:text-primary"
+            >
+              {tag}
+            </button>
+          ))}
+        </div>
+      )
+    }
+
+    <div id="post-list" class="mt-6 divide-y divide-border">
+      {
+        posts.map((post) => (
+          <div data-tags={post.data.tags.join(",")}>
+            <BlogCard
+              slug={post.id}
+              title={post.data.title}
+              description={post.data.description}
+              publishDate={post.data.publishDate}
+              readingTime={getReadingTime(post.body ?? "")}
+              tags={post.data.tags}
+            />
+          </div>
+        ))
+      }
+    </div>
+
+    <p id="no-results" hidden class="py-12 text-center text-foreground-muted">
+      No posts match that tag yet.
+    </p>
+  </div>
+</BaseLayout>
+
+<script is:inline>
+  (function () {
+    var pills = document.querySelectorAll(".filter-pill");
+    var items = document.querySelectorAll("#post-list > [data-tags]");
+    var noResults = document.getElementById("no-results");
+
+    function applyFilter(tag) {
+      pills.forEach(function (p) {
+        var active = p.getAttribute("data-tag-filter") === tag;
+        p.setAttribute("aria-pressed", String(active));
+        p.classList.toggle("border-primary", active);
+        p.classList.toggle("bg-primary", active);
+        p.classList.toggle("text-white", active);
+        p.classList.toggle("text-foreground-muted", !active);
+      });
+
+      var visibleCount = 0;
+      items.forEach(function (item) {
+        var tags = (item.getAttribute("data-tags") || "").split(",");
+        var show = tag === "all" || tags.indexOf(tag) !== -1;
+        item.hidden = !show;
+        if (show) visibleCount++;
+      });
+
+      if (noResults) noResults.hidden = visibleCount !== 0;
+    }
+
+    pills.forEach(function (pill) {
+      pill.addEventListener("click", function () {
+        var tag = pill.getAttribute("data-tag-filter");
+        applyFilter(tag);
+
+        // Reflect the filter in the URL (replace, not push, so clicking
+        // around pills doesn't fill up the back-button history) so a link
+        // to a specific tag stays shareable both in and back out.
+        var url = tag === "all" ? window.location.pathname : window.location.pathname + "?tag=" + encodeURIComponent(tag);
+        window.history.replaceState(null, "", url);
+      });
+    });
+
+    // Pre-filter on load if the URL already names a tag (e.g. /blog/?tag=ai
+    // linked from the homepage) and that tag actually exists on this page.
+    var requestedTag = new URLSearchParams(window.location.search).get("tag");
+    var matchingPill = requestedTag
+      ? Array.prototype.find.call(pills, function (p) {
+          return p.getAttribute("data-tag-filter") === requestedTag;
+        })
+      : null;
+    if (matchingPill) applyFilter(requestedTag);
+  })();
+</script>

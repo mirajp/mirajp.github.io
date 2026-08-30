@@ -1,0 +1,23 @@
+---
+interface Metric {
+  value: string;
+  label: string;
+}
+
+interface Props {
+  metrics: readonly Metric[];
+}
+
+const { metrics } = Astro.props;
+---
+
+<dl class="grid grid-cols-2 gap-8 sm:grid-cols-4">
+  {
+    metrics.map((metric) => (
+      <div class="border-l-2 border-border pl-4">
+        <dd class="font-mono text-3xl font-bold text-foreground sm:text-4xl">{metric.value}</dd>
+        <dt class="mt-1 text-sm text-foreground-muted">{metric.label}</dt>
+      </div>
+    ))
+  }
+</dl>

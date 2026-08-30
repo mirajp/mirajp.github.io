@@ -1,0 +1,131 @@
+---
+import { getCollection, render } from "astro:content";
+import BaseLayout from "./BaseLayout.astro";
+import TableOfContents from "../components/TableOfContents.astro";
+import BlogCard from "../components/BlogCard.astro";
+import Tag from "../components/Tag.astro";
+import { getReadingTime, formatDate } from "../utils/readingTime";
+
+interface Props {
+  slug: string;
+}
+
+const { slug } = Astro.props;
+
+const allPosts = await getCollection("blog", ({ data }) => !data.draft);
+const post = allPosts.find((p) => p.id === slug);
+
+if (!post) {
+  throw new Error(`Blog post not found for slug: ${slug}`);
+}
+
+const { Content, headings } = await render(post);
+const readingTime = getReadingTime(post.body ?? "");
+
+// Related posts: prefer shared tags, fall back to most recent others.
+const related = allPosts
+  .filter((p) => p.id !== post.id)
+  .map((p) => ({
+    post: p,
+    score: p.data.tags.filter((t) => post.data.tags.includes(t)).length,
+  }))
+  .sort((a, b) => b.score - a.score || +b.post.data.publishDate - +a.post.data.publishDate)
+  .slice(0, 2)
+  .map((r) => r.post);
+---
+
+<BaseLayout
+  title={post.data.title}
+  description={post.data.description}
+  ogType="article"
+  publishDate={post.data.publishDate}
+  updatedDate={post.data.updatedDate}
+>
+  <div id="reading-progress" class="fixed left-0 top-0 z-[60] h-[3px] w-0 bg-primary transition-[width] duration-100" aria-hidden="true"></div>
+
+  <div class="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+    <a href="/blog/" class="text-sm text-foreground-muted hover:text-foreground">&larr; Back to blog</a>
+
+    <div class="mt-6 grid grid-cols-1 gap-10 lg:grid-cols-[1fr_260px]">
+      <article id="post-article" class="min-w-0">
+        <header>
+          <div class="flex flex-wrap items-center gap-3 text-sm text-foreground-muted">
+            <time datetime={post.data.publishDate.toISOString()}>
+              {formatDate(post.data.publishDate)}
+            </time>
+            <span aria-hidden="true">·</span>
+            <span>{readingTime}</span>
+            <span aria-hidden="true">·</span>
+            <span>{post.data.author}</span>
+          </div>
+          <h1 class="mt-3 !text-4xl sm:!text-5xl">{post.data.title}</h1>
+          <ul class="mt-4 flex flex-wrap gap-2" aria-label="Tags">
+            {post.data.tags.map((tag) => <li><Tag label={tag} /></li>)}
+          </ul>
+        </header>
+
+        <nav aria-label="Table of contents" class="mt-8 lg:hidden">
+          <TableOfContents headings={headings} />
+        </nav>
+
+        <div class="measure markdown-body mt-10">
+          <Content />
+        </div>
+      </article>
+
+      <aside class="hidden lg:block">
+        <div class="sticky top-24">
+          <TableOfContents headings={headings} />
+        </div>
+      </aside>
+    </div>
+
+    {
+      related.length > 0 && (
+        <section class="mt-16 border-t border-border pt-10" aria-labelledby="related-heading">
+          <h2 id="related-heading" class="!text-2xl !font-semibold">
+            Related posts
+          </h2>
+          <div class="mt-2 divide-y divide-border">
+            {related.map((p) => (
+              <BlogCard
+                slug={p.id}
+                title={p.data.title}
+                description={p.data.description}
+                publishDate={p.data.publishDate}
+                readingTime={getReadingTime(p.body ?? "")}
+                tags={p.data.tags}
+              />
+            ))}
+          </div>
+        </section>
+      )
+    }
+  </div>
+</BaseLayout>
+
+<script is:inline>
+  (function () {
+    var bar = document.getElementById("reading-progress");
+    var article = document.getElementById("post-article");
+    if (!bar || !article) return;
+
+    function update() {
+      var rect = article.getBoundingClientRect();
+      var articleTop = rect.top + window.scrollY;
+      var articleHeight = rect.height;
+      var scrollable = articleHeight - window.innerHeight;
+      if (scrollable <= 0) {
+        bar.style.width = "100%";
+        return;
+      }
+      var progress = (window.scrollY - articleTop) / scrollable;
+      progress = Math.max(0, Math.min(1, progress));
+      bar.style.width = (progress * 100).toFixed(1) + "%";
+    }
+
+    document.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    update();
+  })();
+</script>

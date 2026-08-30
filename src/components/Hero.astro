@@ -1,0 +1,34 @@
+---
+import Button from "./Button.astro";
+
+interface Cta {
+  label: string;
+  href: string;
+  disabled?: boolean;
+}
+
+interface Props {
+  eyebrow: string;
+  subhead: string;
+  primaryCta: Cta;
+  secondaryCta: Cta;
+}
+
+const { eyebrow, subhead, primaryCta, secondaryCta } = Astro.props;
+---
+
+<section class="border-b border-border">
+  <div class="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
+    <p class="font-mono text-sm font-medium text-primary">{eyebrow}</p>
+    <h1 class="mt-4 max-w-3xl !text-5xl sm:!text-6xl lg:!text-7xl">
+      <slot />
+    </h1>
+    <p class="measure mt-6 text-lg leading-relaxed text-foreground-muted sm:text-xl">
+      {subhead}
+    </p>
+    <div class="mt-10 flex flex-wrap gap-4">
+      <Button href={!primaryCta.disabled && primaryCta.href || ''} size="lg" disabled={primaryCta.disabled}>{primaryCta.label}</Button>
+      <Button href={!secondaryCta.disabled && secondaryCta.href || ''} variant="secondary" size="lg" disabled={secondaryCta.disabled}>{secondaryCta.label}</Button>
+    </div>
+  </div>
+</section>

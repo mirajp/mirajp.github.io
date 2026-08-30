@@ -1,0 +1,26 @@
+---
+import { site, nav } from "../data/site";
+const year = new Date().getFullYear();
+---
+
+<footer class="border-t border-border">
+  <div class="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+    <div class="flex flex-col gap-8 sm:flex-row sm:flex-row sm:items-center sm:justify-between">
+      <div class="max-w-sm">
+        <p class="font-mono text-base font-semibold text-foreground">{site.name}</p>
+        <p class="mt-1 text-sm leading-relaxed text-foreground-muted">{site.footerTagline}</p>
+        <p class="mt-1 text-sm leading-relaxed text-foreground-muted">&copy; {year} {site.name}. Built with Astro (and Claude).</p>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <p class="flex gap-4">
+          <a href={site.github} target="_blank" class="hover:text-foreground">GitHub</a>
+          <a href={site.linkedin} target="_blank" class="hover:text-foreground">LinkedIn</a>
+        </p>
+        <p class="flex gap-4 text-xs text-foreground-muted">
+          <a href="/colophon/" class="hover:text-foreground">Colophon</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>

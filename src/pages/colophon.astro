@@ -1,0 +1,91 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Colophon" description="How this site is built — stack, type, color, performance, and hosting.">
+  <div class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
+    <p class="font-mono text-sm font-medium text-primary">Colophon</p>
+    <h1 class="mt-3 max-w-2xl">How this site is built</h1>
+    <p class="measure mt-4 text-lg text-foreground-muted">
+      The kind of page that only exists because someone cared how the thing was put together, not just what
+      it says.
+    </p>
+
+    <div class="measure mt-14 space-y-12">
+      <section>
+        <h2 class="!text-2xl !font-bold">Stack</h2>
+        <p class="mt-3 text-[15px] leading-relaxed text-foreground-muted">
+          Astro, statically generated — no server at runtime, so there's nothing to keep up at 2 a.m. Interactive
+          pieces (this site's contact form, the two tools, the search dialog you can open with
+          <kbd class="rounded border border-border bg-surface px-1.5 py-0.5 font-mono text-xs">⌘K</kbd>) are
+          islands: React only hydrates on the pages that actually need it, so a page like this one ships zero
+          component JavaScript. Content lives in Markdown/MDX collections. Styling is Tailwind, on design tokens
+          rather than one-off values.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="!text-2xl !font-bold">Type &amp; color</h2>
+        <p class="mt-3 text-[15px] leading-relaxed text-foreground-muted">
+          Headlines are set in Bricolage Grotesque; body copy stays in Inter; code stays in JetBrains Mono. The
+          first version of this site used Inter for everything and the same blue every AI-scaffolded site
+          reaches for by default — it worked, but it was invisible in the way templates are invisible. The
+          palette now is warm paper instead of stark white, deep pine teal instead of generic SaaS blue, with a
+          coral second color that has an actual job (tags, accents, hover states) rather than sitting unused in
+          a token file.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="!text-2xl !font-bold">Accessibility</h2>
+        <p class="mt-3 text-[15px] leading-relaxed text-foreground-muted">
+          Every foreground/background pairing in the palette — including white text on every button color, in
+          both themes — is checked against WCAG AA contrast requirements computationally, not by eye. Focus
+          rings are never suppressed. Motion respects <code class="rounded bg-surface px-1 py-0.5 text-xs">prefers-reduced-motion</code> everywhere,
+          including the little status-dot pulse on the homepage. Semantic HTML first; ARIA only where semantic
+          HTML runs out.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="!text-2xl !font-bold">Hosting</h2>
+        <p class="mt-3 text-[15px] leading-relaxed text-foreground-muted">
+          GitHub Pages, deployed by a GitHub Actions workflow on every push to <code class="rounded bg-surface px-1 py-0.5 text-xs">main</code>.
+          Fully static output — no database, no API routes, nothing that can go down independently of GitHub
+          itself.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="!text-2xl !font-bold">Changelog</h2>
+        <p class="mt-3 text-[15px] leading-relaxed text-foreground-muted">
+          This site is built in the open, iteratively — worth tracking honestly rather than pretending it
+          arrived finished.
+        </p>
+        <ol class="mt-6 space-y-6 border-l border-border pl-6">
+          <li>
+            <p class="font-mono text-xs text-foreground-muted">v3</p>
+            <p class="mt-1 text-[15px] text-foreground">
+              Added the command palette (<kbd class="rounded border border-border bg-surface px-1 py-0.5 text-xs">⌘K</kbd>),
+              this Uses page, this Colophon, the Now card, a reading-progress bar on posts, and a contrast
+              checker under Tools.
+            </p>
+          </li>
+          <li>
+            <p class="font-mono text-xs text-foreground-muted">v2</p>
+            <p class="mt-1 text-[15px] text-foreground">
+              Full redesign off the v1 palette and type — warm paper instead of stark white, teal and coral
+              instead of generic SaaS blue, Bricolage Grotesque for headlines. Added Photos.
+            </p>
+          </li>
+          <li>
+            <p class="font-mono text-xs text-foreground-muted">v1</p>
+            <p class="mt-1 text-[15px] text-foreground">
+              First build: Astro, the core pages, the blog, and the two original tools.
+            </p>
+          </li>
+        </ol>
+      </section>
+    </div>
+  </div>
+</BaseLayout>

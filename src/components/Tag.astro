@@ -1,0 +1,22 @@
+---
+interface Props {
+  label: string;
+  class?: string;
+}
+
+const { label, class: className = "" } = Astro.props;
+
+// Deterministic pseudo-random rotation from the label itself, so the same
+// tag always tilts the same way (no layout shift between renders) while
+// different tags in a row don't all lean the same direction.
+let hash = 0;
+for (let i = 0; i < label.length; i++) hash = (hash * 31 + label.charCodeAt(i)) % 1000;
+const angle = (hash % 5) - 2; // -2deg .. 2deg
+---
+
+<span
+  class={`inline-block rounded-md border border-coral-600/30 bg-coral-400/10 px-2.5 py-1 font-mono text-xs text-coral-600 dark:border-coral-400/30 dark:text-coral-400 ${className}`}
+  style={`transform: rotate(${angle}deg);`}
+>
+  {label}
+</span>

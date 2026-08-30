@@ -1,0 +1,107 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { site } from "../data/site";
+import { skills, education, experience } from "../data/experience";
+import Tag from "../components/Tag.astro";
+
+const current = experience[0];
+
+// Adapted from the design system docs supplied for this site
+// (design_system.md / crisp_SKILL.md) — these are the stated principles
+// behind the redesign, not invented ones.
+const principles = [
+  {
+    title: "Content first",
+    body: "Design should never get in the way of what someone came here to read.",
+  },
+  {
+    title: "Accessibility overrides aesthetics",
+    body: "When the two conflict, accessibility wins — that's not a guideline, it's the order of priority.",
+  },
+  {
+    title: "Performance is a feature",
+    body: "Part of the spec from day one, not a checklist item at the end.",
+  },
+  {
+    title: "Consistency beats novelty",
+    body: "Reusable patterns over one-off visual experiments, even when the experiment is tempting.",
+  },
+];
+---
+
+<BaseLayout title="About" description={`About ${site.name} — ${site.role}.`}>
+  <div class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
+    <p class="font-mono text-sm font-medium text-primary">About</p>
+    <h1 class="mt-3 max-w-3xl">A little context</h1>
+
+    <div class="mt-12 grid grid-cols-1 gap-12 lg:grid-cols-[1fr_320px]">
+      <div class="measure space-y-5 text-[17px] leading-[1.75] text-foreground">
+        <p>
+          I'm currently a {current.title} on {current.team} at {current.company}, where I set architecture
+          direction and technical standards for a shared design system and component library used across
+          multiple product teams. Day to day, that spans everything from TypeScript infrastructure decisions
+          to hands-on implementation to design and code review.
+        </p>
+        <p>
+          Before that, I worked on Google Payments' buy-flow surfaces (100M+ users), modernized internal
+          tooling on Azure at Microsoft, and built real-time trade processing systems at Highbridge Capital
+          Management. Across all of it, the throughline has been the same: taking a feature from an early
+          concept through to a production system that holds up at scale — and building the frontend
+          infrastructure, design systems, and (more recently) AI tooling that make the next feature faster to
+          ship correctly.
+        </p>
+        <p>
+          A good amount of my recent work sits at that AI-tooling intersection specifically — prompt and
+          context engineering on one side, the code-review standards that keep agent output honest on the
+          other. My short version: an agent is a fast, occasionally overconfident collaborator, not a
+          replacement for judgment. I'll write more about that on <a href="/blog/?tag=ai" class="text-primary hover:text-primary-hover">the blog &rarr;</a>
+        </p>
+      </div>
+
+      {/* Hiding education on about page
+      <aside class="space-y-8">
+        <div>
+          <h2 class="!text-sm !font-semibold uppercase tracking-wide text-foreground-muted">Location</h2>
+          <p class="mt-2 text-foreground">{site.location}</p>
+        </div>
+        <div>
+          <h2 class="!text-sm !font-semibold uppercase tracking-wide text-foreground-muted">Education</h2>
+          <ul class="mt-2 space-y-3">
+            {
+              education.map((entry) => (
+                <li>
+                  <p class="text-foreground">{entry.degree}</p>
+                  <p class="text-sm text-foreground-muted">{entry.school}</p>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+        <div>
+          <h2 class="!text-sm !font-semibold uppercase tracking-wide text-foreground-muted">Elsewhere</h2>
+          <ul class="mt-2 space-y-2">
+            <li><a href={site.github} class="text-primary hover:text-primary-hover" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+            <li><a href={site.linkedin} class="text-primary hover:text-primary-hover" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
+          </ul>
+        </div>
+      </aside>
+      */}
+    </div>
+
+    <section class="mt-20">
+      <h2 class="!text-3xl !font-bold">Skills</h2>
+      <div class="mt-8 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        {
+          skills.map((group) => (
+            <div>
+              <h3 class="!text-base !font-semibold text-foreground">{group.category}</h3>
+              <ul class="mt-3 flex flex-wrap gap-2">
+                {group.items.map((item) => <li><Tag label={item} /></li>)}
+              </ul>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+  </div>
+</BaseLayout>

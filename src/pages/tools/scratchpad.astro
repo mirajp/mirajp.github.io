@@ -1,0 +1,19 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import MarkdownScratchpad from "../../components/tools/MarkdownScratchpad";
+---
+
+<BaseLayout title="Markdown Scratchpad" description="A two-pane Markdown editor with a live preview.">
+  <div class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
+    <a href="/tools/" class="text-sm text-foreground-muted hover:text-foreground">&larr; All tools</a>
+    <p class="mt-6 font-mono text-sm font-medium text-primary">Tools</p>
+    <h1 class="mt-2">Markdown Scratchpad</h1>
+    <p class="mt-3 max-w-2xl text-foreground-muted">
+      Quick notes with a live preview. Saved to this browser only.
+    </p>
+
+    <div class="mt-10">
+      <MarkdownScratchpad client:load />
+    </div>
+  </div>
+</BaseLayout>

@@ -1,0 +1,81 @@
+---
+import { Image } from "astro:assets";
+import type { PhotoProps } from "../data/photos";
+
+interface Props {
+  photo: PhotoProps;
+  index: number;
+}
+
+const { photo, index } = Astro.props;
+
+const tiltClass = index % 2 === 0 ? "tilt-left" : "tilt-right";
+
+const fills = [
+  "linear-gradient(135deg, var(--teal-100), var(--teal-300))",
+  "linear-gradient(135deg, var(--coral-400), var(--teal-200))",
+  "linear-gradient(135deg, var(--gray-200), var(--teal-100))",
+  "linear-gradient(135deg, var(--teal-300), var(--gray-300))",
+];
+
+const fill = fills[index % fills.length];
+
+const orientation = photo.orientation ?? "portrait";
+const aspectClass =
+  orientation === "landscape" ? "aspect-[4/3]" : "aspect-[4/5]";
+
+const objectPosition = photo.objectPosition ?? "center";
+---
+
+<figure class={`${tiltClass} transition-transform duration-200 ease-[var(--ease-standard)]`}>
+  <div class="relative rounded-md border border-border bg-surface p-2.5 shadow-sm">
+    <span
+      class="absolute -top-2.5 left-6 h-5 w-12 rotate-[-6deg] rounded-[2px] bg-coral-400/40"
+      aria-hidden="true"
+    ></span>
+
+    {
+      photo.src ? (
+        <Image
+          src={photo.src}
+          alt={photo.place ?? "Travel photo"}
+          width={640}
+          class={`${aspectClass} w-full rounded-sm object-cover`}
+          style={`object-position: ${objectPosition};`}
+        />
+      ) : (
+        <div
+          class={`flex ${aspectClass} w-full items-center justify-center rounded-sm`}
+          style={`background-image: ${fill};`}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            opacity="0.85"
+            aria-hidden="true"
+          >
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+            <circle cx="12" cy="13" r="4" />
+          </svg>
+        </div>
+      )
+    }
+
+    <figcaption class="px-1 pb-1 pt-3">
+      <p class="font-display text-sm font-semibold text-foreground">
+        {photo.place}
+      </p>
+
+      <p class="mt-1 text-xs leading-relaxed text-foreground-muted">
+        {photo.caption}
+      </p>
+    </figcaption>
+  </div>
+</figure>

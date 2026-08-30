@@ -1,0 +1,80 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Hero from "../components/Hero.astro";
+import NowCard from "../components/NowCard.astro";
+import Metrics from "../components/Metrics.astro";
+import ProjectCard from "../components/ProjectCard.astro";
+import BlogCard from "../components/BlogCard.astro";
+import Button from "../components/Button.astro";
+import { site } from "../data/site";
+import { projects } from "../data/projects";
+import { experience, headlineMetrics } from "../data/experience";
+import { getCollection } from "astro:content";
+import { getReadingTime } from "../utils/readingTime";
+
+const featuredProjects = projects.filter((p) => p.featured);
+
+const recentPosts = (await getCollection("blog", ({ data }) => !data.draft))
+  .sort((a, b) => +b.data.publishDate - +a.data.publishDate)
+  .slice(0, 3);
+
+const currentRole = experience[0];
+
+// Split the tagline so exactly one phrase can get the hand-drawn squiggle
+// accent — falls back to the plain string if the phrase isn't found, so
+// this never silently breaks if the tagline copy changes later.
+const squiggleWord = "people";
+const [taglineBefore, taglineAfter] = site.tagline.includes(squiggleWord)
+  ? site.tagline.split(squiggleWord)
+  : [site.tagline, null];
+---
+
+<BaseLayout title={site.name} description={site.summary}>
+  <Hero
+    eyebrow={`${currentRole.title} · ${currentRole.company}`}
+    subhead={site.summary}
+    primaryCta={{ label: "View Projects", href: "/projects/" }}
+    secondaryCta={{ label: "Blog (🛠️ 🚧)", href: "/blog/" }}
+  >
+    {taglineBefore}{taglineAfter !== null && <span class="squiggle">{squiggleWord}</span>}{taglineAfter}
+  </Hero>
+
+  <NowCard />
+
+  <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
+    <Metrics metrics={headlineMetrics} />
+  </section>
+
+  <section class="border-t border-border bg-surface/50">
+    <div class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
+      <div class="flex items-baseline justify-between">
+        <h2 class="!text-3xl !font-bold">Featured work</h2>
+        <Button href="/projects/" variant="text">View all projects &rarr;</Button>
+      </div>
+      <div class="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {featuredProjects.map((project) => <ProjectCard project={project} />)}
+      </div>
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
+    <div class="flex items-baseline justify-between">
+      <h2 class="!text-3xl !font-bold">Recent writing</h2>
+      <Button href="/blog/" variant="text">View all posts &rarr;</Button>
+    </div>
+    <div class="mt-4 divide-y divide-border">
+      {
+        recentPosts.map((post) => (
+          <BlogCard
+            slug={post.id}
+            title={post.data.title}
+            description={post.data.description}
+            publishDate={post.data.publishDate}
+            readingTime={getReadingTime(post.body ?? "")}
+            tags={post.data.tags}
+          />
+        ))
+      }
+    </div>
+  </section>
+</BaseLayout>

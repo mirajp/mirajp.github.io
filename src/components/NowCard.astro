@@ -1,0 +1,30 @@
+---
+const lastUpdated = new Date().toLocaleDateString("en-US", {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+});
+---
+
+<section class="border-b border-border bg-surface/50">
+  <div class="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+    <div class="flex flex-col gap-4 rounded-lg border border-border bg-background p-6 sm:flex-row sm:items-start sm:justify-between">
+      <div class="flex gap-3">
+        <span class="relative mt-1.5 flex h-2 w-2 shrink-0">
+          <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"></span>
+          <span class="relative inline-flex h-2 w-2 rounded-full bg-primary"></span>
+        </span>
+        <div>
+          <p class="!font-display text-sm font-semibold uppercase tracking-wide text-foreground-muted">Now</p>
+          <p class="mt-1.5 text-[15px] leading-relaxed text-foreground">
+            Technical lead on Google's Ads Marketing MarTech team — currently focused on AI agent tooling, design systems, launching new incentive programs, and deploying experiential seasonal campaigns.
+          </p>
+          <p class="mt-2 text-[15px] italic leading-relaxed text-foreground-muted">
+            Outside of work: <span class="not-italic">Dog spotting, sunset chasing, pastry hunting.</span>
+          </p>
+        </div>
+      </div>
+      <p class="shrink-0 font-mono text-xs text-foreground-muted sm:text-right">Last updated<br />{lastUpdated}</p>
+    </div>
+  </div>
+</section>
