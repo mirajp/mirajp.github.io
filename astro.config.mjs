@@ -10,15 +10,15 @@ import tailwindcss from "@tailwindcss/vite";
 // ---------------------------------------------------------------------------
 // `site` must point at the real, published URL for correct canonical tags,
 // the sitemap, and RSS (removed). The defaults below assume a GitHub *user*
-// Pages repo named `mirajp.github.io`, which publishes at the domain root
+// Pages repo named `miraj.dev`, which publishes at the domain root
 // (no `base`).
 //
 // If you instead deploy this as a *project* page (e.g. a repo named
-// `portfolio` published at mirajp.github.io/portfolio), update BOTH values:
-//   site: "https://mirajp.github.io",
+// `portfolio` published at miraj.dev/portfolio), update BOTH values:
+//   site: "https://miraj.dev",
 //   base: "/portfolio",
 export default defineConfig({
-  site: "https://mirajp.github.io",
+  site: "https://miraj.dev",
   // base: "/portfolio", // uncomment + set if deploying as a project page
 
   output: "static", // GitHub Pages only serves static files, no SSR adapter

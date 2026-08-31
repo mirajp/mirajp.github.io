@@ -1,6 +1,6 @@
 export const site = {
   name: "Miraj Patel",
-  role: "Software Engineer & Technical Lead",
+  role: "Software Engineer & Tech Lead",
   location: "New York, NY",
   github: "https://github.com/mirajp",
   linkedin: "https://www.linkedin.com/in/mirajp",

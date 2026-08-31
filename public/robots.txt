@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://mirajp.github.io/sitemap-index.xml
+Sitemap: https://miraj.dev/sitemap-index.xml
