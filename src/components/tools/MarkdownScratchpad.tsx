@@ -22,23 +22,30 @@ export default function MarkdownScratchpad() {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [copyLabel, setCopyLabel] = useState("Copy as HTML");
   const [storageAvailable, setStorageAvailable] = useState(true);
+
   const saveTimeoutRef = useRef<number | undefined>(undefined);
 
   // Load any previously-saved note once, on mount (client only).
   useEffect(() => {
     try {
       const stored = window.localStorage.getItem(STORAGE_KEY);
-      if (stored !== null) setContent(stored);
+
+      if (stored !== null) {
+        setContent(stored);
+      }
     } catch {
       setStorageAvailable(false);
     }
+
     setLoaded(true);
   }, []);
 
   // Debounced autosave.
   useEffect(() => {
     if (!loaded || !storageAvailable) return;
+
     window.clearTimeout(saveTimeoutRef.current);
+
     saveTimeoutRef.current = window.setTimeout(() => {
       try {
         window.localStorage.setItem(STORAGE_KEY, content);
@@ -47,6 +54,7 @@ export default function MarkdownScratchpad() {
         setStorageAvailable(false);
       }
     }, 400);
+
     return () => window.clearTimeout(saveTimeoutRef.current);
   }, [content, loaded, storageAvailable]);
 
@@ -57,23 +65,40 @@ export default function MarkdownScratchpad() {
 
   function handleClear() {
     if (!window.confirm("Clear the scratchpad? This can't be undone.")) return;
+
     setContent("");
   }
 
   async function handleCopyHtml() {
     try {
       await navigator.clipboard.writeText(html);
+
       setCopyLabel("Copied!");
-      window.setTimeout(() => setCopyLabel("Copy as HTML"), 1800);
+
+      window.setTimeout(() => {
+        setCopyLabel("Copy as HTML");
+      }, 1800);
     } catch {
       setCopyLabel("Couldn't copy");
-      window.setTimeout(() => setCopyLabel("Copy as HTML"), 1800);
+
+      window.setTimeout(() => {
+        setCopyLabel("Copy as HTML");
+      }, 1800);
     }
   }
 
+  function handleExportPdf() {
+    if (!content.trim()) return;
+
+    // Use the browser's native print engine. The @media print rules in
+    // global.css hide the editor/chrome and print only the rendered Markdown.
+    // This produces real text in the PDF and avoids html2canvas artifacts.
+    window.print();
+  }
+
   return (
-    <div className="rounded-xl border border-border bg-surface">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-3">
+    <div className="scratchpad-shell rounded-xl border border-border bg-surface">
+      <div className="scratchpad-toolbar flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-3">
         <p className="text-xs text-foreground-muted">
           {storageAvailable
             ? lastSaved
@@ -81,6 +106,7 @@ export default function MarkdownScratchpad() {
               : "Autosaves as you type"
             : "Storage unavailable in this browser — notes won't persist on reload"}
         </p>
+
         <div className="flex gap-2">
           <button
             type="button"
@@ -89,6 +115,16 @@ export default function MarkdownScratchpad() {
           >
             {copyLabel}
           </button>
+
+          <button
+            type="button"
+            onClick={handleExportPdf}
+            disabled={!content.trim()}
+            className="min-h-9 rounded-md border border-border px-3 text-xs font-medium text-foreground hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Export PDF
+          </button>
+
           <button
             type="button"
             onClick={handleClear}
@@ -99,11 +135,12 @@ export default function MarkdownScratchpad() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 divide-y divide-border lg:grid-cols-2 lg:divide-x lg:divide-y-0">
-        <div className="flex flex-col">
+      <div className="scratchpad-content grid grid-cols-1 divide-y divide-border lg:grid-cols-2 lg:divide-x lg:divide-y-0">
+        <div className="scratchpad-editor flex flex-col">
           <label htmlFor="scratchpad-input" className="sr-only">
             Markdown input
           </label>
+
           <textarea
             id="scratchpad-input"
             value={content}
@@ -113,10 +150,11 @@ export default function MarkdownScratchpad() {
           />
         </div>
 
-        <div className="min-h-[420px] flex-1 overflow-auto p-5">
+        <div className="scratchpad-preview min-h-[420px] flex-1 overflow-auto p-5">
           <div className="sr-only" aria-live="polite">
             Preview updates as you type.
           </div>
+
           {content.trim() === "" ? (
             <p className="text-sm text-foreground-muted">
               Nothing to preview yet — start typing on the left.
@@ -124,7 +162,7 @@ export default function MarkdownScratchpad() {
           ) : (
             // eslint-disable-next-line react/no-danger
             <div
-              className="markdown-body"
+              className="markdown-body pdf-export"
               dangerouslySetInnerHTML={{ __html: html }}
             />
           )}

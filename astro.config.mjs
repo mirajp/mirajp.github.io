@@ -38,4 +38,9 @@ export default defineConfig({
       defaultColor: false, // let our own CSS drive light/dark via [data-theme]
     },
   },
+
+  redirects: {
+    "/markdown": "/tools/scratchpad",
+    "/scratchpad": "/tools/scratchpad",
+  },
 });

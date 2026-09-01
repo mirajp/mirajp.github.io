@@ -278,9 +278,11 @@
   .tilt-left {
     transform: rotate(-2deg);
   }
+
   .tilt-right {
     transform: rotate(1.5deg);
   }
+
   .tilt-left:hover,
   .tilt-right:hover {
     transform: rotate(0deg);
@@ -293,49 +295,93 @@
     margin-top: 2.5rem;
     margin-bottom: 1rem;
   }
+
   .markdown-body h3 {
     margin-top: 2rem;
     margin-bottom: 0.75rem;
   }
+
   .markdown-body p {
     margin-bottom: 1.25rem;
     font-size: 17px;
     line-height: 1.75;
     color: var(--color-foreground);
   }
+
   .markdown-body ul {
     margin-bottom: 1.25rem;
     list-style-type: disc;
     padding-left: 1.5rem;
   }
+
   .markdown-body ol {
     margin-bottom: 1.25rem;
     list-style-type: decimal;
     padding-left: 1.5rem;
   }
+
   .markdown-body li {
     margin-bottom: 0.5rem;
     font-size: 17px;
     line-height: 1.75;
   }
+
   .markdown-body a {
     color: var(--color-primary);
     text-decoration: underline;
     text-underline-offset: 2px;
   }
+
   .markdown-body strong {
     font-weight: 600;
   }
+
   .markdown-body code {
     border-radius: 0.25rem;
     background-color: var(--color-surface);
     padding: 0.125rem 0.375rem;
     font-size: 0.9em;
   }
+
   .markdown-body blockquote {
     border-left: 2px solid var(--color-primary);
     padding-left: 1rem;
     color: var(--color-foreground-muted);
+  }
+
+  /* -------------------------------------------------------------------------
+   * Markdown PDF export
+   *
+   * These rules are scoped to .pdf-export so PDF-specific behavior doesn't
+   * alter the normal Markdown preview or blog article styling.
+   * ---------------------------------------------------------------------- */
+
+  .pdf-export p,
+  .pdf-export blockquote,
+  .pdf-export pre,
+  .pdf-export table,
+  .pdf-export img,
+  .pdf-export li {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .pdf-export h1,
+  .pdf-export h2,
+  .pdf-export h3,
+  .pdf-export h4 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  .pdf-export img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .pdf-export pre {
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
   }
 }
 
@@ -362,6 +408,7 @@
 /* ---------------------------------------------------------------------------
  * Shiki dual-theme code blocks (paired with defaultColor:false in astro.config)
  * ------------------------------------------------------------------------ */
+
 .astro-code,
 .astro-code span {
   color: var(--shiki-light);
@@ -388,33 +435,275 @@
 }
 
 /* ---------------------------------------------------------------------------
- * Print — nobody wants nav chrome, a dark background, or grain texture on
- * paper. Resume page adds its own additional tweaks (see resume.astro).
+ * Print / PDF export
+ *
+ * Native browser printing is used instead of html2canvas/html2pdf so the
+ * exported PDF contains real text and uses the browser's document layout
+ * engine for pagination.
  * ------------------------------------------------------------------------ */
+
+@page {
+  size: Letter;
+  margin: 0.65in;
+}
+
 @media print {
-  body::before {
-    display: none; /* grain texture */
-  }
-  header,
-  footer,
-  .skip-link,
-  #cmdk-trigger,
-  #theme-toggle {
-    display: none !important;
-  }
+  /*
+   * IMPORTANT:
+   *
+   * The browser itself can add:
+   *   - date/time
+   *   - document title
+   *   - URL
+   *   - page numbers
+   *
+   * Those are controlled by the browser's "Headers and footers" print
+   * setting, NOT by CSS. Turn "Headers and footers" OFF in the print dialog.
+   */
+
+  /*
+   * Start with a completely blank white document.
+   *
+   * This is intentionally applied to html, body, and the application's
+   * layout containers so no dark/light theme background can leak through.
+   */
+  html,
   body {
     background: #ffffff !important;
-    color: #000000 !important;
+    background-color: #ffffff !important;
+    color: #1c2624 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: 0 !important;
   }
-  a {
-    color: #000000 !important;
-    text-decoration: underline;
+
+  /*
+   * Hide everything in the application first. The PDF export subtree below
+   * explicitly opts back into visibility.
+   *
+   * Using visibility rather than display:none is important because it lets
+   * the exported Markdown retain its normal document layout.
+   */
+  body * {
+    visibility: hidden !important;
+  }
+
+  /*
+   * Completely remove application chrome from the print layout.
+   */
+  header,
+  footer,
+  nav,
+  .skip-link,
+  #cmdk-trigger,
+  #theme-toggle,
+  .scratchpad-toolbar,
+  .scratchpad-editor {
+    display: none !important;
+  }
+
+  /*
+   * Make the scratchpad itself the only visible printed document.
+   */
+  .scratchpad-shell,
+  .scratchpad-shell * {
+    visibility: visible !important;
+  }
+
+  .scratchpad-shell {
+    position: absolute !important;
+    inset: 0 !important;
+
+    display: block !important;
+
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 0 !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    border: 0 !important;
+    border-radius: 0 !important;
+
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+
+    box-shadow: none !important;
+  }
+
+  /*
+   * The two-column editor/preview layout becomes a normal block document.
+   */
+  .scratchpad-content {
+    display: block !important;
+
+    width: 100% !important;
+    min-height: 0 !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    border: 0 !important;
+
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+  }
+
+  /*
+   * The preview pane must not retain its interactive scroll container.
+   * @page provides the actual physical page margins.
+   */
+  .scratchpad-preview {
+    display: block !important;
+
+    width: 100% !important;
+    max-width: none !important;
+
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    overflow: visible !important;
+
+    border: 0 !important;
+
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+  }
+
+  /*
+   * The actual Markdown document.
+   */
+  .pdf-export {
+    display: block !important;
+
+    width: 100% !important;
+    max-width: none !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+
+    color: #1c2624 !important;
+  }
+
+  /*
+   * Force Markdown content onto the white paper background.
+   */
+  .pdf-export h1,
+  .pdf-export h2,
+  .pdf-export h3,
+  .pdf-export h4,
+  .pdf-export h5,
+  .pdf-export h6,
+  .pdf-export p,
+  .pdf-export li,
+  .pdf-export blockquote,
+  .pdf-export table {
+    background: transparent !important;
+    background-color: transparent !important;
+    color: #1c2624 !important;
+  }
+
+  /*
+   * Links remain readable and identifiable on paper.
+   */
+  .pdf-export a {
+    color: #0b5645 !important;
+    text-decoration: underline !important;
+  }
+
+  /*
+   * Inline code gets a subtle paper-gray background instead of inheriting
+   * the site's interactive surface color.
+   */
+  .pdf-export code {
+    background: #f0eee7 !important;
+    color: #1c2624 !important;
+  }
+
+  /*
+   * Code blocks should remain readable and fit within the printable area.
+   */
+  .pdf-export pre {
+    max-width: 100% !important;
+
+    overflow: visible !important;
+
+    white-space: pre-wrap !important;
+    overflow-wrap: break-word !important;
+    word-break: break-word !important;
+
+    background: #f0eee7 !important;
+    color: #1c2624 !important;
+  }
+
+  /*
+   * Keep content blocks together whenever the browser can honor it.
+   *
+   * This specifically prevents the "half a paragraph at the bottom of one
+   * page, other half at the top of the next page" problem.
+   */
+  .pdf-export p,
+  .pdf-export blockquote,
+  .pdf-export pre,
+  .pdf-export table,
+  .pdf-export img,
+  .pdf-export li {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  /*
+   * Don't leave headings stranded at the bottom of a page.
+   */
+  .pdf-export h1,
+  .pdf-export h2,
+  .pdf-export h3,
+  .pdf-export h4,
+  .pdf-export h5,
+  .pdf-export h6 {
+    break-after: avoid !important;
+    page-break-after: avoid !important;
+  }
+
+  /*
+   * Keep images inside the printable page.
+   */
+  .pdf-export img {
+    display: block;
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  /*
+   * Remove interactive focus styling from the PDF.
+   */
+  .pdf-export :focus,
+  .pdf-export :focus-visible {
+    outline: none !important;
+  }
+
+  /*
+   * Remove any selection highlighting that might accidentally be active
+   * when the user clicks Export PDF.
+   */
+  ::selection {
+    background: transparent !important;
+    color: inherit !important;
   }
 }
 
 /* ---------------------------------------------------------------------------
  * Reduced motion — respected globally, no exceptions
  * ------------------------------------------------------------------------ */
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
