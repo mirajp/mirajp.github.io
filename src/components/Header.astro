@@ -59,7 +59,7 @@ const isActive = (href: string) =>
     id="mobile-menu"
     aria-label="Mobile"
     hidden
-    class="border-t border-border bg-background px-4 pb-4 lg:hidden"
+    class="absolute inset-x-0 top-full border-t border-border bg-background px-4 pb-4 shadow-lg lg:hidden"
   >
     {
       nav.map((item) => (
@@ -83,11 +83,28 @@ const isActive = (href: string) =>
     var menu = document.getElementById("mobile-menu");
     if (!btn || !menu) return;
 
+    function setOpen(open) {
+      menu.hidden = !open;
+      btn.setAttribute("aria-expanded", String(open));
+      btn.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+    }
+
     btn.addEventListener("click", function () {
-      var isOpen = !menu.hidden;
-      menu.hidden = isOpen;
-      btn.setAttribute("aria-expanded", String(!isOpen));
-      btn.setAttribute("aria-label", isOpen ? "Open menu" : "Close menu");
+      setOpen(menu.hidden);
+    });
+
+    document.addEventListener("click", function (e) {
+      if (menu.hidden) return;
+      if (!menu.contains(e.target) && !btn.contains(e.target)) {
+        setOpen(false);
+      }
+    });
+
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && !menu.hidden) {
+        setOpen(false);
+        btn.focus();
+      }
     });
   })();
 </script>
