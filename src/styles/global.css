@@ -63,7 +63,7 @@
   --surface: #f0eee7;
   --surface-hover: #e8e4d8;
   --foreground: #1c2624;
-  --foreground-muted: #5e6a67;
+  --foreground-muted: #576360;
   --border: #dcd5c8;
   --primary: #0f6e5c;
   --primary-hover: #0b5645;
@@ -142,6 +142,10 @@
   --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.05);
   --shadow-md: 0 4px 12px rgb(0 0 0 / 0.08);
   --shadow-lg: 0 10px 30px rgb(0 0 0 / 0.12);
+
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --duration-slow: 400ms;
 
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
   --ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
@@ -236,6 +240,34 @@
   [data-theme="dark"] ::selection {
     background-color: var(--teal-700);
     color: var(--gray-50);
+  }
+
+  .mobile-menu-item {
+    opacity: 0;
+    transform: translateY(-4px);
+    transition:
+      opacity var(--duration-fast) var(--ease-decelerate),
+      transform var(--duration-fast) var(--ease-decelerate);
+    transition-delay: calc(var(--menu-index) * 20ms);
+  }
+
+  #mobile-menu[data-open="true"] {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  #mobile-menu[data-open="true"] .mobile-menu-item {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mobile-menu-item,
+    #mobile-menu {
+      transition: none;
+    }
   }
 }
 

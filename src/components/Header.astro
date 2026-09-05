@@ -58,22 +58,25 @@ const isActive = (href: string) =>
   <nav
     id="mobile-menu"
     aria-label="Mobile"
-    hidden
-    class="absolute inset-x-0 top-full border-t border-border bg-background px-4 pb-4 shadow-lg lg:hidden"
+    aria-hidden="true"
+    class="opacity-0 invisible absolute inset-x-0 top-full translate-y-[-8px] border-t border-border bg-background px-4 pb-4 shadow-lg transition-[opacity,transform,visibility] duration-250 ease-out lg:hidden"
   >
-    {
-      nav.map((item) => (
-        <a
-          href={item.href}
-          aria-current={isActive(item.href) ? "page" : undefined}
-          class={`block rounded-sm px-2 py-3 text-base font-medium ${
-            isActive(item.href) ? "text-primary" : "text-foreground-muted"
-          }`}
-        >
-          {item.label}
-        </a>
-      ))
-    }
+    <div class="mobile-menu-items">
+      {
+        nav.map((item, index) => (
+          <a
+            href={item.href}
+            aria-current={isActive(item.href) ? "page" : undefined}
+            class={`mobile-menu-item block rounded-sm px-2 py-3 text-base font-medium ${
+              isActive(item.href) ? "text-primary" : "text-foreground-muted"
+            }`}
+            style={`--menu-index: ${index}`}
+          >
+            {item.label}
+          </a>
+        ))
+      }
+    </div>
   </nav>
 </header>
 
@@ -81,27 +84,37 @@ const isActive = (href: string) =>
   (function () {
     var btn = document.getElementById("mobile-menu-button");
     var menu = document.getElementById("mobile-menu");
+
     if (!btn || !menu) return;
 
     function setOpen(open) {
-      menu.hidden = !open;
+      menu.dataset.open = String(open);
+      menu.classList.toggle('opacity-0');
+      menu.classList.toggle('invisible');
+      menu.setAttribute("aria-hidden", String(!open));
+
       btn.setAttribute("aria-expanded", String(open));
-      btn.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+      btn.setAttribute(
+        "aria-label",
+        open ? "Close menu" : "Open menu"
+      );
     }
 
     btn.addEventListener("click", function () {
-      setOpen(menu.hidden);
+      var isOpen = menu.dataset.open === "true";
+      setOpen(!isOpen);
     });
 
     document.addEventListener("click", function (e) {
-      if (menu.hidden) return;
+      if (menu.dataset.open !== "true") return;
+
       if (!menu.contains(e.target) && !btn.contains(e.target)) {
         setOpen(false);
       }
     });
 
     document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape" && !menu.hidden) {
+      if (e.key === "Escape" && menu.dataset.open === "true") {
         setOpen(false);
         btn.focus();
       }
