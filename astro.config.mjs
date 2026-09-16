@@ -40,8 +40,10 @@ export default defineConfig({
   },
 
   redirects: {
+    "/contrast": "/tools/contrast",
     "/diff": "/tools/diff",
     "/markdown": "/tools/scratchpad",
+    "/paint": "/tools/paint",
     "/scratchpad": "/tools/scratchpad",
   },
 });
