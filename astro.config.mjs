@@ -40,6 +40,7 @@ export default defineConfig({
   },
 
   redirects: {
+    "/diff": "/tools/diff",
     "/markdown": "/tools/scratchpad",
     "/scratchpad": "/tools/scratchpad",
   },
