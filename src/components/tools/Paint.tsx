@@ -1540,14 +1540,14 @@ export default function PaintStudio() {
       )}
 
       {/* Top Header Navigation */}
-      <header className="h-14 border-b border-[var(--color-border,#dcd5c8)] bg-[var(--color-surface,#f0eee7)] px-4 flex items-center justify-between z-20">
+      <header className="h-14 border-b border-[var(--color-border,#dcd5c8)] bg-[var(--color-surface,#f0eee7)] px-2 md:px-4 flex items-center justify-between z-20 gap-2 overflow-x-auto">
         {/* Quick Actions */}
-        <div className="flex items-center space-x-2 bg-[var(--color-background,#faf9f6)] px-2 py-1 rounded-md border border-[var(--color-border,#dcd5c8)]">
+        <div className="flex items-center space-x-1 md:space-x-2 bg-[var(--color-background,#faf9f6)] px-2 py-1 rounded-md border border-[var(--color-border,#dcd5c8)] shrink-0">
           <button
             onClick={handleUndo}
             disabled={historyIndex <= 0}
             title="Undo (Ctrl+Z)"
-            className="p-1.5 hover:bg-[var(--color-surface-hover,#e8e4d8)] rounded disabled:opacity-30"
+            className="p-2 md:p-1.5 hover:bg-[var(--color-surface-hover,#e8e4d8)] rounded disabled:opacity-30"
           >
             <Icons.Undo />
           </button>
@@ -1555,7 +1555,7 @@ export default function PaintStudio() {
             onClick={handleRedo}
             disabled={historyIndex >= history.length - 1}
             title="Redo (Ctrl+Y)"
-            className="p-1.5 hover:bg-[var(--color-surface-hover,#e8e4d8)] rounded disabled:opacity-30"
+            className="p-2 md:p-1.5 hover:bg-[var(--color-surface-hover,#e8e4d8)] rounded disabled:opacity-30"
           >
             <Icons.Redo />
           </button>
@@ -1567,7 +1567,7 @@ export default function PaintStudio() {
             onClick={deleteSelectedElement}
             disabled={!selectedElementId}
             title="Delete Selected Artifact (Backspace/Delete)"
-            className="p-1.5 hover:bg-red-100 text-red-600 rounded disabled:opacity-30 disabled:hover:bg-transparent transition-colors flex items-center gap-1 text-xs font-medium"
+            className="p-2 md:p-1.5 hover:bg-red-100 text-red-600 rounded disabled:opacity-30 disabled:hover:bg-transparent transition-colors flex items-center gap-1 text-xs font-medium"
           >
             <Icons.Trash />
             <span className="hidden sm:inline">Delete</span>
@@ -1588,10 +1588,10 @@ export default function PaintStudio() {
         </div>
 
         {/* Right Actions: Image Upload, Share & Export */}
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-1 md:space-x-2 shrink-0">
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="px-3 py-1.5 text-xs font-medium text-[var(--color-foreground,#1c2624)] bg-transparent hover:bg-[var(--color-surface-hover,#e8e4d8)] rounded-md border border-[var(--color-border,#dcd5c8)] flex items-center gap-1.5"
+            className="px-2 md:px-3 py-1.5 text-xs font-medium text-[var(--color-foreground,#1c2624)] bg-transparent hover:bg-[var(--color-surface-hover,#e8e4d8)] rounded-md border border-[var(--color-border,#dcd5c8)] flex items-center gap-1.5"
             title="Upload Local Image"
           >
             <Icons.Upload />
@@ -1608,7 +1608,7 @@ export default function PaintStudio() {
 
           <button
             onClick={handleShareUrl}
-            className="px-3 py-1.5 text-xs font-medium text-[var(--color-foreground,#1c2624)] bg-transparent hover:bg-[var(--color-surface-hover,#e8e4d8)] rounded-md border border-[var(--color-border,#dcd5c8)] flex items-center gap-1.5"
+            className="px-2 md:px-3 py-1.5 text-xs font-medium text-[var(--color-foreground,#1c2624)] bg-transparent hover:bg-[var(--color-surface-hover,#e8e4d8)] rounded-md border border-[var(--color-border,#dcd5c8)] flex items-center gap-1.5"
           >
             <Icons.Share />
             <span className="hidden md:inline">Share URL</span>
@@ -1637,14 +1637,15 @@ export default function PaintStudio() {
         </div>
       </header>
 
-      <div className="h-10 border-b border-[var(--color-border,#dcd5c8)] bg-[var(--color-background,#faf9f6)] px-4 flex items-center justify-between text-xs overflow-x-auto">
-        <div className="flex items-center space-x-4 shrink-0">
+      {/* Secondary Control Toolbar */}
+      <div className="min-h-10 border-b border-[var(--color-border,#dcd5c8)] bg-[var(--color-background,#faf9f6)] px-2 md:px-4 flex items-center justify-between text-xs overflow-x-auto scrollbar-none py-1 md:py-0">
+        <div className="flex items-center space-x-3 md:space-x-4 shrink-0">
           {/* Stroke Width Slider */}
           {(activeTool === "brush" ||
             activeTool === "pencil" ||
             activeTool === "eraser" ||
             activeTool === "shape") && (
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1.5 md:space-x-2">
               <span className="text-[var(--color-foreground-muted,#576360)]">
                 Size:
               </span>
@@ -1654,7 +1655,7 @@ export default function PaintStudio() {
                 max="50"
                 value={strokeWidth}
                 onChange={(e) => setStrokeWidth(Number(e.target.value))}
-                className="w-20 accent-[var(--color-primary,#0f6e5c)]"
+                className="w-16 md:w-20 accent-[var(--color-primary,#0f6e5c)]"
               />
               <span className="font-mono w-4">{strokeWidth}</span>
             </div>
@@ -1662,7 +1663,7 @@ export default function PaintStudio() {
 
           {/* Opacity Slider */}
           {(activeTool === "brush" || activeTool === "pencil") && (
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1.5 md:space-x-2">
               <span className="text-[var(--color-foreground-muted,#576360)]">
                 Opacity:
               </span>
@@ -1673,7 +1674,7 @@ export default function PaintStudio() {
                 step="0.05"
                 value={brushOpacity}
                 onChange={(e) => setBrushOpacity(Number(e.target.value))}
-                className="w-20 accent-[var(--color-primary,#0f6e5c)]"
+                className="w-16 md:w-20 accent-[var(--color-primary,#0f6e5c)]"
               />
               <span className="font-mono">
                 {Math.round(brushOpacity * 100)}%
@@ -1684,7 +1685,7 @@ export default function PaintStudio() {
           {/* Line Cap */}
           {(activeTool === "brush" || activeTool === "pencil") && (
             <div className="flex items-center space-x-1">
-              <span className="text-[var(--color-foreground-muted,#576360)]">
+              <span className="text-[var(--color-foreground-muted,#576360)] hidden sm:inline">
                 Cap:
               </span>
               {["round", "butt", "square"].map((cap) => (
@@ -1714,14 +1715,14 @@ export default function PaintStudio() {
                   <button
                     key={shape}
                     onClick={() => setActiveShape(shape)}
-                    className={`px-2 py-0.5 rounded capitalize ${activeShape === shape ? "bg-[var(--color-primary,#0f6e5c)] text-white" : "hover:bg-[var(--color-surface,#f0eee7)]"}`}
+                    className={`px-2 py-0.5 rounded capitalize whitespace-nowrap ${activeShape === shape ? "bg-[var(--color-primary,#0f6e5c)] text-white" : "hover:bg-[var(--color-surface,#f0eee7)]"}`}
                   >
                     {shape.replace("-", " ")}
                   </button>
                 ))}
               </div>
 
-              <label className="flex items-center space-x-1 cursor-pointer">
+              <label className="flex items-center space-x-1 cursor-pointer whitespace-nowrap">
                 <input
                   type="checkbox"
                   checked={fillEnabled}
@@ -1733,7 +1734,7 @@ export default function PaintStudio() {
 
               {fillEnabled && (
                 <div className="flex items-center space-x-1">
-                  <span>Fill Color:</span>
+                  <span className="whitespace-nowrap">Fill Color:</span>
                   <input
                     type="color"
                     value={fillColor}
@@ -1748,8 +1749,8 @@ export default function PaintStudio() {
           {/* Real-time Text Inspector & Editing Bar */}
           {(selectedElement && selectedElement.type === "text") ||
           activeTool === "text" ? (
-            <div className="flex items-center space-x-3 bg-amber-50/60 p-1 px-2.5 rounded border border-amber-200">
-              <span className="font-semibold text-amber-900">
+            <div className="flex items-center space-x-2 md:space-x-3 bg-amber-50/60 p-1 px-2.5 rounded border border-amber-200 shrink-0">
+              <span className="font-semibold text-amber-900 hidden lg:inline">
                 Text Inspector:
               </span>
 
@@ -1762,7 +1763,7 @@ export default function PaintStudio() {
                     updateSelectedTextElement("text", e.target.value);
                   }}
                   placeholder="Type text content..."
-                  className="px-2 py-0.5 border border-amber-300 rounded bg-white font-sans text-xs w-48 focus:outline-none focus:ring-1 focus:ring-[var(--color-primary,#0f6e5c)]"
+                  className="px-2 py-0.5 border border-amber-300 rounded bg-white font-sans text-xs w-28 sm:w-36 md:w-48 focus:outline-none focus:ring-1 focus:ring-[var(--color-primary,#0f6e5c)]"
                 />
               )}
 
@@ -1776,7 +1777,7 @@ export default function PaintStudio() {
                   setTextFont(e.target.value);
                   updateSelectedTextElement("font", e.target.value);
                 }}
-                className="bg-white border border-amber-300 rounded px-2 py-0.5 text-xs focus:outline-none"
+                className="bg-white border border-amber-300 rounded px-1.5 py-0.5 text-xs focus:outline-none"
               >
                 {FONTS.map((f) => (
                   <option key={f.id} value={f.family}>
@@ -1786,7 +1787,7 @@ export default function PaintStudio() {
               </select>
 
               <div className="flex items-center space-x-1">
-                <span>Size:</span>
+                <span className="hidden sm:inline">Size:</span>
                 <input
                   type="number"
                   min="10"
@@ -1801,7 +1802,7 @@ export default function PaintStudio() {
                     setTextSize(val);
                     updateSelectedTextElement("fontSize", val);
                   }}
-                  className="w-14 bg-white border border-amber-300 rounded px-1 py-0.5 text-xs font-mono"
+                  className="w-12 md:w-14 bg-white border border-amber-300 rounded px-1 py-0.5 text-xs font-mono"
                 />
               </div>
 
@@ -1834,7 +1835,7 @@ export default function PaintStudio() {
               </button>
 
               <div className="flex items-center space-x-1">
-                <span className="px-2">Color:</span>
+                <span className="px-1 hidden sm:inline">Color:</span>
                 <input
                   type="color"
                   value={
@@ -1854,8 +1855,8 @@ export default function PaintStudio() {
         </div>
 
         {/* Quick Palette Bar */}
-        <div className="flex items-center space-x-1.5 shrink-0">
-          <span className="text-[var(--color-foreground-muted,#576360)] mr-1 px-2">
+        <div className="flex items-center space-x-1 md:space-x-1.5 shrink-0 ml-2">
+          <span className="text-[var(--color-foreground-muted,#576360)] mr-1 px-1 hidden md:inline">
             Color:
           </span>
           {COLOR_PALETTES[0].colors.map((c) => (
@@ -1888,8 +1889,8 @@ export default function PaintStudio() {
       </div>
 
       <div className="flex-1 flex overflow-hidden relative">
-        {}
-        <div className="w-12 border-r border-[var(--color-border,#dcd5c8)] bg-[var(--color-surface,#f0eee7)] flex flex-col items-center py-3 space-y-2 z-10 shrink-0">
+        {/* Left Sidebar Toolbar */}
+        <div className="w-12 border-r border-[var(--color-border,#dcd5c8)] bg-[var(--color-surface,#f0eee7)] flex flex-col items-center py-3 space-y-2 z-10 shrink-0 overflow-y-auto">
           {[
             {
               id: "select",
@@ -1915,21 +1916,21 @@ export default function PaintStudio() {
             <button
               key={tool.id}
               onClick={() => setActiveTool(tool.id)}
-              className={`p-2 rounded-lg transition-colors relative group ${activeTool === tool.id ? "bg-[var(--color-primary,#0f6e5c)] text-white shadow-sm" : "hover:bg-[var(--color-surface-hover,#e8e4d8)] text-[var(--color-foreground,#1c2624)]"}`}
+              className={`p-2.5 md:p-2 rounded-lg transition-colors relative group ${activeTool === tool.id ? "bg-[var(--color-primary,#0f6e5c)] text-white shadow-sm" : "hover:bg-[var(--color-surface-hover,#e8e4d8)] text-[var(--color-foreground,#1c2624)]"}`}
               title={tool.label}
             >
               <tool.icon />
-              <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 bg-gray-900 text-white text-[10px] px-2 py-1 rounded hidden group-hover:block whitespace-nowrap z-30">
+              <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 bg-gray-900 text-white text-[10px] px-2 py-1 rounded hidden lg:group-hover:block whitespace-nowrap z-30">
                 {tool.label}
               </div>
             </button>
           ))}
         </div>
 
-        {}
+        {/* Main Interactive Canvas Area */}
         <div
           ref={containerRef}
-          className="flex-1 bg-[#e8e4d8] dark:bg-[#121817] relative overflow-hidden flex items-center justify-center cursor-crosshair"
+          className="flex-1 bg-[#e8e4d8] dark:bg-[#121817] relative overflow-hidden flex items-center justify-center cursor-crosshair touch-none"
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
@@ -1952,14 +1953,14 @@ export default function PaintStudio() {
           </div>
 
           {/* Floating Zoom Controls Bar */}
-          <div className="absolute bottom-4 left-4 bg-[var(--color-surface,#f0eee7)]/90 backdrop-blur border border-[var(--color-border,#dcd5c8)] rounded-lg p-1.5 flex items-center space-x-2 shadow-md z-20 text-xs">
+          <div className="absolute bottom-3 left-3 md:bottom-4 md:left-4 bg-[var(--color-surface,#f0eee7)]/90 backdrop-blur border border-[var(--color-border,#dcd5c8)] rounded-lg p-1 md:p-1.5 flex items-center space-x-1.5 md:space-x-2 shadow-md z-20 text-xs">
             <button
               onClick={() => setZoom((z) => Math.max(0.1, z - 0.1))}
               className="p-1 hover:bg-[var(--color-surface-hover,#e8e4d8)] rounded"
             >
               <Icons.ZoomOut />
             </button>
-            <span className="font-mono w-12 text-center">
+            <span className="font-mono w-10 md:w-12 text-center text-[11px] md:text-xs">
               {Math.round(zoom * 100)}%
             </span>
             <button
@@ -1973,16 +1974,16 @@ export default function PaintStudio() {
                 setZoom(1);
                 setPanOffset({ x: 0, y: 0 });
               }}
-              className="px-2 py-0.5 text-[10px] bg-[var(--color-background,#faf9f6)] hover:bg-[var(--color-surface-hover,#e8e4d8)] rounded border"
+              className="px-2 py-0.5 text-[10px] bg-[var(--color-background,#faf9f6)] hover:bg-[var(--color-surface-hover,#e8e4d8)] rounded border hidden sm:inline-block"
             >
               Reset View
             </button>
           </div>
         </div>
 
-        {}
+        {/* Right Drawer Side Panel: Layer Manager */}
         <div
-          className={`${isLayersOpen ? "w-64" : "w-10"} border-l border-[var(--color-border,#dcd5c8)] bg-[var(--color-surface,#f0eee7)] transition-all duration-200 flex flex-col z-10 shrink-0`}
+          className={`absolute md:relative right-0 top-0 bottom-0 ${isLayersOpen ? "w-64" : "w-10"} border-l border-[var(--color-border,#dcd5c8)] bg-[var(--color-surface,#f0eee7)] transition-all duration-200 flex flex-col z-20 md:z-10 shrink-0 shadow-lg md:shadow-none`}
         >
           <div className="h-10 border-b border-[var(--color-border,#dcd5c8)] px-3 flex items-center justify-between">
             {isLayersOpen && (
@@ -2133,11 +2134,11 @@ export default function PaintStudio() {
       </div>
 
       {/* Bottom Status Bar */}
-      <footer className="h-6 border-t border-[var(--color-border,#dcd5c8)] bg-[var(--color-surface,#f0eee7)] px-4 flex items-center justify-between text-[11px] text-[var(--color-foreground-muted,#576360)] font-mono z-20">
+      <footer className="h-6 border-t border-[var(--color-border,#dcd5c8)] bg-[var(--color-surface,#f0eee7)] px-2 md:px-4 flex items-center justify-between text-[10px] md:text-[11px] text-[var(--color-foreground-muted,#576360)] font-mono z-20">
         <div>
           X: {cursorCoords.x}px Y: {cursorCoords.y}px
         </div>
-        <div>
+        <div className="truncate max-w-[120px] sm:max-w-none">
           Selected:{" "}
           {selectedElement
             ? `${selectedElement.type.toUpperCase()} (${selectedElement.id})`
@@ -2149,8 +2150,8 @@ export default function PaintStudio() {
       {/* Modal: Image Upload / Paste Options */}
       {showImageModal && pendingImage && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[var(--color-surface,#f0eee7)] border border-[var(--color-border,#dcd5c8)] rounded-xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <h2 className="text-lg font-bold font-display">
+          <div className="bg-[var(--color-surface,#f0eee7)] border border-[var(--color-border,#dcd5c8)] rounded-xl max-w-md w-full p-4 md:p-6 shadow-2xl space-y-4">
+            <h2 className="text-base md:text-lg font-bold font-display">
               Image Placed on Canvas
             </h2>
             <p className="text-xs text-[var(--color-foreground-muted,#576360)]">
