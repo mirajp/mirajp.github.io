@@ -1,5 +1,18 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 
+// Helper for Eyedropper cursor
+const EYEDROPPER_CURSOR = (() => {
+  // SVG formatted for CSS cursor, styled with black fill & thin white outline for contrast
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16" fill="black" stroke="white" stroke-width="0.5">
+    <path d="M15 1c-1.8-1.8-3.7-0.7-4.6 0.1-0.4 0.4-0.7 0.9-0.7 1.5v0c0 1.1-1.1 1.8-2.1 1.5l-0.1-0.1-0.7 0.8 0.7 0.7-6 6-0.8 2.3-0.7 0.7 1.5 1.5 0.8-0.8 2.3-0.8 6-6 0.7 0.7 0.7-0.6-0.1-0.2c-0.3-1 0.4-2.1 1.5-2.1v0c0.6 0 1.1-0.2 1.4-0.6 0.9-0.9 2-2.8 0.2-4.6zM3.9 13.6l-2 0.7-0.2 0.1 0.1-0.2 0.7-2 5.8-5.8 1.5 1.5-5.9 5.7z" />
+  </svg>`;
+
+  const encoded = encodeURIComponent(svg);
+
+  // "2 22" sets the active click hotspot to the bottom-left tip of the eyedropper
+  return `url("data:image/svg+xml;utf8,${encoded}") 2 22, crosshair`;
+})();
+
 // Inline SVG Icon components for reliable, dependency-free rendering
 const Icons = {
   Select: () => (
@@ -598,16 +611,18 @@ export default function PaintStudio() {
   const [historyIndex, setHistoryIndex] = useState(-1);
 
   // UI Modals & Notifications
-  const [isLayersOpen, setIsLayersOpen] = useState(true);
+  const [isLayersOpen, setIsLayersOpen] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
   const [pendingImage, setPendingImage] = useState(null);
   const [showResizeModal, setShowResizeModal] = useState(false);
   const [showShortcutsModal, setShowShortcutsModal] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
   const [cursorCoords, setCursorCoords] = useState({ x: 0, y: 0 });
+  const [showExportMenu, setShowExportMenu] = useState(false);
 
   // Refs
   const containerRef = useRef(null);
+  const exportMenuRef = useRef(null);
   const canvasRef = useRef(null);
   const fileInputRef = useRef(null);
   const drawingStateRef = useRef(null);
@@ -615,6 +630,62 @@ export default function PaintStudio() {
   const showToast = (msg) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  // Close export dropdown when clicking anywhere outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(e.target)) {
+        setShowExportMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
+  }, []);
+
+  // Helper to generate a custom circle cursor that scales with strokeWidth & zoom
+  const getBrushCursor = (size, zoom, color = "#000000") => {
+    const scaledDiameter = Math.max(4, Math.min(size * zoom, 128)); // Cap size between 4px and 128px for browser compatibility
+    const radius = scaledDiameter / 2;
+    const padding = 2;
+    const svgSize = scaledDiameter + padding * 2;
+    const center = svgSize / 2;
+
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${svgSize}" height="${svgSize}" viewBox="0 0 ${svgSize} ${svgSize}">
+    <circle cx="${center}" cy="${center}" r="${radius}" fill="none" stroke="rgba(0,0,0,0.6)" stroke-width="2" />
+    <circle cx="${center}" cy="${center}" r="${radius}" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="1" />
+  </svg>`;
+
+    const encodedSvg = encodeURIComponent(svg);
+    return `url("data:image/svg+xml;utf8,${encodedSvg}") ${center} ${center}, crosshair`;
+  };
+
+  const getCursorStyle = () => {
+    if (isPanning) return "grabbing";
+
+    switch (activeTool) {
+      case "pan":
+        return "grab";
+      case "select":
+        return "default"; // or "pointer" when hovering over a selectable artifact
+      case "text":
+        return "text";
+      case "eyedropper":
+        return EYEDROPPER_CURSOR;
+      case "brush":
+      case "pencil":
+        return getBrushCursor(strokeWidth, zoom, primaryColor);
+      case "eraser":
+        return getBrushCursor(strokeWidth, zoom, "#ffffff");
+      case "shape":
+        return "crosshair";
+      default:
+        return "default";
+    }
   };
 
   const saveHistory = useCallback(
@@ -1199,20 +1270,39 @@ export default function PaintStudio() {
     );
   };
 
-  const getCanvasPointerPos = (e) => {
+  const getCanvasPointerPos = (
+    e: React.PointerEvent<HTMLCanvasElement>,
+  ): { x: number; y: number } => {
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
     const rect = canvas.getBoundingClientRect();
-    const clientX = e.clientX ?? (e.touches && e.touches[0].clientX);
-    const clientY = e.clientY ?? (e.touches && e.touches[0].clientY);
 
-    return {
-      x: (clientX - rect.left) / zoom,
-      y: (clientY - rect.top) / zoom,
-    };
+    // const clientX = e.clientX ?? (e.touches && e.touches[0].clientX);
+    // const clientY = e.clientY ?? (e.touches && e.touches[0].clientY);
+    // return {
+    //   x: (clientX - rect.left) / zoom,
+    //   y: (clientY - rect.top) / zoom,
+    // };
+
+    const x = (e.clientX - rect.left) / zoom;
+    const y = (e.clientY - rect.top) / zoom;
+    return { x, y };
   };
 
-  const handlePointerDown = (e) => {
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    // CRITICAL FOR IOS SAFARI: Prevent browser scrolling/gestures from stealing touch
+    if (e.cancelable) e.preventDefault();
+
+    // Capture touch input so fast movement doesn't drop off-canvas
+    if (e.target && e.target.setPointerCapture) {
+      try {
+        e.target.setPointerCapture(e.pointerId);
+      } catch (err) {
+        // fallback
+      }
+    }
+
+    // button === 1 is middle button click
     if (activeTool === "pan" || e.button === 1 || e.spaceKey) {
       setIsPanning(true);
       panStartRef.current = {
@@ -1357,7 +1447,7 @@ export default function PaintStudio() {
     }
 
     if (activeTool === "text") {
-      const defaultText = "Editorial Paint Studio";
+      const defaultText = "<enter text>";
       const newText = {
         id: "text_" + Date.now(),
         type: "text",
@@ -1385,6 +1475,8 @@ export default function PaintStudio() {
   };
 
   const handlePointerMove = (e) => {
+    if (e.cancelable) e.preventDefault();
+
     const pos = getCanvasPointerPos(e);
     setCursorCoords({ x: Math.round(pos.x), y: Math.round(pos.y) });
 
@@ -1409,39 +1501,40 @@ export default function PaintStudio() {
       drawingStateRef.current.activePreviewElement = state.shape;
       renderAllLayers();
     } else if (state.mode === "drag_element") {
+      // FIX FOR IOS LAG: Update local ref preview instead of firing pushLayerUpdate on every frame
       const dx = pos.x - state.startX;
       const dy = pos.y - state.startY;
 
-      pushLayerUpdate((prev) =>
-        prev.map((l) => {
-          if (l.id !== activeLayerId) return l;
-          return {
-            ...l,
-            elements: l.elements.map((el) => {
-              if (el.id !== state.element.id) return el;
-              if (el.type === "path") {
-                const origPoints = state.element.points;
-                return {
-                  ...el,
-                  points: origPoints.map((pt) => ({
-                    x: pt.x + dx,
-                    y: pt.y + dy,
-                  })),
-                };
-              }
-              return {
-                ...el,
-                x: state.origX + dx,
-                y: state.origY + dy,
-              };
-            }),
-          };
-        }),
-      );
+      if (state.element.type === "path") {
+        const origPoints = state.element.points;
+        state.draggedElement = {
+          ...state.element,
+          points: origPoints.map((pt) => ({
+            x: pt.x + dx,
+            y: pt.y + dy,
+          })),
+        };
+      } else {
+        state.draggedElement = {
+          ...state.element,
+          x: state.origX + dx,
+          y: state.origY + dy,
+        };
+      }
+      drawingStateRef.current.activePreviewElement = state.draggedElement;
+      renderAllLayers();
     }
   };
 
-  const handlePointerUp = () => {
+  const handlePointerUp = (e) => {
+    if (e && e.target && e.target.releasePointerCapture) {
+      try {
+        e.target.releasePointerCapture(e.pointerId);
+      } catch (err) {
+        // ignore
+      }
+    }
+
     if (isPanning) {
       setIsPanning(false);
       return;
@@ -1470,6 +1563,20 @@ export default function PaintStudio() {
         );
         setSelectedElementId(state.shape.id);
       }
+    } else if (state.mode === "drag_element" && state.draggedElement) {
+      // Commit the final dragged position to React state ONCE when release occurs
+      const updatedEl = state.draggedElement;
+      pushLayerUpdate((prev) =>
+        prev.map((l) => {
+          if (l.id !== activeLayerId) return l;
+          return {
+            ...l,
+            elements: l.elements.map((el) =>
+              el.id === updatedEl.id ? updatedEl : el,
+            ),
+          };
+        }),
+      );
     }
 
     drawingStateRef.current = null;
@@ -1540,58 +1647,62 @@ export default function PaintStudio() {
       )}
 
       {/* Top Header Navigation */}
-      <header className="h-14 border-b border-[var(--color-border,#dcd5c8)] bg-[var(--color-surface,#f0eee7)] px-2 md:px-4 flex items-center justify-between z-20 gap-2 overflow-x-auto">
-        {/* Quick Actions */}
-        <div className="flex items-center space-x-1 md:space-x-2 bg-[var(--color-background,#faf9f6)] px-2 py-1 rounded-md border border-[var(--color-border,#dcd5c8)] shrink-0">
-          <button
-            onClick={handleUndo}
-            disabled={historyIndex <= 0}
-            title="Undo (Ctrl+Z)"
-            className="p-2 md:p-1.5 hover:bg-[var(--color-surface-hover,#e8e4d8)] rounded disabled:opacity-30"
-          >
-            <Icons.Undo />
-          </button>
-          <button
-            onClick={handleRedo}
-            disabled={historyIndex >= history.length - 1}
-            title="Redo (Ctrl+Y)"
-            className="p-2 md:p-1.5 hover:bg-[var(--color-surface-hover,#e8e4d8)] rounded disabled:opacity-30"
-          >
-            <Icons.Redo />
-          </button>
+      <header className="h-14 border-b border-[var(--color-border,#dcd5c8)] bg-[var(--color-surface,#f0eee7)] px-2 md:px-4 flex items-center justify-between z-50 gap-2 relative overflow-visible">
+        {/* SCROLLABLE TOOLBAR AREA: Left & Middle items */}
+        {/* 'touch-pan-x' enables native mobile swiping, 'overflow-x-auto' allows scrolling */}
+        <div
+          className="flex items-center space-x-1 md:space-x-2 overflow-x-auto touch-pan-x py-1 flex-1 min-w-0 [webkit-overflow-scrolling:touch]"
+          style={{ touchAction: "pan-x" }}
+        >
+          {/* Quick Actions Group */}
+          <div className="flex items-center space-x-1 md:space-x-2 bg-[var(--color-background,#faf9f6)] px-2 py-1 rounded-md border border-[var(--color-border,#dcd5c8)] shrink-0">
+            <button
+              onClick={handleUndo}
+              disabled={historyIndex <= 0}
+              title="Undo (Ctrl+Z)"
+              className="p-2 md:p-1.5 hover:bg-[var(--color-surface-hover,#e8e4d8)] rounded disabled:opacity-30 shrink-0"
+            >
+              <Icons.Undo />
+            </button>
+            <button
+              onClick={handleRedo}
+              disabled={historyIndex >= history.length - 1}
+              title="Redo (Ctrl+Y)"
+              className="p-2 md:p-1.5 hover:bg-[var(--color-surface-hover,#e8e4d8)] rounded disabled:opacity-30 shrink-0"
+            >
+              <Icons.Redo />
+            </button>
 
-          <div className="h-4 w-px bg-[var(--color-border,#dcd5c8)]" />
+            <div className="h-4 w-px bg-[var(--color-border,#dcd5c8)] shrink-0" />
 
-          {/* Delete Artifact Button */}
-          <button
-            onClick={deleteSelectedElement}
-            disabled={!selectedElementId}
-            title="Delete Selected Artifact (Backspace/Delete)"
-            className="p-2 md:p-1.5 hover:bg-red-100 text-red-600 rounded disabled:opacity-30 disabled:hover:bg-transparent transition-colors flex items-center gap-1 text-xs font-medium"
-          >
-            <Icons.Trash />
-            <span className="hidden sm:inline">Delete</span>
-          </button>
+            <button
+              onClick={deleteSelectedElement}
+              disabled={!selectedElementId}
+              title="Delete Selected Artifact (Backspace/Delete)"
+              className="p-2 md:p-1.5 hover:bg-red-100 text-red-600 rounded disabled:opacity-30 disabled:hover:bg-transparent transition-colors flex items-center gap-1 text-xs font-medium shrink-0"
+            >
+              <Icons.Trash />
+              <span className="hidden sm:inline">Delete</span>
+            </button>
 
-          <div className="h-4 w-px bg-[var(--color-border,#dcd5c8)]" />
+            <div className="h-4 w-px bg-[var(--color-border,#dcd5c8)] shrink-0" />
 
-          <button
-            onClick={() => setShowResizeModal(true)}
-            title="Canvas Dimensions"
-            className="text-xs font-mono px-2 py-1 hover:bg-[var(--color-surface-hover,#e8e4d8)] rounded flex items-center gap-1"
-          >
-            <span>
-              {canvasWidth} x {canvasHeight}
-            </span>
-            <Icons.Settings />
-          </button>
-        </div>
+            <button
+              onClick={() => setShowResizeModal(true)}
+              title="Canvas Dimensions"
+              className="text-xs font-mono px-2 py-1 hover:bg-[var(--color-surface-hover,#e8e4d8)] rounded flex items-center gap-1 shrink-0"
+            >
+              <span>
+                {canvasWidth} x {canvasHeight}
+              </span>
+              <Icons.Settings />
+            </button>
+          </div>
 
-        {/* Right Actions: Image Upload, Share & Export */}
-        <div className="flex items-center space-x-1 md:space-x-2 shrink-0">
+          {/* Secondary Action Buttons */}
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="px-2 md:px-3 py-1.5 text-xs font-medium text-[var(--color-foreground,#1c2624)] bg-transparent hover:bg-[var(--color-surface-hover,#e8e4d8)] rounded-md border border-[var(--color-border,#dcd5c8)] flex items-center gap-1.5"
+            className="px-2 md:px-3 py-1.5 text-xs font-medium text-[var(--color-foreground,#1c2624)] bg-transparent hover:bg-[var(--color-surface-hover,#e8e4d8)] rounded-md border border-[var(--color-border,#dcd5c8)] flex items-center gap-1.5 shrink-0"
             title="Upload Local Image"
           >
             <Icons.Upload />
@@ -1600,7 +1711,7 @@ export default function PaintStudio() {
 
           <button
             onClick={() => setShowShortcutsModal(true)}
-            className="p-2 text-xs hover:bg-[var(--color-surface-hover,#e8e4d8)] rounded-md border border-[var(--color-border,#dcd5c8)] flex items-center gap-1"
+            className="p-2 text-xs hover:bg-[var(--color-surface-hover,#e8e4d8)] rounded-md border border-[var(--color-border,#dcd5c8)] flex items-center gap-1 shrink-0"
             title="Shortcuts"
           >
             <Icons.Help />
@@ -1608,31 +1719,47 @@ export default function PaintStudio() {
 
           <button
             onClick={handleShareUrl}
-            className="px-2 md:px-3 py-1.5 text-xs font-medium text-[var(--color-foreground,#1c2624)] bg-transparent hover:bg-[var(--color-surface-hover,#e8e4d8)] rounded-md border border-[var(--color-border,#dcd5c8)] flex items-center gap-1.5"
+            className="px-2 md:px-3 py-1.5 text-xs font-medium text-[var(--color-foreground,#1c2624)] bg-transparent hover:bg-[var(--color-surface-hover,#e8e4d8)] rounded-md border border-[var(--color-border,#dcd5c8)] flex items-center gap-1.5 shrink-0"
           >
             <Icons.Share />
             <span className="hidden md:inline">Share URL</span>
           </button>
+        </div>
 
-          <div className="relative group">
-            <button className="px-3 py-1.5 text-xs font-medium text-white bg-[var(--color-primary,#0f6e5c)] hover:bg-[var(--color-primary-hover,#0b5645)] rounded-md flex items-center gap-1.5 shadow-sm">
+        {/* NON-SCROLLABLE AREA: Fixed on the right so popout menu is NEVER clipped */}
+        {/* Export Action Button */}
+        <div className="shrink-0 overflow-visible relative">
+          <div className="relative">
+            <button
+              onClick={() => setShowExportMenu((prev) => !prev)}
+              className="px-3 py-1.5 text-xs font-medium text-white bg-[var(--color-primary,#0f6e5c)] hover:bg-[var(--color-primary-hover,#0b5645)] rounded-md flex items-center gap-1.5 shadow-sm active:scale-95 transition-transform"
+            >
               <Icons.Download />
               <span>Export</span>
             </button>
-            <div className="absolute right-0 top-full hidden group-hover:block bg-[var(--color-surface,#f0eee7)] border border-[var(--color-border,#dcd5c8)] rounded-md shadow-lg py-1 w-36 z-30">
-              <button
-                onClick={() => handleExport("png")}
-                className="w-full text-left px-3 py-1.5 text-xs hover:bg-[var(--color-surface-hover,#e8e4d8)]"
-              >
-                PNG (Transparent)
-              </button>
-              <button
-                onClick={() => handleExport("jpeg")}
-                className="w-full text-left px-3 py-1.5 text-xs hover:bg-[var(--color-surface-hover,#e8e4d8)]"
-              >
-                JPG (Solid Background)
-              </button>
-            </div>
+
+            {showExportMenu && (
+              <div className="absolute right-0 top-full mt-1 bg-[var(--color-surface,#f0eee7)] border border-[var(--color-border,#dcd5c8)] rounded-md shadow-xl py-1 w-40 z-50">
+                <button
+                  onClick={() => {
+                    handleExport("png");
+                    setShowExportMenu(false);
+                  }}
+                  className="w-full text-left px-3 py-2 text-xs hover:bg-[var(--color-surface-hover,#e8e4d8)] transition-colors"
+                >
+                  PNG (Transparent)
+                </button>
+                <button
+                  onClick={() => {
+                    handleExport("jpeg");
+                    setShowExportMenu(false);
+                  }}
+                  className="w-full text-left px-3 py-2 text-xs hover:bg-[var(--color-surface-hover,#e8e4d8)] transition-colors"
+                >
+                  JPG (Solid Background)
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </header>
@@ -1930,25 +2057,35 @@ export default function PaintStudio() {
         {/* Main Interactive Canvas Area */}
         <div
           ref={containerRef}
-          className="flex-1 bg-[#e8e4d8] dark:bg-[#121817] relative overflow-hidden flex items-center justify-center cursor-crosshair touch-none"
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
+          className="flex-1 bg-[#e8e4d8] dark:bg-[#121817] relative overflow-hidden flex items-center justify-center touch-none select-none"
+          style={{
+            cursor: getCursorStyle(),
+          }}
         >
           {/* Transform Container for Zoom & Pan */}
           <div
-            className="transition-transform duration-75 shadow-2xl relative"
+            className="shadow-2xl relative"
             style={{
               transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom})`,
               transformOrigin: "center center",
+              touchAction: "none",
             }}
           >
             <canvas
               ref={canvasRef}
               width={canvasWidth}
               height={canvasHeight}
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerUp}
+              onPointerCancel={handlePointerUp}
               className="block bg-white rounded-sm shadow-md"
-              style={{ width: `${canvasWidth}px`, height: `${canvasHeight}px` }}
+              style={{
+                width: `${canvasWidth}px`,
+                height: `${canvasHeight}px`,
+                touchAction:
+                  "none" /** Necessary for iOS so it does not scroll or zoom on touch */,
+              }}
             />
           </div>
 
