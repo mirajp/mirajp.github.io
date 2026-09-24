@@ -272,6 +272,20 @@ const Icons = {
       />
     </svg>
   ),
+  Duplicate: () => (
+    <svg
+      className="w-4 h-4"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="9" y="9" width="11" height="11" rx="1.5" />
+      <path d="M5 15H4a1 1 0 01-1-1V4a1 1 0 011-1h10a1 1 0 011 1v1" />
+    </svg>
+  ),
   Download: () => (
     <svg
       className="w-4 h-4"
@@ -499,6 +513,9 @@ const encodeCanvasState = (state) => {
           b: e.bold ? 1 : 0,
           i: e.italic ? 1 : 0,
           src: e.src && e.src.length < 50000 ? e.src : undefined,
+          v: e.visible === false ? 0 : 1,
+          lk: e.locked ? 1 : 0,
+          op: e.opacity ?? 1,
         })),
       })),
     };
@@ -556,6 +573,9 @@ const decodeCanvasState = (base64) => {
           bold: e.b === 1,
           italic: e.i === 1,
           src: e.src,
+          visible: e.v === undefined ? true : e.v === 1,
+          locked: e.lk === 1,
+          opacity: e.op ?? 1,
         })),
       })),
     };
@@ -563,6 +583,104 @@ const decodeCanvasState = (base64) => {
     console.error("Decoding error:", err);
     return null;
   }
+};
+
+// --- Selection geometry helpers -------------------------------------------
+// These are pure functions of (element, bounds) so they can be shared
+// between rendering (drawing the selection box + handles) and pointer
+// handling (hit-testing the handles, computing a resize/rotate in progress).
+
+// The artifact's own local (unrotated) bounding box. Path/text bounds are
+// derived (points extent / measured text); shape and image carry x/y/width/
+// height directly. `ctx` is only used to measure text width and can be any
+// live 2D context (font metrics don't depend on which canvas).
+const getElementBounds = (el, ctx) => {
+  let x = el.x || 0,
+    y = el.y || 0,
+    w = el.width || 0,
+    h = el.height || 0;
+
+  if (el.type === "path") {
+    if (!el.points || el.points.length === 0) return { x: 0, y: 0, w: 0, h: 0 };
+    const xs = el.points.map((pt) => pt.x);
+    const ys = el.points.map((pt) => pt.y);
+    x = Math.min(...xs);
+    y = Math.min(...ys);
+    w = Math.max(...xs) - x;
+    h = Math.max(...ys) - y;
+  } else if (el.type === "text") {
+    let textWidth = 100;
+    if (ctx) {
+      ctx.font = `${el.italic ? "italic " : ""}${el.bold ? "bold " : ""}${el.fontSize || 28}px ${el.font || "Inter, sans-serif"}`;
+      textWidth = ctx.measureText(el.text || "").width;
+    }
+    w = Math.max(20, textWidth);
+    h = (el.fontSize || 28) * 1.2;
+  }
+
+  return { x, y, w, h };
+};
+
+const HANDLE_PAD = 6; // padding between the artifact and its selection box
+const ROTATE_HANDLE_OFFSET = 24; // stem length above the box for the rotate handle
+
+// The 4 corner (resize) handle positions and the 1 rotate handle position,
+// for a given local bounding box. Matches what renderAllLayers draws.
+const getSelectionHandles = (bounds) => {
+  const { x, y, w, h } = bounds;
+  const corners = [
+    { corner: "tl", x: x - HANDLE_PAD, y: y - HANDLE_PAD },
+    { corner: "tr", x: x + w + HANDLE_PAD, y: y - HANDLE_PAD },
+    { corner: "br", x: x + w + HANDLE_PAD, y: y + h + HANDLE_PAD },
+    { corner: "bl", x: x - HANDLE_PAD, y: y + h + HANDLE_PAD },
+  ];
+  const rotate = {
+    x: x + w / 2,
+    y: y - HANDLE_PAD - ROTATE_HANDLE_OFFSET,
+  };
+  return { corners, rotate };
+};
+
+// Given the artifact's original bounds and a new dragged bounds (with the
+// opposite corner held fixed), return a patched copy of the element.
+// Shapes/images resize directly; a path scales its points about the
+// original top-left; text can't stretch independently so it scales its
+// font size instead, using whichever axis moved further.
+const computeResizedElement = (el, origBounds, newBounds) => {
+  if (el.type === "shape" || el.type === "image") {
+    return {
+      ...el,
+      x: newBounds.x,
+      y: newBounds.y,
+      width: newBounds.w,
+      height: newBounds.h,
+    };
+  }
+
+  if (el.type === "path") {
+    const scaleX = origBounds.w > 0 ? newBounds.w / origBounds.w : 1;
+    const scaleY = origBounds.h > 0 ? newBounds.h / origBounds.h : 1;
+    return {
+      ...el,
+      points: el.points.map((pt) => ({
+        x: newBounds.x + (pt.x - origBounds.x) * scaleX,
+        y: newBounds.y + (pt.y - origBounds.y) * scaleY,
+      })),
+    };
+  }
+
+  if (el.type === "text") {
+    const scaleX = origBounds.w > 0 ? newBounds.w / origBounds.w : 1;
+    const scaleY = origBounds.h > 0 ? newBounds.h / origBounds.h : 1;
+    const scale = Math.max(scaleX, scaleY);
+    const newFontSize = Math.min(
+      400,
+      Math.max(6, Math.round((el.fontSize || 28) * scale)),
+    );
+    return { ...el, fontSize: newFontSize };
+  }
+
+  return el;
 };
 
 export default function PaintStudio() {
@@ -626,6 +744,13 @@ export default function PaintStudio() {
   const canvasRef = useRef(null);
   const fileInputRef = useRef(null);
   const drawingStateRef = useRef(null);
+  // Off-screen per-layer raster buffers. Each layer is rendered into its own
+  // canvas so that an eraser stroke (drawn with globalCompositeOperation =
+  // "destination-out") only clears pixels belonging to that layer, instead
+  // of punching a transparent hole through the shared background fill and
+  // every layer underneath it (which is what previously made the eraser
+  // look like it was painting a plain white stroke).
+  const layerCanvasesRef = useRef({});
 
   const showToast = (msg) => {
     setToastMessage(msg);
@@ -754,23 +879,121 @@ export default function PaintStudio() {
     }
   }, [selectedElementId]);
 
+  // Remove a single artifact by id, from whichever layer holds it — used by
+  // both the toolbar/keyboard delete (on the current selection) and the
+  // per-artifact delete button in the layers panel.
+  const deleteElement = useCallback(
+    (elementId) => {
+      pushLayerUpdate((prev) =>
+        prev.map((l) => ({
+          ...l,
+          elements: l.elements.filter((e) => e.id !== elementId),
+        })),
+      );
+      setSelectedElementId((prev) => (prev === elementId ? null : prev));
+      showToast("Artifact deleted");
+    },
+    [pushLayerUpdate],
+  );
+
   // Artifact Deletion Function
   const deleteSelectedElement = useCallback(() => {
     if (!selectedElementId) {
       showToast("No element selected to delete");
       return;
     }
+    deleteElement(selectedElementId);
+  }, [selectedElementId, deleteElement]);
 
-    pushLayerUpdate((prev) =>
-      prev.map((l) => ({
-        ...l,
-        elements: l.elements.filter((e) => e.id !== selectedElementId),
-      })),
-    );
+  // Patch one or more properties (visible / locked / opacity / etc.) on a
+  // single artifact, wherever it lives, without needing to know its layer.
+  const updateElementProps = useCallback(
+    (elementId, updates) => {
+      pushLayerUpdate((prev) =>
+        prev.map((l) => ({
+          ...l,
+          elements: l.elements.map((el) =>
+            el.id === elementId ? { ...el, ...updates } : el,
+          ),
+        })),
+      );
+    },
+    [pushLayerUpdate],
+  );
 
-    setSelectedElementId(null);
-    showToast("Artifact deleted");
-  }, [selectedElementId, pushLayerUpdate]);
+  // Clone a single artifact (by id) into the same layer it already lives
+  // in, offset slightly so the copy is visible and easy to grab. Used by
+  // the toolbar/keyboard shortcut (on the current selection) and by the
+  // per-artifact duplicate button in the layers panel.
+  const duplicateElement = useCallback(
+    (elementId) => {
+      let original = null;
+      let targetLayerId = null;
+      for (const l of layers) {
+        const found = l.elements.find((e) => e.id === elementId);
+        if (found) {
+          original = found;
+          targetLayerId = l.id;
+          break;
+        }
+      }
+      if (!original) {
+        showToast("No element selected to duplicate");
+        return;
+      }
+
+      const offset = 16;
+      const newId = `${original.type}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+      const duplicated = { ...original, id: newId };
+      if (original.points) {
+        duplicated.points = original.points.map((pt) => ({
+          x: pt.x + offset,
+          y: pt.y + offset,
+        }));
+      } else {
+        duplicated.x = (original.x || 0) + offset;
+        duplicated.y = (original.y || 0) + offset;
+      }
+
+      pushLayerUpdate((prev) =>
+        prev.map((l) =>
+          l.id === targetLayerId
+            ? { ...l, elements: [...l.elements, duplicated] }
+            : l,
+        ),
+      );
+      setSelectedElementId(newId);
+      setActiveLayerId(targetLayerId);
+      showToast("Artifact duplicated");
+    },
+    [layers, pushLayerUpdate],
+  );
+
+  const duplicateSelectedElement = useCallback(() => {
+    if (!selectedElementId) {
+      showToast("No element selected to duplicate");
+      return;
+    }
+    duplicateElement(selectedElementId);
+  }, [selectedElementId, duplicateElement]);
+
+  // Short human-readable label for an artifact row in the layers panel.
+  const getElementLabel = (el) => {
+    if (el.type === "text") {
+      const preview = (el.text || "").trim();
+      return preview ? `Text: "${preview.slice(0, 14)}"` : "Text";
+    }
+    if (el.type === "path") {
+      if (el.strokeType === "eraser") return "Eraser Stroke";
+      if (el.strokeType === "pencil") return "Pencil Stroke";
+      return "Brush Stroke";
+    }
+    if (el.type === "shape") {
+      return `Shape: ${(el.shapeType || "").replace("-", " ")}`;
+    }
+    if (el.type === "image") return "Image";
+    return el.type;
+  };
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -809,12 +1032,15 @@ export default function PaintStudio() {
       } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "y") {
         e.preventDefault();
         handleRedo();
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "d") {
+        e.preventDefault();
+        duplicateSelectedElement();
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [deleteSelectedElement, handleUndo, handleRedo]);
+  }, [deleteSelectedElement, duplicateSelectedElement, handleUndo, handleRedo]);
 
   // Initial Hash Loading
   useEffect(() => {
@@ -898,6 +1124,8 @@ export default function PaintStudio() {
         height: pendingImage.height,
         src: pendingImage.src,
         rotation: 0,
+        visible: true,
+        locked: false,
       };
       pushLayerUpdate((prev) =>
         prev.map((l) =>
@@ -927,6 +1155,8 @@ export default function PaintStudio() {
         height: h,
         src: pendingImage.src,
         rotation: 0,
+        visible: true,
+        locked: false,
       };
       pushLayerUpdate((prev) =>
         prev.map((l) =>
@@ -949,6 +1179,8 @@ export default function PaintStudio() {
         height: pendingImage.height,
         src: pendingImage.src,
         rotation: 0,
+        visible: true,
+        locked: false,
       };
       pushLayerUpdate((prev) =>
         prev.map((l) =>
@@ -1019,6 +1251,8 @@ export default function PaintStudio() {
       const remaining = layers.filter((l) => l.id !== id);
       setActiveLayerId(remaining[remaining.length - 1].id);
     }
+    // Drop the cached off-screen buffer for the deleted layer.
+    delete layerCanvasesRef.current[id];
     showToast("Layer deleted");
   };
 
@@ -1055,16 +1289,40 @@ export default function PaintStudio() {
   };
 
   const drawElementToContext = (ctx, el) => {
+    // An individually hidden artifact is skipped entirely, regardless of
+    // its layer's own visibility.
+    if (el.visible === false) return;
+
     ctx.save();
+    // Per-artifact opacity applies to every element type (path, shape,
+    // text, image), on top of whatever the layer's own opacity is.
+    ctx.globalAlpha = el.opacity ?? 1;
+
+    // Rotation is applied uniformly, around the artifact's own bounding-box
+    // center, before any type-specific drawing below (which is written in
+    // the element's unrotated local space). This covers every type — the
+    // shape branch used to do its own translate/rotate/translate; that's
+    // now redundant and has been removed there.
+    const rotation = el.rotation || 0;
+    if (rotation) {
+      const bounds = getElementBounds(el, ctx);
+      const cx = bounds.x + bounds.w / 2;
+      const cy = bounds.y + bounds.h / 2;
+      ctx.translate(cx, cy);
+      ctx.rotate((rotation * Math.PI) / 180);
+      ctx.translate(-cx, -cy);
+    }
 
     if (el.type === "path") {
-      if (el.points.length < 1) return;
+      if (el.points.length < 1) {
+        ctx.restore();
+        return;
+      }
       ctx.beginPath();
       ctx.strokeStyle = el.strokeColor;
       ctx.lineWidth = el.strokeWidth;
       ctx.lineCap = el.lineCap || "round";
       ctx.lineJoin = "round";
-      ctx.globalAlpha = el.opacity ?? 1;
 
       if (el.strokeType === "eraser") {
         ctx.globalCompositeOperation = "destination-out";
@@ -1079,10 +1337,6 @@ export default function PaintStudio() {
       ctx.strokeStyle = el.strokeColor;
       ctx.lineWidth = el.strokeWidth;
       ctx.fillStyle = el.fillColor;
-
-      ctx.translate(el.x + el.width / 2, el.y + el.height / 2);
-      if (el.rotation) ctx.rotate((el.rotation * Math.PI) / 180);
-      ctx.translate(-(el.x + el.width / 2), -(el.y + el.height / 2));
 
       ctx.beginPath();
       if (el.shapeType === "rectangle") {
@@ -1173,6 +1427,27 @@ export default function PaintStudio() {
     ctx.restore();
   };
 
+  // Get (creating/resizing as needed) the persistent off-screen canvas used
+  // to rasterize a single layer in isolation.
+  const getLayerCanvas = useCallback(
+    (layerId) => {
+      let layerCanvas = layerCanvasesRef.current[layerId];
+      if (!layerCanvas) {
+        layerCanvas = document.createElement("canvas");
+        layerCanvasesRef.current[layerId] = layerCanvas;
+      }
+      if (
+        layerCanvas.width !== canvasWidth ||
+        layerCanvas.height !== canvasHeight
+      ) {
+        layerCanvas.width = canvasWidth;
+        layerCanvas.height = canvasHeight;
+      }
+      return layerCanvas;
+    },
+    [canvasWidth, canvasHeight],
+  );
+
   const renderAllLayers = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -1183,44 +1458,43 @@ export default function PaintStudio() {
     ctx.fillStyle = bgColor;
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-    // Draw each visible layer
+    const preview = drawingStateRef.current?.activePreviewElement;
+
+    // Rasterize each visible layer onto its own off-screen buffer, then
+    // composite that buffer onto the main canvas. Doing this per layer
+    // (rather than drawing every layer's elements straight onto the shared
+    // canvas) is what makes the eraser's destination-out compositing only
+    // clear pixels within its own layer: it reveals the actual background
+    // fill / lower layers already painted onto the main canvas, instead of
+    // punching through to the canvas element's plain white CSS background.
     layers.forEach((layer) => {
       if (!layer.visible) return;
+
+      const layerCanvas = getLayerCanvas(layer.id);
+      const layerCtx = layerCanvas.getContext("2d");
+      layerCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+      layer.elements.forEach((el) => drawElementToContext(layerCtx, el));
+
+      // Draw the in-progress stroke/shape/drag preview onto the layer it
+      // actually belongs to (always the active layer), so a preview eraser
+      // stroke shows correct real-time feedback too.
+      if (preview && layer.id === activeLayerId) {
+        drawElementToContext(layerCtx, preview);
+      }
+
       ctx.save();
       ctx.globalAlpha = layer.opacity;
-
-      layer.elements.forEach((el) => drawElementToContext(ctx, el));
-
+      ctx.drawImage(layerCanvas, 0, 0);
       ctx.restore();
     });
 
-    // Draw active preview element during creation
-    if (
-      drawingStateRef.current &&
-      drawingStateRef.current.activePreviewElement
-    ) {
-      drawElementToContext(ctx, drawingStateRef.current.activePreviewElement);
-    }
-
-    // Draw Bounding Box around selected artifact
+    // Draw Bounding Box around selected artifact, plus its resize (corner)
+    // and rotate handles.
     if (selectedElement) {
-      let x = selectedElement.x,
-        y = selectedElement.y,
-        w = selectedElement.width || 0,
-        h = selectedElement.height || 0;
-      if (selectedElement.type === "path") {
-        const xs = selectedElement.points.map((pt) => pt.x);
-        const ys = selectedElement.points.map((pt) => pt.y);
-        x = Math.min(...xs);
-        y = Math.min(...ys);
-        w = Math.max(...xs) - x;
-        h = Math.max(...ys) - y;
-      } else if (selectedElement.type === "text") {
-        ctx.font = `${selectedElement.italic ? "italic " : ""}${selectedElement.bold ? "bold " : ""}${selectedElement.fontSize || 28}px ${selectedElement.font || "Inter, sans-serif"}`;
-        const metrics = ctx.measureText(selectedElement.text || "");
-        w = Math.max(20, metrics.width);
-        h = (selectedElement.fontSize || 28) * 1.2;
-      }
+      const bounds = getElementBounds(selectedElement, ctx);
+      const { x, y, w, h } = bounds;
+      const { corners, rotate } = getSelectionHandles(bounds);
 
       ctx.save();
       ctx.strokeStyle = "#c14e32";
@@ -1228,25 +1502,42 @@ export default function PaintStudio() {
       ctx.setLineDash([4, 4]);
       ctx.strokeRect(x - 6, y - 6, w + 12, h + 12);
 
-      // Handle corner nodes
+      // Stem connecting the box to the rotate handle
+      ctx.beginPath();
+      ctx.moveTo(x + w / 2, y - 6);
+      ctx.lineTo(rotate.x, rotate.y);
+      ctx.stroke();
+
+      // Corner resize handles
       ctx.fillStyle = "#ffffff";
       ctx.setLineDash([]);
-      const handles = [
-        { x: x - 6, y: y - 6 },
-        { x: x + w + 6, y: y - 6 },
-        { x: x + w + 6, y: y + h + 6 },
-        { x: x - 6, y: y + h + 6 },
-      ];
-      handles.forEach((hnd) => {
+      corners.forEach((hnd) => {
         ctx.beginPath();
         ctx.arc(hnd.x, hnd.y, 4, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
       });
 
+      // Rotate handle
+      ctx.beginPath();
+      ctx.arc(rotate.x, rotate.y, 5, 0, Math.PI * 2);
+      ctx.fillStyle = "#c14e32";
+      ctx.fill();
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
       ctx.restore();
     }
-  }, [layers, canvasWidth, canvasHeight, bgColor, selectedElement]);
+  }, [
+    layers,
+    canvasWidth,
+    canvasHeight,
+    bgColor,
+    selectedElement,
+    activeLayerId,
+    getLayerCanvas,
+  ]);
 
   useEffect(() => {
     renderAllLayers();
@@ -1325,10 +1616,56 @@ export default function PaintStudio() {
     }
 
     if (activeTool === "select") {
+      // If something is already selected (and isn't locked), its resize
+      // and rotate handles take priority over re-selecting or dragging
+      // whatever else is underneath the pointer.
+      if (selectedElement && !selectedElement.locked) {
+        const bounds = getElementBounds(
+          selectedElement,
+          canvasRef.current?.getContext("2d"),
+        );
+        const { corners, rotate } = getSelectionHandles(bounds);
+        const hitRadius = 10 / zoom;
+        const distTo = (pt) => Math.hypot(pos.x - pt.x, pos.y - pt.y);
+
+        if (distTo(rotate) <= hitRadius) {
+          const cx = bounds.x + bounds.w / 2;
+          const cy = bounds.y + bounds.h / 2;
+          drawingStateRef.current = {
+            mode: "rotate_element",
+            element: selectedElement,
+            center: { x: cx, y: cy },
+            startAngle: Math.atan2(pos.y - cy, pos.x - cx),
+            origRotation: selectedElement.rotation || 0,
+          };
+          return;
+        }
+
+        const cornerHit = corners.find((c) => distTo(c) <= hitRadius);
+        if (cornerHit) {
+          const anchorByCorner = {
+            tl: { x: bounds.x + bounds.w, y: bounds.y + bounds.h },
+            tr: { x: bounds.x, y: bounds.y + bounds.h },
+            br: { x: bounds.x, y: bounds.y },
+            bl: { x: bounds.x + bounds.w, y: bounds.y },
+          };
+          drawingStateRef.current = {
+            mode: "resize_element",
+            element: selectedElement,
+            origBounds: bounds,
+            anchor: anchorByCorner[cornerHit.corner],
+          };
+          return;
+        }
+      }
+
       // Find element under cursor across current active layer
       let found = null;
       for (let i = activeLayer.elements.length - 1; i >= 0; i--) {
         const el = activeLayer.elements[i];
+        // Locked or hidden artifacts can't be picked up on the canvas —
+        // unlock/show them from the layers panel first.
+        if (el.locked || el.visible === false) continue;
         if (el.type === "shape" || el.type === "image") {
           const minX = Math.min(el.x, el.x + el.width);
           const maxX = Math.max(el.x, el.x + el.width);
@@ -1412,6 +1749,9 @@ export default function PaintStudio() {
           activeTool === "pencil" ? Math.min(2, strokeWidth) : strokeWidth,
         opacity: brushOpacity,
         lineCap,
+        visible: true,
+        locked: false,
+        rotation: 0,
       };
 
       drawingStateRef.current = {
@@ -1435,6 +1775,8 @@ export default function PaintStudio() {
         fillColor,
         fillEnabled,
         rotation: 0,
+        visible: true,
+        locked: false,
       };
 
       drawingStateRef.current = {
@@ -1459,6 +1801,9 @@ export default function PaintStudio() {
         fontSize: textSize,
         bold: textBold,
         italic: textItalic,
+        visible: true,
+        locked: false,
+        rotation: 0,
       };
       pushLayerUpdate((prev) =>
         prev.map((l) =>
@@ -1523,6 +1868,36 @@ export default function PaintStudio() {
       }
       drawingStateRef.current.activePreviewElement = state.draggedElement;
       renderAllLayers();
+    } else if (state.mode === "resize_element") {
+      const anchor = state.anchor;
+      const minSize = 8;
+      const newBounds = {
+        x: Math.min(anchor.x, pos.x),
+        y: Math.min(anchor.y, pos.y),
+        w: Math.max(minSize, Math.abs(pos.x - anchor.x)),
+        h: Math.max(minSize, Math.abs(pos.y - anchor.y)),
+      };
+      state.draggedElement = computeResizedElement(
+        state.element,
+        state.origBounds,
+        newBounds,
+      );
+      drawingStateRef.current.activePreviewElement = state.draggedElement;
+      renderAllLayers();
+    } else if (state.mode === "rotate_element") {
+      const currentAngle = Math.atan2(
+        pos.y - state.center.y,
+        pos.x - state.center.x,
+      );
+      let newRotation =
+        state.origRotation +
+        ((currentAngle - state.startAngle) * 180) / Math.PI;
+      if (e.shiftKey) {
+        newRotation = Math.round(newRotation / 15) * 15;
+      }
+      state.draggedElement = { ...state.element, rotation: newRotation };
+      drawingStateRef.current.activePreviewElement = state.draggedElement;
+      renderAllLayers();
     }
   };
 
@@ -1577,6 +1952,13 @@ export default function PaintStudio() {
           };
         }),
       );
+    } else if (
+      (state.mode === "resize_element" || state.mode === "rotate_element") &&
+      state.draggedElement
+    ) {
+      // Commit the final resized/rotated artifact once, on release — same
+      // one-history-entry-per-gesture approach as dragging.
+      updateElementProps(state.draggedElement.id, state.draggedElement);
     }
 
     drawingStateRef.current = null;
@@ -1599,9 +1981,18 @@ export default function PaintStudio() {
 
     layers.forEach((layer) => {
       if (!layer.visible) return;
+
+      // Rasterize each layer in isolation (same approach as the on-screen
+      // renderer) so exported eraser strokes only clear that layer's own
+      // pixels instead of bleeding into the background/layers below it.
+      const layerCanvas = getLayerCanvas(layer.id);
+      const layerCtx = layerCanvas.getContext("2d");
+      layerCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+      layer.elements.forEach((el) => drawElementToContext(layerCtx, el));
+
       ctx.save();
       ctx.globalAlpha = layer.opacity;
-      layer.elements.forEach((el) => drawElementToContext(ctx, el));
+      ctx.drawImage(layerCanvas, 0, 0);
       ctx.restore();
     });
 
@@ -1630,6 +2021,16 @@ export default function PaintStudio() {
 
   return (
     <div className="flex flex-col h-screen w-full bg-[var(--color-background,#faf9f6)] text-[var(--color-foreground,#1c2624)] font-sans select-none overflow-hidden">
+      {/* These toolbars scroll horizontally on narrow screens (see
+          'touch-pan-x'/'overflow-x-auto' below) but are meant to be swiped,
+          not scrolled via a visible native scrollbar — the scrollbar was
+          rendering as a chunky, unstyled bar that clashed with the rest of
+          the UI. This hides it while keeping the element scrollable. */}
+      <style>{`
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
+
       {/* Hidden File Input for Direct Image Upload */}
       <input
         type="file"
@@ -1639,9 +2040,9 @@ export default function PaintStudio() {
         className="hidden"
       />
 
-      {/* Toast Notification */}
+      {/* Toast Notification, offset 96px, and z-index above rest of app (50), but below nav (100) */}
       {toastMessage && (
-        <div className="fixed top-4 right-4 z-50 bg-[var(--color-primary,#0f6e5c)] text-white text-xs font-medium px-4 py-2.5 rounded-lg shadow-lg border border-teal-600 animate-bounce">
+        <div className="fixed top-24 right-4 z-60 bg-[var(--color-primary,#0f6e5c)] text-white text-xs font-medium px-4 py-2.5 rounded-lg shadow-lg border border-teal-600 animate-bounce">
           {toastMessage}
         </div>
       )}
@@ -1651,7 +2052,7 @@ export default function PaintStudio() {
         {/* SCROLLABLE TOOLBAR AREA: Left & Middle items */}
         {/* 'touch-pan-x' enables native mobile swiping, 'overflow-x-auto' allows scrolling */}
         <div
-          className="flex items-center space-x-1 md:space-x-2 overflow-x-auto touch-pan-x py-1 flex-1 min-w-0 [webkit-overflow-scrolling:touch]"
+          className="flex items-center space-x-1 md:space-x-2 overflow-x-auto touch-pan-x py-1 flex-1 min-w-0 no-scrollbar [webkit-overflow-scrolling:touch]"
           style={{ touchAction: "pan-x" }}
         >
           {/* Quick Actions Group */}
@@ -1683,6 +2084,16 @@ export default function PaintStudio() {
             >
               <Icons.Trash />
               <span className="hidden sm:inline">Delete</span>
+            </button>
+
+            <button
+              onClick={duplicateSelectedElement}
+              disabled={!selectedElementId}
+              title="Duplicate Selected Artifact (Ctrl+D)"
+              className="p-2 md:p-1.5 hover:bg-[var(--color-surface-hover,#e8e4d8)] rounded disabled:opacity-30 disabled:hover:bg-transparent transition-colors flex items-center gap-1 text-xs font-medium shrink-0"
+            >
+              <Icons.Duplicate />
+              <span className="hidden sm:inline">Duplicate</span>
             </button>
 
             <div className="h-4 w-px bg-[var(--color-border,#dcd5c8)] shrink-0" />
@@ -1765,7 +2176,7 @@ export default function PaintStudio() {
       </header>
 
       {/* Secondary Control Toolbar */}
-      <div className="min-h-10 border-b border-[var(--color-border,#dcd5c8)] bg-[var(--color-background,#faf9f6)] px-2 md:px-4 flex items-center justify-between text-xs overflow-x-auto scrollbar-none py-1 md:py-0">
+      <div className="min-h-10 border-b border-[var(--color-border,#dcd5c8)] bg-[var(--color-background,#faf9f6)] px-2 md:px-4 flex items-center justify-between text-xs overflow-x-auto no-scrollbar py-1 md:py-0">
         <div className="flex items-center space-x-3 md:space-x-4 shrink-0">
           {/* Stroke Width Slider */}
           {(activeTool === "brush" ||
@@ -1862,12 +2273,14 @@ export default function PaintStudio() {
               {fillEnabled && (
                 <div className="flex items-center space-x-1">
                   <span className="whitespace-nowrap">Fill Color:</span>
-                  <input
-                    type="color"
-                    value={fillColor}
-                    onChange={(e) => setFillColor(e.target.value)}
-                    className="w-6 h-6 rounded cursor-pointer border-0"
-                  />
+                  <div className="w-6 h-6 rounded-full overflow-hidden shrink-0 ring-1 ring-black/20">
+                    <input
+                      type="color"
+                      value={fillColor}
+                      onChange={(e) => setFillColor(e.target.value)}
+                      className="w-[150%] h-[150%] -m-[25%] cursor-pointer border-0 p-0 bg-transparent"
+                    />
+                  </div>
                 </div>
               )}
             </>
@@ -1963,19 +2376,21 @@ export default function PaintStudio() {
 
               <div className="flex items-center space-x-1">
                 <span className="px-1 hidden sm:inline">Color:</span>
-                <input
-                  type="color"
-                  value={
-                    selectedElement && selectedElement.type === "text"
-                      ? selectedElement.strokeColor
-                      : primaryColor
-                  }
-                  onChange={(e) => {
-                    setPrimaryColor(e.target.value);
-                    updateSelectedTextElement("strokeColor", e.target.value);
-                  }}
-                  className="w-6 h-6 rounded cursor-pointer border-0 bg-transparent"
-                />
+                <div className="w-6 h-6 rounded-full overflow-hidden shrink-0 ring-1 ring-black/20">
+                  <input
+                    type="color"
+                    value={
+                      selectedElement && selectedElement.type === "text"
+                        ? selectedElement.strokeColor
+                        : primaryColor
+                    }
+                    onChange={(e) => {
+                      setPrimaryColor(e.target.value);
+                      updateSelectedTextElement("strokeColor", e.target.value);
+                    }}
+                    className="w-[150%] h-[150%] -m-[25%] cursor-pointer border-0 p-0 bg-transparent"
+                  />
+                </div>
               </div>
             </div>
           ) : null}
@@ -2000,18 +2415,22 @@ export default function PaintStudio() {
             />
           ))}
 
-          <input
-            type="color"
-            value={primaryColor}
-            onChange={(e) => {
-              setPrimaryColor(e.target.value);
-              if (selectedElement && selectedElement.type === "text") {
-                updateSelectedTextElement("strokeColor", e.target.value);
-              }
-            }}
-            className="w-6 h-6 rounded cursor-pointer border-0 bg-transparent"
+          <div
+            className="w-6 h-6 rounded-full overflow-hidden shrink-0 ring-1 ring-black/20"
             title="Custom Hex Picker"
-          />
+          >
+            <input
+              type="color"
+              value={primaryColor}
+              onChange={(e) => {
+                setPrimaryColor(e.target.value);
+                if (selectedElement && selectedElement.type === "text") {
+                  updateSelectedTextElement("strokeColor", e.target.value);
+                }
+              }}
+              className="w-[150%] h-[150%] -m-[25%] cursor-pointer border-0 p-0 bg-transparent"
+            />
+          </div>
         </div>
       </div>
 
@@ -2122,7 +2541,7 @@ export default function PaintStudio() {
         <div
           className={`absolute md:relative right-0 top-0 bottom-0 ${isLayersOpen ? "w-64" : "w-10"} border-l border-[var(--color-border,#dcd5c8)] bg-[var(--color-surface,#f0eee7)] transition-all duration-200 flex flex-col z-20 md:z-10 shrink-0 shadow-lg md:shadow-none`}
         >
-          <div className="h-10 border-b border-[var(--color-border,#dcd5c8)] px-3 flex items-center justify-between">
+          <div className="h-10 border-b border-[var(--color-border,#dcd5c8)] px-3 flex items-center justify-center">
             {isLayersOpen && (
               <div className="flex items-center space-x-1.5 font-bold text-xs">
                 <Icons.Layers />
@@ -2252,6 +2671,136 @@ export default function PaintStudio() {
                             <span className="text-[10px] font-mono">
                               {Math.round(layer.opacity * 100)}%
                             </span>
+                          </div>
+                        )}
+
+                        {/* Per-artifact list: each element in this layer is
+                            individually selectable (highlights on canvas),
+                            and its own visibility / lock / opacity can be
+                            controlled, or it can be deleted, right here. */}
+                        {layer.elements.length > 0 && (
+                          <div
+                            className="pt-2 border-t border-[var(--color-border,#dcd5c8)]/50 space-y-1"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <div className="text-[9px] font-semibold text-[var(--color-foreground-muted,#576360)] uppercase tracking-wide">
+                              Artifacts ({layer.elements.length})
+                            </div>
+                            <div className="space-y-1 max-h-40 overflow-y-auto pr-0.5">
+                              {layer.elements
+                                .slice()
+                                .reverse()
+                                .map((el) => {
+                                  const isElActive =
+                                    el.id === selectedElementId;
+                                  const isElVisible = el.visible !== false;
+                                  return (
+                                    <div
+                                      key={el.id}
+                                      onClick={() => {
+                                        setSelectedElementId(el.id);
+                                        setActiveLayerId(layer.id);
+                                      }}
+                                      className={`px-1.5 py-1 rounded border text-[10px] flex flex-col cursor-pointer transition-colors ${
+                                        isElActive
+                                          ? "bg-[var(--color-primary,#0f6e5c)]/10 border-[var(--color-primary,#0f6e5c)]"
+                                          : "border-transparent hover:bg-[var(--color-surface-hover,#e8e4d8)]"
+                                      }`}
+                                    >
+                                      <div className="flex items-center justify-between gap-1">
+                                        <span className="truncate flex-1">
+                                          {getElementLabel(el)}
+                                        </span>
+                                        <div
+                                          className="flex items-center space-x-0.5 shrink-0"
+                                          onClick={(e) => e.stopPropagation()}
+                                        >
+                                          <button
+                                            onClick={() =>
+                                              updateElementProps(el.id, {
+                                                visible: !isElVisible,
+                                              })
+                                            }
+                                            title={
+                                              isElVisible ? "Hide" : "Show"
+                                            }
+                                            className="p-0.5 text-[var(--color-foreground-muted,#576360)] hover:text-black"
+                                          >
+                                            {isElVisible ? (
+                                              <Icons.Eye />
+                                            ) : (
+                                              <Icons.EyeOff />
+                                            )}
+                                          </button>
+                                          <button
+                                            onClick={() =>
+                                              updateElementProps(el.id, {
+                                                locked: !el.locked,
+                                              })
+                                            }
+                                            title={
+                                              el.locked ? "Unlock" : "Lock"
+                                            }
+                                            className="p-0.5 text-[var(--color-foreground-muted,#576360)] hover:text-black"
+                                          >
+                                            {el.locked ? (
+                                              <Icons.Lock />
+                                            ) : (
+                                              <Icons.Unlock />
+                                            )}
+                                          </button>
+                                          <button
+                                            onClick={() =>
+                                              duplicateElement(el.id)
+                                            }
+                                            title="Duplicate"
+                                            className="p-0.5 text-[var(--color-foreground-muted,#576360)] hover:text-black"
+                                          >
+                                            <Icons.Duplicate />
+                                          </button>
+                                          <button
+                                            onClick={() => deleteElement(el.id)}
+                                            title="Delete"
+                                            className="p-0.5 text-red-500 hover:text-red-700"
+                                          >
+                                            <Icons.Trash />
+                                          </button>
+                                        </div>
+                                      </div>
+
+                                      {isElActive && (
+                                        <div
+                                          className="flex items-center space-x-1.5 mt-1"
+                                          onClick={(e) => e.stopPropagation()}
+                                        >
+                                          <span className="text-[9px] text-[var(--color-foreground-muted,#576360)]">
+                                            Opacity
+                                          </span>
+                                          <input
+                                            type="range"
+                                            min="0"
+                                            max="1"
+                                            step="0.05"
+                                            value={el.opacity ?? 1}
+                                            onChange={(e) =>
+                                              updateElementProps(el.id, {
+                                                opacity: Number(e.target.value),
+                                              })
+                                            }
+                                            className="flex-1 accent-[var(--color-primary,#0f6e5c)]"
+                                          />
+                                          <span className="text-[9px] font-mono w-7 text-right">
+                                            {Math.round(
+                                              (el.opacity ?? 1) * 100,
+                                            )}
+                                            %
+                                          </span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                            </div>
                           </div>
                         )}
                       </div>
