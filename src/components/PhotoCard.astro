@@ -38,7 +38,7 @@ const objectPosition = photo.objectPosition ?? "center";
       photo.src ? (
         <Image
           src={photo.src}
-          alt={photo.place ?? "Travel photo"}
+          alt={photo.title ?? "Travel photo"}
           width={640}
           class={`${aspectClass} w-full rounded-sm object-cover`}
           style={`object-position: ${objectPosition};`}
@@ -70,7 +70,7 @@ const objectPosition = photo.objectPosition ?? "center";
 
     <figcaption class="px-1 pb-1 pt-3">
       <p class="font-display text-sm font-semibold text-foreground">
-        {photo.place}
+        {photo.title}
       </p>
 
       <p class="mt-1 text-xs leading-relaxed text-foreground-muted">
