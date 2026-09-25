@@ -479,6 +479,18 @@ const FONTS = [
   },
 ];
 
+// Autosave: the whole canvas (dimensions, background, every layer/artifact)
+// is persisted to localStorage on every committed change, debounced, so a
+// refresh no longer wipes the canvas the way only-the-share-URL did. Unlike
+// the share-URL encoding this is plain JSON (no 50KB-per-image cap, no
+// precision rounding) since localStorage has much more headroom.
+const AUTOSAVE_STORAGE_KEY = "paint-studio:autosave:v1";
+
+// True axis-aligned overlap test, used to resolve a marquee/rubber-band
+// selection against each artifact's bounding box.
+const boxesOverlap = (a, b) =>
+  a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+
 const encodeCanvasState = (state) => {
   try {
     const compact = {
@@ -686,6 +698,7 @@ const computeResizedElement = (el, origBounds, newBounds) => {
 export default function PaintStudio() {
   // Canvas Canvas dimensions & Viewport State
   const [canvasWidth, setCanvasWidth] = useState(800);
+
   const [canvasHeight, setCanvasHeight] = useState(600);
   const [bgColor, setBgColor] = useState("#faf9f6");
   const [zoom, setZoom] = useState(1);
@@ -723,10 +736,22 @@ export default function PaintStudio() {
   ]);
   const [activeLayerId, setActiveLayerId] = useState("layer_1");
   const [selectedElementId, setSelectedElementId] = useState(null);
+  // Multi-select: ids of artifacts selected as a group, via shift-click or a
+  // marquee/rubber-band drag on the canvas. Only meaningful when it holds 2+
+  // ids — at 0 or 1, `selectedElementId` above is the single source of
+  // truth (keeps every existing single-artifact code path, incl. resize/
+  // rotate handles and the property inspector, untouched).
+  const [multiSelectIds, setMultiSelectIds] = useState([]);
 
   // Undo/Redo History
   const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
+
+  // Autosave-to-localStorage: flips true once initial hydration (from a
+  // share-URL hash, a prior autosave, or a blank default) has happened, so
+  // the autosave effect doesn't stomp a real save with the blank initial
+  // state before that hydration has resolved.
+  const [isHydrated, setIsHydrated] = useState(false);
 
   // UI Modals & Notifications
   const [isLayersOpen, setIsLayersOpen] = useState(false);
@@ -751,6 +776,8 @@ export default function PaintStudio() {
   // every layer underneath it (which is what previously made the eraser
   // look like it was painting a plain white stroke).
   const layerCanvasesRef = useRef({});
+  const autosaveTimeoutRef = useRef(null);
+  const autosaveWarnedRef = useRef(false);
 
   const showToast = (msg) => {
     setToastMessage(msg);
@@ -865,6 +892,46 @@ export default function PaintStudio() {
     return null;
   }, [layers, selectedElementId]);
 
+  // The layer that actually holds the selected artifact, and its stacking
+  // (z-order) position within that layer's elements array — index 0 is the
+  // bottom of the stack, the last index is the top (drawn last / on top).
+  const selectedElementLayer = useMemo(() => {
+    if (!selectedElementId) return null;
+    return (
+      layers.find((l) => l.elements.some((e) => e.id === selectedElementId)) ||
+      null
+    );
+  }, [layers, selectedElementId]);
+
+  const selectedElementZIndex = useMemo(() => {
+    if (!selectedElementLayer || !selectedElementId) return -1;
+    return selectedElementLayer.elements.findIndex(
+      (e) => e.id === selectedElementId,
+    );
+  }, [selectedElementLayer, selectedElementId]);
+
+  // Whether a multi-selection (2+ artifacts) is currently active. At 0 or 1
+  // ids, everything falls back to the normal single-selection behavior.
+  const isMultiSelect = multiSelectIds.length > 1;
+  const hasSelection = isMultiSelect || !!selectedElementId;
+
+  // Resolve the multi-selected ids to their actual artifact objects, for
+  // drawing per-artifact selection boxes and for group move/delete/nudge.
+  const multiSelectedElements = useMemo(() => {
+    if (!isMultiSelect) return [];
+    const byId = new Map();
+    layers.forEach((l) => l.elements.forEach((e) => byId.set(e.id, e)));
+    return multiSelectIds.map((id) => byId.get(id)).filter(Boolean);
+  }, [layers, multiSelectIds, isMultiSelect]);
+
+  // Set a single, ordinary (non-group) selection — used by every selection
+  // flow other than the canvas select-tool's own shift-click / marquee
+  // handling, so a fresh single pick always clears any prior multi-select.
+  const selectSingleElement = useCallback((id) => {
+    setSelectedElementId(id);
+    setMultiSelectIds((prev) => (prev.length ? [] : prev));
+  }, []);
+
   // Synchronize text property inputs when selected element changes
   useEffect(() => {
     if (selectedElement && selectedElement.type === "text") {
@@ -891,19 +958,40 @@ export default function PaintStudio() {
         })),
       );
       setSelectedElementId((prev) => (prev === elementId ? null : prev));
+      setMultiSelectIds((prev) => prev.filter((id) => id !== elementId));
       showToast("Artifact deleted");
     },
     [pushLayerUpdate],
   );
 
-  // Artifact Deletion Function
+  // Delete the whole multi-selection at once, or fall back to the single
+  // selected artifact — used by the toolbar Delete button and the Delete/
+  // Backspace keyboard shortcut.
   const deleteSelectedElement = useCallback(() => {
+    if (isMultiSelect) {
+      const idSet = new Set(multiSelectIds);
+      pushLayerUpdate((prev) =>
+        prev.map((l) => ({
+          ...l,
+          elements: l.elements.filter((e) => !idSet.has(e.id)),
+        })),
+      );
+      showToast(`${idSet.size} artifacts deleted`);
+      setMultiSelectIds([]);
+      return;
+    }
     if (!selectedElementId) {
       showToast("No element selected to delete");
       return;
     }
     deleteElement(selectedElementId);
-  }, [selectedElementId, deleteElement]);
+  }, [
+    isMultiSelect,
+    multiSelectIds,
+    selectedElementId,
+    deleteElement,
+    pushLayerUpdate,
+  ]);
 
   // Patch one or more properties (visible / locked / opacity / etc.) on a
   // single artifact, wherever it lives, without needing to know its layer.
@@ -962,20 +1050,82 @@ export default function PaintStudio() {
             : l,
         ),
       );
-      setSelectedElementId(newId);
+      selectSingleElement(newId);
       setActiveLayerId(targetLayerId);
       showToast("Artifact duplicated");
     },
-    [layers, pushLayerUpdate],
+    [layers, pushLayerUpdate, selectSingleElement],
   );
 
   const duplicateSelectedElement = useCallback(() => {
+    if (isMultiSelect) {
+      showToast("Select a single artifact to duplicate");
+      return;
+    }
     if (!selectedElementId) {
       showToast("No element selected to duplicate");
       return;
     }
     duplicateElement(selectedElementId);
-  }, [selectedElementId, duplicateElement]);
+  }, [isMultiSelect, selectedElementId, duplicateElement]);
+
+  // Reorder a single artifact's stacking position within its own layer's
+  // elements array — that array order doubles as z-order (last = drawn
+  // last = on top) and hit-test order (topmost first). Scoped to whichever
+  // layer the artifact actually lives in, same as whole-layer reordering.
+  const reorderElementZ = useCallback(
+    (elementId, action) => {
+      pushLayerUpdate((prev) =>
+        prev.map((l) => {
+          const idx = l.elements.findIndex((e) => e.id === elementId);
+          if (idx === -1) return l;
+          const elements = l.elements.slice();
+          const [el] = elements.splice(idx, 1);
+          if (action === "front") {
+            elements.push(el);
+          } else if (action === "back") {
+            elements.unshift(el);
+          } else if (action === "forward") {
+            elements.splice(Math.min(idx + 1, elements.length), 0, el);
+          } else if (action === "backward") {
+            elements.splice(Math.max(idx - 1, 0), 0, el);
+          } else {
+            elements.splice(idx, 0, el);
+          }
+          return { ...l, elements };
+        }),
+      );
+    },
+    [pushLayerUpdate],
+  );
+
+  // Nudge one or more artifacts by a small pixel offset — used by the arrow
+  // key shortcuts, for both a single selection and a multi-selection.
+  const nudgeElements = useCallback(
+    (ids, dx, dy) => {
+      if (!ids.length) return;
+      const idSet = new Set(ids);
+      pushLayerUpdate((prev) =>
+        prev.map((l) => ({
+          ...l,
+          elements: l.elements.map((el) => {
+            if (!idSet.has(el.id) || el.locked) return el;
+            if (el.type === "path") {
+              return {
+                ...el,
+                points: el.points.map((pt) => ({
+                  x: pt.x + dx,
+                  y: pt.y + dy,
+                })),
+              };
+            }
+            return { ...el, x: (el.x || 0) + dx, y: (el.y || 0) + dy };
+          }),
+        })),
+      );
+    },
+    [pushLayerUpdate],
+  );
 
   // Short human-readable label for an artifact row in the layers panel.
   const getElementLabel = (el) => {
@@ -1035,14 +1185,65 @@ export default function PaintStudio() {
       } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "d") {
         e.preventDefault();
         duplicateSelectedElement();
+      } else if (e.key === "Escape") {
+        if (multiSelectIds.length || selectedElementId) {
+          e.preventDefault();
+          setMultiSelectIds([]);
+          setSelectedElementId(null);
+        }
+      } else if ((e.ctrlKey || e.metaKey) && e.key === "]") {
+        // Z-order: Ctrl/Cmd+] bumps the selected artifact forward one step;
+        // add Shift to send it all the way to the front.
+        if (selectedElementId) {
+          e.preventDefault();
+          reorderElementZ(selectedElementId, e.shiftKey ? "front" : "forward");
+        }
+      } else if ((e.ctrlKey || e.metaKey) && e.key === "[") {
+        // Z-order: Ctrl/Cmd+[ bumps it backward one step; Shift sends it all
+        // the way to the back.
+        if (selectedElementId) {
+          e.preventDefault();
+          reorderElementZ(selectedElementId, e.shiftKey ? "back" : "backward");
+        }
+      } else if (
+        ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)
+      ) {
+        // Nudge the current selection (single or multi) by 1px, or 10px
+        // with Shift held.
+        const ids = isMultiSelect
+          ? multiSelectIds
+          : selectedElementId
+            ? [selectedElementId]
+            : [];
+        if (ids.length) {
+          e.preventDefault();
+          const step = e.shiftKey ? 10 : 1;
+          const dx =
+            e.key === "ArrowLeft" ? -step : e.key === "ArrowRight" ? step : 0;
+          const dy =
+            e.key === "ArrowUp" ? -step : e.key === "ArrowDown" ? step : 0;
+          nudgeElements(ids, dx, dy);
+        }
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [deleteSelectedElement, duplicateSelectedElement, handleUndo, handleRedo]);
+  }, [
+    deleteSelectedElement,
+    duplicateSelectedElement,
+    handleUndo,
+    handleRedo,
+    multiSelectIds,
+    selectedElementId,
+    isMultiSelect,
+    reorderElementZ,
+    nudgeElements,
+  ]);
 
-  // Initial Hash Loading
+  // Initial Load: a shared link (hash) always wins; otherwise fall back to
+  // whatever was last autosaved to localStorage, so a refresh (with no
+  // share link open) restores the canvas instead of wiping it.
   useEffect(() => {
     if (window.location.hash.startsWith("#data=")) {
       const base64 = window.location.hash.replace("#data=", "");
@@ -1053,13 +1254,73 @@ export default function PaintStudio() {
         setBgColor(loaded.bgColor || "#faf9f6");
         setLayers(loaded.layers);
         setActiveLayerId(loaded.layers[0]?.id || "layer_1");
+        setHistory([JSON.stringify(loaded.layers)]);
+        setHistoryIndex(0);
         showToast("Shared canvas state restored!");
+        setIsHydrated(true);
+        return;
       }
-    } else {
-      setHistory([JSON.stringify(layers)]);
-      setHistoryIndex(0);
     }
+
+    try {
+      const raw = window.localStorage.getItem(AUTOSAVE_STORAGE_KEY);
+      const saved = raw ? JSON.parse(raw) : null;
+      if (saved && Array.isArray(saved.layers) && saved.layers.length) {
+        setCanvasWidth(saved.width || 800);
+        setCanvasHeight(saved.height || 600);
+        setBgColor(saved.bgColor || "#faf9f6");
+        setLayers(saved.layers);
+        setActiveLayerId(saved.layers[0]?.id || "layer_1");
+        setHistory([JSON.stringify(saved.layers)]);
+        setHistoryIndex(0);
+        showToast("Restored your last autosaved session");
+        setIsHydrated(true);
+        return;
+      }
+    } catch (err) {
+      console.error("Autosave restore failed:", err);
+    }
+
+    setHistory([JSON.stringify(layers)]);
+    setHistoryIndex(0);
+    setIsHydrated(true);
   }, []);
+
+  // Autosave: persist the whole canvas to localStorage, debounced, any time
+  // it changes — but only once initial hydration above has resolved, so we
+  // don't immediately overwrite a real save with the blank default canvas.
+  useEffect(() => {
+    if (!isHydrated) return;
+
+    if (autosaveTimeoutRef.current) clearTimeout(autosaveTimeoutRef.current);
+    autosaveTimeoutRef.current = setTimeout(() => {
+      try {
+        const sanitizedLayers = layers.map((l) => ({
+          ...l,
+          elements: l.elements.map(({ _imgObj, ...rest }) => rest),
+        }));
+        window.localStorage.setItem(
+          AUTOSAVE_STORAGE_KEY,
+          JSON.stringify({
+            version: 1,
+            savedAt: Date.now(),
+            width: canvasWidth,
+            height: canvasHeight,
+            bgColor,
+            layers: sanitizedLayers,
+          }),
+        );
+      } catch (err) {
+        console.error("Autosave failed:", err);
+        if (!autosaveWarnedRef.current) {
+          autosaveWarnedRef.current = true;
+          showToast("Autosave failed — local storage may be full");
+        }
+      }
+    }, 800);
+
+    return () => clearTimeout(autosaveTimeoutRef.current);
+  }, [isHydrated, layers, canvasWidth, canvasHeight, bgColor]);
 
   const processImageFile = (file) => {
     if (!file || !file.type.startsWith("image/")) return;
@@ -1134,7 +1395,7 @@ export default function PaintStudio() {
             : l,
         ),
       );
-      setSelectedElementId(newImgElement.id);
+      selectSingleElement(newImgElement.id);
       showToast("Canvas resized to match image dimensions");
     } else if (option === "scale_fit") {
       const scale = Math.min(
@@ -1165,7 +1426,7 @@ export default function PaintStudio() {
             : l,
         ),
       );
-      setSelectedElementId(newImgElement.id);
+      selectSingleElement(newImgElement.id);
       showToast("Image scaled to fit canvas");
     } else {
       const x = Math.max(0, (canvasWidth - pendingImage.width) / 2);
@@ -1189,7 +1450,7 @@ export default function PaintStudio() {
             : l,
         ),
       );
-      setSelectedElementId(newImgElement.id);
+      selectSingleElement(newImgElement.id);
       showToast("Image added as canvas element");
     }
 
@@ -1458,7 +1719,15 @@ export default function PaintStudio() {
     ctx.fillStyle = bgColor;
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
+    // Two distinct kinds of "not yet committed to state" content:
+    // - activePreviewElement: a brand-new path/shape being drawn, not yet in
+    //   any layer's elements array — drawn as an extra element on top.
+    // - previewOverrides: EXISTING artifacts being dragged/resized/rotated
+    //   (single or as a group) — these replace the committed artifact of
+    //   the same id for this frame, instead of drawing both (which would
+    //   otherwise leave a "ghost" of the artifact at its old position).
     const preview = drawingStateRef.current?.activePreviewElement;
+    const overrides = drawingStateRef.current?.previewOverrides;
 
     // Rasterize each visible layer onto its own off-screen buffer, then
     // composite that buffer onto the main canvas. Doing this per layer
@@ -1474,9 +1743,12 @@ export default function PaintStudio() {
       const layerCtx = layerCanvas.getContext("2d");
       layerCtx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-      layer.elements.forEach((el) => drawElementToContext(layerCtx, el));
+      layer.elements.forEach((el) => {
+        const override = overrides && overrides[el.id];
+        drawElementToContext(layerCtx, override || el);
+      });
 
-      // Draw the in-progress stroke/shape/drag preview onto the layer it
+      // Draw the in-progress stroke/shape preview onto the layer it
       // actually belongs to (always the active layer), so a preview eraser
       // stroke shows correct real-time feedback too.
       if (preview && layer.id === activeLayerId) {
@@ -1489,9 +1761,38 @@ export default function PaintStudio() {
       ctx.restore();
     });
 
+    // Multi-select feedback: a plain (handle-less) dashed box around every
+    // artifact currently part of a multi-selection — resize/rotate handles
+    // only make sense for a single artifact, so those stay on the
+    // single-selection path below.
+    if (multiSelectedElements.length > 1) {
+      ctx.save();
+      ctx.strokeStyle = "#c14e32";
+      ctx.lineWidth = 1.25;
+      ctx.setLineDash([3, 3]);
+      multiSelectedElements.forEach((el) => {
+        const b = getElementBounds(el, ctx);
+        ctx.strokeRect(b.x - 6, b.y - 6, b.w + 12, b.h + 12);
+      });
+      ctx.restore();
+    }
+
+    // Live marquee/rubber-band rectangle while a drag-select is in progress.
+    const marquee = drawingStateRef.current?.marqueeRect;
+    if (marquee) {
+      ctx.save();
+      ctx.fillStyle = "rgba(15, 110, 92, 0.08)";
+      ctx.strokeStyle = "#0f6e5c";
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 3]);
+      ctx.fillRect(marquee.x, marquee.y, marquee.w, marquee.h);
+      ctx.strokeRect(marquee.x, marquee.y, marquee.w, marquee.h);
+      ctx.restore();
+    }
+
     // Draw Bounding Box around selected artifact, plus its resize (corner)
-    // and rotate handles.
-    if (selectedElement) {
+    // and rotate handles. Suppressed during a multi-selection (see above).
+    if (selectedElement && !isMultiSelect) {
       const bounds = getElementBounds(selectedElement, ctx);
       const { x, y, w, h } = bounds;
       const { corners, rotate } = getSelectionHandles(bounds);
@@ -1535,6 +1836,8 @@ export default function PaintStudio() {
     canvasHeight,
     bgColor,
     selectedElement,
+    isMultiSelect,
+    multiSelectedElements,
     activeLayerId,
     getLayerCanvas,
   ]);
@@ -1717,8 +2020,52 @@ export default function PaintStudio() {
         }
       }
 
+      const isShiftClick = e.shiftKey;
+
       if (found) {
-        setSelectedElementId(found.id);
+        if (isShiftClick) {
+          // Shift-click toggles this artifact's membership in the
+          // multi-selection, building on whatever is already selected.
+          const base = isMultiSelect
+            ? multiSelectIds
+            : selectedElementId
+              ? [selectedElementId]
+              : [];
+          const next = base.includes(found.id)
+            ? base.filter((id) => id !== found.id)
+            : [...base, found.id];
+
+          if (next.length > 1) {
+            setMultiSelectIds(next);
+            setSelectedElementId(null);
+          } else {
+            setMultiSelectIds([]);
+            setSelectedElementId(next[0] || null);
+          }
+          renderAllLayers();
+          return;
+        }
+
+        if (isMultiSelect && multiSelectIds.includes(found.id)) {
+          // Clicking (without shift) a member of the current multi-
+          // selection keeps the whole group selected and drags it together.
+          const originals = {};
+          multiSelectIds.forEach((id) => {
+            const el = activeLayer.elements.find((e) => e.id === id);
+            if (el) originals[id] = el;
+          });
+          drawingStateRef.current = {
+            mode: "drag_group",
+            startX: pos.x,
+            startY: pos.y,
+            originals,
+          };
+          return;
+        }
+
+        // Plain click on a single artifact: collapse to an ordinary
+        // single selection and start dragging just that one.
+        selectSingleElement(found.id);
         drawingStateRef.current = {
           mode: "drag_element",
           element: found,
@@ -1727,9 +2074,26 @@ export default function PaintStudio() {
           origX: found.x,
           origY: found.y,
         };
-      } else {
-        setSelectedElementId(null);
+        renderAllLayers();
+        return;
       }
+
+      // Nothing under the cursor: begin a marquee/rubber-band selection.
+      // A plain click with no drag (resolved in pointer-up) still clears
+      // the selection, matching the previous click-to-deselect behavior.
+      drawingStateRef.current = {
+        mode: "marquee_select",
+        startX: pos.x,
+        startY: pos.y,
+        additive: isShiftClick,
+        baseSelection: isShiftClick
+          ? isMultiSelect
+            ? multiSelectIds
+            : selectedElementId
+              ? [selectedElementId]
+              : []
+          : [],
+      };
       renderAllLayers();
       return;
     }
@@ -1812,7 +2176,7 @@ export default function PaintStudio() {
             : l,
         ),
       );
-      setSelectedElementId(newText.id);
+      selectSingleElement(newText.id);
       setActiveTool("select");
       showToast("Text created. Edit content in the context bar above.");
       return;
@@ -1866,7 +2230,7 @@ export default function PaintStudio() {
           y: state.origY + dy,
         };
       }
-      drawingStateRef.current.activePreviewElement = state.draggedElement;
+      state.previewOverrides = { [state.element.id]: state.draggedElement };
       renderAllLayers();
     } else if (state.mode === "resize_element") {
       const anchor = state.anchor;
@@ -1882,7 +2246,7 @@ export default function PaintStudio() {
         state.origBounds,
         newBounds,
       );
-      drawingStateRef.current.activePreviewElement = state.draggedElement;
+      state.previewOverrides = { [state.element.id]: state.draggedElement };
       renderAllLayers();
     } else if (state.mode === "rotate_element") {
       const currentAngle = Math.atan2(
@@ -1896,7 +2260,31 @@ export default function PaintStudio() {
         newRotation = Math.round(newRotation / 15) * 15;
       }
       state.draggedElement = { ...state.element, rotation: newRotation };
-      drawingStateRef.current.activePreviewElement = state.draggedElement;
+      state.previewOverrides = { [state.element.id]: state.draggedElement };
+      renderAllLayers();
+    } else if (state.mode === "drag_group") {
+      const dx = pos.x - state.startX;
+      const dy = pos.y - state.startY;
+      const overrides = {};
+      Object.entries(state.originals).forEach(([id, el]) => {
+        if (el.type === "path") {
+          overrides[id] = {
+            ...el,
+            points: el.points.map((pt) => ({ x: pt.x + dx, y: pt.y + dy })),
+          };
+        } else {
+          overrides[id] = { ...el, x: (el.x || 0) + dx, y: (el.y || 0) + dy };
+        }
+      });
+      state.previewOverrides = overrides;
+      renderAllLayers();
+    } else if (state.mode === "marquee_select") {
+      state.marqueeRect = {
+        x: Math.min(state.startX, pos.x),
+        y: Math.min(state.startY, pos.y),
+        w: Math.abs(pos.x - state.startX),
+        h: Math.abs(pos.y - state.startY),
+      };
       renderAllLayers();
     }
   };
@@ -1926,7 +2314,7 @@ export default function PaintStudio() {
             : l,
         ),
       );
-      setSelectedElementId(state.currentPath.id);
+      selectSingleElement(state.currentPath.id);
     } else if (state.mode === "draw_shape") {
       if (Math.abs(state.shape.width) > 2 || Math.abs(state.shape.height) > 2) {
         pushLayerUpdate((prev) =>
@@ -1936,7 +2324,7 @@ export default function PaintStudio() {
               : l,
           ),
         );
-        setSelectedElementId(state.shape.id);
+        selectSingleElement(state.shape.id);
       }
     } else if (state.mode === "drag_element" && state.draggedElement) {
       // Commit the final dragged position to React state ONCE when release occurs
@@ -1959,6 +2347,58 @@ export default function PaintStudio() {
       // Commit the final resized/rotated artifact once, on release — same
       // one-history-entry-per-gesture approach as dragging.
       updateElementProps(state.draggedElement.id, state.draggedElement);
+    } else if (state.mode === "drag_group" && state.previewOverrides) {
+      // Commit every dragged group member's final position at once, as a
+      // single history entry — same pattern as a single-artifact drag.
+      const overrides = state.previewOverrides;
+      pushLayerUpdate((prev) =>
+        prev.map((l) => {
+          if (l.id !== activeLayerId) return l;
+          return {
+            ...l,
+            elements: l.elements.map((el) => overrides[el.id] || el),
+          };
+        }),
+      );
+    } else if (state.mode === "marquee_select") {
+      const rect = state.marqueeRect;
+      const movedEnough = rect && (rect.w > 3 || rect.h > 3);
+      const activeLayer = layers.find((l) => l.id === activeLayerId);
+
+      if (!movedEnough) {
+        // A plain click on empty canvas: clear the selection, unless shift
+        // was held (a shift-click on empty space leaves it untouched).
+        if (!state.additive) {
+          setSelectedElementId(null);
+          setMultiSelectIds([]);
+        }
+      } else if (activeLayer) {
+        const ctx0 = canvasRef.current?.getContext("2d");
+        const hitIds = activeLayer.elements
+          .filter((el) => {
+            if (el.locked || el.visible === false) return false;
+            const b = getElementBounds(el, ctx0);
+            return boxesOverlap(rect, {
+              x: b.x - 6,
+              y: b.y - 6,
+              w: b.w + 12,
+              h: b.h + 12,
+            });
+          })
+          .map((el) => el.id);
+
+        const combined = state.additive
+          ? Array.from(new Set([...state.baseSelection, ...hitIds]))
+          : hitIds;
+
+        if (combined.length > 1) {
+          setMultiSelectIds(combined);
+          setSelectedElementId(null);
+        } else {
+          setMultiSelectIds([]);
+          setSelectedElementId(combined[0] || null);
+        }
+      }
     }
 
     drawingStateRef.current = null;
@@ -2078,12 +2518,18 @@ export default function PaintStudio() {
 
             <button
               onClick={deleteSelectedElement}
-              disabled={!selectedElementId}
-              title="Delete Selected Artifact (Backspace/Delete)"
+              disabled={!hasSelection}
+              title={
+                isMultiSelect
+                  ? `Delete ${multiSelectIds.length} Selected Artifacts (Backspace/Delete)`
+                  : "Delete Selected Artifact (Backspace/Delete)"
+              }
               className="p-2 md:p-1.5 hover:bg-red-100 text-red-600 rounded disabled:opacity-30 disabled:hover:bg-transparent transition-colors flex items-center gap-1 text-xs font-medium shrink-0"
             >
               <Icons.Trash />
-              <span className="hidden sm:inline">Delete</span>
+              <span className="hidden sm:inline">
+                {isMultiSelect ? `Delete (${multiSelectIds.length})` : "Delete"}
+              </span>
             </button>
 
             <button
@@ -2095,6 +2541,61 @@ export default function PaintStudio() {
               <Icons.Duplicate />
               <span className="hidden sm:inline">Duplicate</span>
             </button>
+
+            <div className="h-4 w-px bg-[var(--color-border,#dcd5c8)] shrink-0" />
+
+            {/* Z-order (stacking) controls for the single selected artifact.
+                Scoped to a single selection — a multi-selection is for
+                move/delete/nudge, not restacking. */}
+            <button
+              onClick={() => reorderElementZ(selectedElementId, "front")}
+              disabled={
+                !selectedElementId ||
+                selectedElementZIndex >=
+                  (selectedElementLayer?.elements.length ?? 0) - 1
+              }
+              title="Bring to Front (Ctrl+Shift+])"
+              className="p-2 md:p-1.5 hover:bg-[var(--color-surface-hover,#e8e4d8)] rounded disabled:opacity-30 disabled:hover:bg-transparent shrink-0 text-sm leading-none font-mono"
+            >
+              ⤒
+            </button>
+            <button
+              onClick={() => reorderElementZ(selectedElementId, "forward")}
+              disabled={
+                !selectedElementId ||
+                selectedElementZIndex >=
+                  (selectedElementLayer?.elements.length ?? 0) - 1
+              }
+              title="Bring Forward (Ctrl+])"
+              className="p-2 md:p-1.5 hover:bg-[var(--color-surface-hover,#e8e4d8)] rounded disabled:opacity-30 disabled:hover:bg-transparent shrink-0 text-sm leading-none font-mono"
+            >
+              ▲
+            </button>
+            <button
+              onClick={() => reorderElementZ(selectedElementId, "backward")}
+              disabled={!selectedElementId || selectedElementZIndex <= 0}
+              title="Send Backward (Ctrl+[)"
+              className="p-2 md:p-1.5 hover:bg-[var(--color-surface-hover,#e8e4d8)] rounded disabled:opacity-30 disabled:hover:bg-transparent shrink-0 text-sm leading-none font-mono"
+            >
+              ▼
+            </button>
+            <button
+              onClick={() => reorderElementZ(selectedElementId, "back")}
+              disabled={!selectedElementId || selectedElementZIndex <= 0}
+              title="Send to Back (Ctrl+Shift+[)"
+              className="p-2 md:p-1.5 hover:bg-[var(--color-surface-hover,#e8e4d8)] rounded disabled:opacity-30 disabled:hover:bg-transparent shrink-0 text-sm leading-none font-mono"
+            >
+              ⤓
+            </button>
+
+            {isMultiSelect && (
+              <>
+                <div className="h-4 w-px bg-[var(--color-border,#dcd5c8)] shrink-0" />
+                <span className="text-[10px] md:text-xs font-medium text-[var(--color-primary,#0f6e5c)] bg-[var(--color-primary,#0f6e5c)]/10 px-2 py-1 rounded shrink-0 whitespace-nowrap">
+                  {multiSelectIds.length} selected
+                </span>
+              </>
+            )}
 
             <div className="h-4 w-px bg-[var(--color-border,#dcd5c8)] shrink-0" />
 
@@ -2693,16 +3194,22 @@ export default function PaintStudio() {
                                 .map((el) => {
                                   const isElActive =
                                     el.id === selectedElementId;
+                                  const isElGrouped =
+                                    isMultiSelect &&
+                                    multiSelectIds.includes(el.id);
                                   const isElVisible = el.visible !== false;
+                                  const zIdx = layer.elements.findIndex(
+                                    (e2) => e2.id === el.id,
+                                  );
                                   return (
                                     <div
                                       key={el.id}
                                       onClick={() => {
-                                        setSelectedElementId(el.id);
+                                        selectSingleElement(el.id);
                                         setActiveLayerId(layer.id);
                                       }}
                                       className={`px-1.5 py-1 rounded border text-[10px] flex flex-col cursor-pointer transition-colors ${
-                                        isElActive
+                                        isElActive || isElGrouped
                                           ? "bg-[var(--color-primary,#0f6e5c)]/10 border-[var(--color-primary,#0f6e5c)]"
                                           : "border-transparent hover:bg-[var(--color-surface-hover,#e8e4d8)]"
                                       }`}
@@ -2710,6 +3217,11 @@ export default function PaintStudio() {
                                       <div className="flex items-center justify-between gap-1">
                                         <span className="truncate flex-1">
                                           {getElementLabel(el)}
+                                          {isElGrouped && !isElActive && (
+                                            <span className="ml-1 text-[var(--color-primary,#0f6e5c)]">
+                                              •
+                                            </span>
+                                          )}
                                         </span>
                                         <div
                                           className="flex items-center space-x-0.5 shrink-0"
@@ -2797,6 +3309,61 @@ export default function PaintStudio() {
                                           </span>
                                         </div>
                                       )}
+
+                                      {isElActive && (
+                                        <div
+                                          className="flex items-center space-x-1 mt-1"
+                                          onClick={(e) => e.stopPropagation()}
+                                        >
+                                          <span className="text-[9px] text-[var(--color-foreground-muted,#576360)]">
+                                            Order
+                                          </span>
+                                          <button
+                                            onClick={() =>
+                                              reorderElementZ(el.id, "front")
+                                            }
+                                            disabled={
+                                              zIdx >= layer.elements.length - 1
+                                            }
+                                            title="Bring to Front"
+                                            className="px-1 font-mono text-[10px] leading-tight text-[var(--color-foreground-muted,#576360)] hover:text-black disabled:opacity-30"
+                                          >
+                                            ⤒
+                                          </button>
+                                          <button
+                                            onClick={() =>
+                                              reorderElementZ(el.id, "forward")
+                                            }
+                                            disabled={
+                                              zIdx >= layer.elements.length - 1
+                                            }
+                                            title="Bring Forward"
+                                            className="px-1 font-mono text-[10px] leading-tight text-[var(--color-foreground-muted,#576360)] hover:text-black disabled:opacity-30"
+                                          >
+                                            ▲
+                                          </button>
+                                          <button
+                                            onClick={() =>
+                                              reorderElementZ(el.id, "backward")
+                                            }
+                                            disabled={zIdx <= 0}
+                                            title="Send Backward"
+                                            className="px-1 font-mono text-[10px] leading-tight text-[var(--color-foreground-muted,#576360)] hover:text-black disabled:opacity-30"
+                                          >
+                                            ▼
+                                          </button>
+                                          <button
+                                            onClick={() =>
+                                              reorderElementZ(el.id, "back")
+                                            }
+                                            disabled={zIdx <= 0}
+                                            title="Send to Back"
+                                            className="px-1 font-mono text-[10px] leading-tight text-[var(--color-foreground-muted,#576360)] hover:text-black disabled:opacity-30"
+                                          >
+                                            ⤓
+                                          </button>
+                                        </div>
+                                      )}
                                     </div>
                                   );
                                 })}
@@ -2826,9 +3393,11 @@ export default function PaintStudio() {
         </div>
         <div className="truncate max-w-[120px] sm:max-w-none">
           Selected:{" "}
-          {selectedElement
-            ? `${selectedElement.type.toUpperCase()} (${selectedElement.id})`
-            : "None"}
+          {isMultiSelect
+            ? `${multiSelectIds.length} artifacts`
+            : selectedElement
+              ? `${selectedElement.type.toUpperCase()} (${selectedElement.id})`
+              : "None"}
         </div>
         <div>Zoom: {Math.round(zoom * 100)}%</div>
       </footer>
