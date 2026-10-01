@@ -1,15 +1,17 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
-import Hero from "../components/Hero.astro";
-import NowCard from "../components/NowCard.astro";
-import Metrics from "../components/Metrics.astro";
-import ProjectCard from "../components/ProjectCard.astro";
+import { getCollection } from "astro:content";
+
 import BlogCard from "../components/BlogCard.astro";
 import Button from "../components/Button.astro";
+import HeroSkyline from "../components/HeroSkyline.astro";
+import Metrics from "../components/Metrics.astro";
+import NowCard from "../components/NowCard.astro";
+import NycHero from "../components/NycHero.astro";
+import ProjectCard from "../components/ProjectCard.astro";
 import { site } from "../data/site";
 import { projects } from "../data/projects";
 import { experience, headlineMetrics } from "../data/experience";
-import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
 import { getReadingTime } from "../utils/readingTime";
 
 const featuredProjects = projects.filter((p) => p.featured);
@@ -30,14 +32,14 @@ const [taglineBefore, taglineAfter] = site.tagline.includes(squiggleWord)
 ---
 
 <BaseLayout title={site.name} description={site.summary}>
-  <Hero
+  <NycHero
     eyebrow={`${currentRole.title} · ${currentRole.company}`}
     subhead={site.summary}
     primaryCta={{ label: "View Projects", href: "/projects/" }}
     secondaryCta={{ label: "Blog (🛠️ 🚧)", href: "/blog/" }}
   >
     {taglineBefore}{taglineAfter !== null && <span class="squiggle">{squiggleWord}</span>}{taglineAfter}
-  </Hero>
+  </NycHero>
 
   <NowCard />
 
