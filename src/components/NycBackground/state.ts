@@ -73,11 +73,14 @@ export const initShips = (count: number, width: number, height: number): Ship[] 
   });
 };
 
-export const initHelicopters = (count: number, width: number, height: number): Helicopter[] =>
-  Array.from({ length: count }).map(() => ({
+export function getResetHelicopter(width: number, height: number): Helicopter {
+  return {
     x: Math.random() * width,
     y: height * 0.05 + Math.random() * (height * 0.35),
     speed: 1.7 + Math.random() * 0.9,
     direction: Math.random() > 0.5 ? 1 : -1,
     rotorAngle: 0,
-  }));
+  };
+}
+export const initHelicopters = (count: number, width: number, height: number): Helicopter[] =>
+  Array.from({ length: count }).map(() => getResetHelicopter(width, height));

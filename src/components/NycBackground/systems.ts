@@ -1,7 +1,8 @@
-import { Cloud, Witch, Ship, Helicopter, Bird } from "./types";
-import { getPaths } from "./paths";
-import { smoothstep, approachAngle } from "./utils";
 import { DEFAULT_CONFIG } from "./config";
+import { getPaths } from "./paths";
+import { getResetHelicopter } from "./state";
+import { Cloud, Witch, Ship, Helicopter, Bird } from "./types";
+import { smoothstep, approachAngle } from "./utils";
 
 export const updateAndDrawClouds = (ctx: CanvasRenderingContext2D, clouds: Cloud[], dt: number, width: number, baseScale: number) => {
   clouds.forEach((cloud) => {
@@ -137,13 +138,10 @@ export const updateAndDrawHelicopters = (ctx: CanvasRenderingContext2D, helicopt
     heli.x += heli.speed * heli.direction * dt;
     heli.rotorAngle += 0.25 * dt;
 
-    if (heli.x > width + 100) {
-      heli.x = -100;
-      heli.y = height * 0.15 + Math.random() * (height * 0.15);
-    }
-    if (heli.x < -100) {
-      heli.x = width + 100;
-      heli.y = height * 0.15 + Math.random() * (height * 0.15);
+    if (heli.x > width + 100 || heli.x < -100) {
+      Object.assign(heli, getResetHelicopter(ctx.canvas.width,  ctx.canvas.height), {
+        x: heli.x < 0 ? width + 100 : -100
+      })
     }
 
     ctx.save();
