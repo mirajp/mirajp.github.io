@@ -22,15 +22,15 @@ export interface PhotoProps {
 
 export const photos: PhotoProps[] = [
   {
-    title: "Wake up New York",
+    title: "Wake up, New York",
     caption: "Good morning, New Yorkers. ",
     src: wtcSunrise,
     orientation: "landscape",
     objectPosition: "0% 50%",
   },
   {
-    title: "Google NYC",
-    caption: "Rainy day",
+    title: "Google NYC Rooftop",
+    caption: "Rain or shine, the in-office mandate stands.",
     src: kaiRaincoat,
     orientation: "portrait",
     objectPosition: "50% 80%",
@@ -50,16 +50,16 @@ export const photos: PhotoProps[] = [
     objectPosition: "30% 50%",
   },
   {
-    title: "Hudson River Greenway",
-    caption: "February pinks",
+    title: "February Pinks",
+    caption:
+      "A beautiful sunset to warm you up when the weather outside is frightful.",
     src: wtcPinkSunset,
     orientation: "landscape",
     objectPosition: "20% 50%",
   },
   {
     title: "Light in the Darkness",
-    caption:
-      "Shining bright as a symbol of remembrance and the unbroken spirit of a city.",
+    caption: "A symbol of the unbroken spirit of a city.",
     src: wtcBeams,
     orientation: "landscape",
     objectPosition: "10% 10%",
