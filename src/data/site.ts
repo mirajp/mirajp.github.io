@@ -7,7 +7,7 @@ export const site = {
   // Keep in sync with `site` in astro.config.mjs
   url: "https://mirajp.github.io",
   summary:
-    "Hands-on, full stack engineer with 10+ years building software of shapes and sizes.",
+    "Hands-on, full stack engineer with 10+ years building software of all shapes and sizes.",
   tagline: "I build systems and tools people like using.",
   footerTagline: "Hello, world.",
 } as const;
