@@ -6,10 +6,20 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro build",
+    "build": "astro build && node scripts/svg-editor/csp/postprocess.mjs",
     "preview": "astro preview",
     "check": "astro check",
-    "generate:og": "node scripts/generate-og-image.cjs"
+    "generate:og": "node scripts/generate-og-image.cjs",
+    "lint": "eslint --config scripts/svg-editor/eslint.config.js --ext .ts,.tsx src/components/tools/svg-editor tests/svg-editor scripts/svg-editor && tsc --noEmit --project tsconfig.svg-editor.json && tsc --noEmit --project tsconfig.svg-editor.core.json && prettier --check src/components/tools/svg-editor tests/svg-editor scripts/svg-editor",
+    "test": "vitest run --config scripts/svg-editor/vitest.config.ts && vitest run --config scripts/svg-editor/vitest.browser.config.ts",
+    "test:core": "vitest run --config scripts/svg-editor/vitest.config.ts tests/svg-editor/core",
+    "test:io": "vitest run --config scripts/svg-editor/vitest.config.ts tests/svg-editor/io",
+    "test:render": "vitest run --config scripts/svg-editor/vitest.browser.config.ts tests/svg-editor/render",
+    "test:ui": "vitest run --config scripts/svg-editor/vitest.browser.config.ts tests/svg-editor/ui",
+    "bench": "node tests/svg-editor/bench/run.mjs",
+    "e2e": "playwright test --config scripts/svg-editor/playwright.config.mjs --project=e2e",
+    "visual": "playwright test --config scripts/svg-editor/playwright.config.mjs --project=visual",
+    "size": "node scripts/svg-editor/size/index.mjs"
   },
   "keywords": [],
   "author": "",
@@ -31,10 +41,24 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
+    "@testing-library/dom": "10.4.2",
+    "@testing-library/react": "16.3.3",
     "@types/diff": "^8.0.0",
+    "@types/jsdom": "21.1.7",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
+    "@vitest/browser": "5.0.3",
+    "@vitest/browser-playwright": "5.0.3",
+    "eslint": "10.12.0",
+    "fast-check": "4.10.2",
+    "immutable": "5.1.9",
+    "jsdom": "26.1.0",
+    "playwright": "1.63.0",
+    "prettier": "3.9.9",
     "sharp": "^0.35.3",
-    "vite": "^8.2.2"
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.71.0",
+    "vite": "^8.2.2",
+    "vitest": "5.0.3"
   }
 }

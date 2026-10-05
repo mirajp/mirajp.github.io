@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["src/components/tools/svg-editor/**/*", "tests/svg-editor/**/*"],
+  "exclude": ["node_modules", "dist", "scripts/svg-editor"],
+  "compilerOptions": {
+    "strict": true,
+    "noEmit": true
+  }
+}

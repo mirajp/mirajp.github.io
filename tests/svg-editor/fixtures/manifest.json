@@ -1,0 +1,541 @@
+{
+  "version": 1,
+  "fixtures": [
+    {
+      "path": "corpus/illustrator-st0.svg",
+      "tags": ["illustrator", "class", "stylesheet"],
+      "source": "hand-written minimal Illustrator-style fixture",
+      "sanitization": {
+        "remove": [],
+        "preserve": [".st0 class", "path", "style declarations"]
+      }
+    },
+    {
+      "path": "corpus/figma-export.svg",
+      "tags": ["figma", "group", "path", "circle"],
+      "source": "hand-written minimal Figma-style fixture",
+      "sanitization": { "remove": [], "preserve": ["group", "path", "circle"] }
+    },
+    {
+      "path": "corpus/inkscape-namespaces.svg",
+      "tags": ["inkscape", "sodipodi", "namespaces"],
+      "source": "hand-written minimal Inkscape-style fixture",
+      "sanitization": {
+        "remove": [],
+        "preserve": [
+          "inkscape namespace attributes",
+          "sodipodi namespace attributes"
+        ]
+      }
+    },
+    {
+      "path": "corpus/sketch-export.svg",
+      "tags": ["sketch", "group", "stroke"],
+      "source": "hand-written minimal Sketch-style fixture",
+      "sanitization": {
+        "remove": [],
+        "preserve": ["group id", "stroke attributes"]
+      }
+    },
+    {
+      "path": "corpus/icon-license-comment.svg",
+      "tags": ["icon-set", "license-comment", "comment"],
+      "source": "hand-written minimal CC0-style icon fixture",
+      "sanitization": { "remove": [], "preserve": ["license comment", "path"] }
+    },
+    {
+      "path": "corpus/nested-svg.svg",
+      "tags": ["nested-svg", "viewbox"],
+      "source": "hand-written minimal edge-case fixture",
+      "sanitization": {
+        "remove": [],
+        "preserve": ["nested svg viewport", "circle"]
+      }
+    },
+    {
+      "path": "corpus/use-symbol.svg",
+      "tags": ["use", "symbol", "fragment-reference"],
+      "source": "hand-written minimal edge-case fixture",
+      "sanitization": {
+        "remove": [],
+        "preserve": ["symbol", "internal use references"]
+      }
+    },
+    {
+      "path": "corpus/linear-gradient.svg",
+      "tags": ["gradient", "linear-gradient", "defs"],
+      "source": "hand-written minimal edge-case fixture",
+      "sanitization": {
+        "remove": [],
+        "preserve": ["linearGradient", "stop elements", "fragment paint URL"]
+      }
+    },
+    {
+      "path": "corpus/radial-gradient.svg",
+      "tags": ["gradient", "radial-gradient"],
+      "source": "hand-written minimal edge-case fixture",
+      "sanitization": {
+        "remove": [],
+        "preserve": ["radialGradient", "stop elements"]
+      }
+    },
+    {
+      "path": "corpus/clip-path.svg",
+      "tags": ["clip-path", "defs"],
+      "source": "hand-written minimal edge-case fixture",
+      "sanitization": {
+        "remove": [],
+        "preserve": ["clipPath", "internal clip-path URL"]
+      }
+    },
+    {
+      "path": "corpus/mask.svg",
+      "tags": ["mask", "defs"],
+      "source": "hand-written minimal edge-case fixture",
+      "sanitization": {
+        "remove": [],
+        "preserve": ["mask", "internal mask URL"]
+      }
+    },
+    {
+      "path": "corpus/filter.svg",
+      "tags": ["filter", "feGaussianBlur"],
+      "source": "hand-written minimal edge-case fixture",
+      "sanitization": { "remove": [], "preserve": ["filter", "feGaussianBlur"] }
+    },
+    {
+      "path": "corpus/missing-viewbox.svg",
+      "tags": ["missing-viewbox", "dimensions"],
+      "source": "hand-written minimal edge-case fixture",
+      "sanitization": { "remove": [], "preserve": ["width", "height", "rect"] }
+    },
+    {
+      "path": "corpus/percentage-dimensions.svg",
+      "tags": ["percentage", "width", "height"],
+      "source": "hand-written minimal edge-case fixture",
+      "sanitization": {
+        "remove": [],
+        "preserve": ["percentage width", "percentage height", "viewBox"]
+      }
+    },
+    {
+      "path": "corpus/bom.svg",
+      "tags": ["bom", "encoding"],
+      "source": "hand-written minimal edge-case fixture with UTF-8 BOM",
+      "sanitization": { "remove": [], "preserve": ["svg root", "path"] }
+    },
+    {
+      "path": "corpus/embedded-font.svg",
+      "tags": ["font-face", "data-url", "font/woff2"],
+      "source": "hand-written minimal edge-case fixture",
+      "sanitization": {
+        "remove": [],
+        "preserve": ["font/woff2 data URL in @font-face src", "text"]
+      }
+    },
+    {
+      "path": "corpus/cdata-style.svg",
+      "tags": ["cdata", "style", "css"],
+      "source": "hand-written minimal edge-case fixture",
+      "sanitization": {
+        "remove": [],
+        "preserve": ["CDATA style content", "class selector", "rect"]
+      }
+    },
+    {
+      "path": "corpus/custom-properties.svg",
+      "tags": ["custom-properties", "var", "inline-style"],
+      "source": "hand-written minimal edge-case fixture",
+      "sanitization": {
+        "remove": [],
+        "preserve": ["custom property declaration", "var() reference"]
+      }
+    },
+    {
+      "path": "corpus/malformed-xml.svg",
+      "tags": ["malformed", "xml"],
+      "source": "hand-written malformed XML fixture",
+      "malformed": true,
+      "sanitization": {
+        "remove": [],
+        "preserve": ["original input for error reporting"]
+      }
+    },
+    {
+      "path": "corpus/inherited-fill.svg",
+      "tags": ["inheritance", "fill"],
+      "source": "hand-written minimal edge-case fixture",
+      "sanitization": {
+        "remove": [],
+        "preserve": ["inherited fill", "group and path"]
+      }
+    },
+    {
+      "path": "corpus/important-cascade.svg",
+      "tags": ["cascade", "important", "inline-style"],
+      "source": "hand-written minimal edge-case fixture",
+      "sanitization": {
+        "remove": [],
+        "preserve": [
+          "stylesheet !important",
+          "presentation and inline declarations"
+        ]
+      }
+    },
+    {
+      "path": "corpus/transform-group.svg",
+      "tags": ["transform", "group"],
+      "source": "hand-written minimal edge-case fixture",
+      "sanitization": { "remove": [], "preserve": ["group transform", "rect"] }
+    },
+    {
+      "path": "corpus/href-reference.svg",
+      "tags": ["href", "fragment-reference", "use"],
+      "source": "hand-written minimal edge-case fixture",
+      "sanitization": {
+        "remove": [],
+        "preserve": ["internal href reference", "defs path"]
+      }
+    },
+    {
+      "path": "corpus/xml-space-preserve.svg",
+      "tags": ["xml-space", "text", "whitespace"],
+      "source": "hand-written minimal edge-case fixture",
+      "sanitization": {
+        "remove": [],
+        "preserve": ["xml:space preserve", "text whitespace"]
+      }
+    },
+    {
+      "path": "corpus/namespaced-attributes.svg",
+      "tags": ["namespace", "xlink", "image"],
+      "source": "hand-written minimal edge-case fixture",
+      "sanitization": {
+        "remove": [],
+        "preserve": ["xlink namespace", "image element"]
+      }
+    },
+    {
+      "path": "corpus/defs-and-use.svg",
+      "tags": ["defs", "use", "fragment-reference"],
+      "source": "hand-written minimal edge-case fixture",
+      "sanitization": {
+        "remove": [],
+        "preserve": ["defs group", "internal use references"]
+      }
+    },
+    {
+      "path": "corpus/opacity-and-stroke.svg",
+      "tags": ["stroke", "opacity", "path"],
+      "source": "hand-written minimal edge-case fixture",
+      "sanitization": {
+        "remove": [],
+        "preserve": ["stroke properties", "opacity", "path"]
+      }
+    },
+    {
+      "path": "corpus/markers.svg",
+      "tags": ["marker", "fragment-reference"],
+      "source": "hand-written minimal edge-case fixture",
+      "sanitization": {
+        "remove": [],
+        "preserve": ["marker definition", "internal marker URL"]
+      }
+    },
+    {
+      "path": "corpus/pattern.svg",
+      "tags": ["pattern", "defs"],
+      "source": "hand-written minimal edge-case fixture",
+      "sanitization": {
+        "remove": [],
+        "preserve": ["pattern definition", "internal pattern URL"]
+      }
+    },
+    {
+      "path": "corpus/text-tspan.svg",
+      "tags": ["text", "tspan"],
+      "source": "hand-written minimal edge-case fixture",
+      "sanitization": {
+        "remove": [],
+        "preserve": ["text", "tspan", "text content"]
+      }
+    },
+    {
+      "path": "corpus/use-xlink.svg",
+      "tags": ["use", "xlink", "fragment-reference"],
+      "source": "hand-written minimal edge-case fixture",
+      "sanitization": {
+        "remove": [],
+        "preserve": ["xlink href fragment reference", "defs circle"]
+      }
+    },
+    {
+      "path": "corpus/processing-instruction.svg",
+      "tags": ["processing-instruction", "style"],
+      "source": "hand-written minimal edge-case fixture",
+      "sanitization": {
+        "remove": [],
+        "preserve": ["xml-stylesheet processing instruction", "embedded style"]
+      }
+    },
+    {
+      "path": "corpus/rounded-rect.svg",
+      "tags": ["rect", "rounded-corners"],
+      "source": "hand-written minimal edge-case fixture",
+      "sanitization": { "remove": [], "preserve": ["rect rx and ry", "fill"] }
+    },
+    {
+      "path": "corpus/percentage-coordinates.svg",
+      "tags": ["percentage", "coordinates"],
+      "source": "hand-written minimal edge-case fixture",
+      "sanitization": {
+        "remove": [],
+        "preserve": ["percentage circle coordinates and radius"]
+      }
+    },
+    {
+      "path": "corpus/multiple-stylesheets.svg",
+      "tags": ["stylesheets", "class", "cascade"],
+      "source": "hand-written minimal edge-case fixture",
+      "sanitization": {
+        "remove": [],
+        "preserve": ["both style blocks", "class selectors"]
+      }
+    },
+    {
+      "path": "corpus/no-viewbox-dimensions.svg",
+      "tags": ["m2", "missing-viewbox", "missing-dimensions"],
+      "source": "hand-written geometry edge-case fixture",
+      "m2": { "viewBox": [8, 6, 84, 48] },
+      "sanitization": {
+        "remove": [],
+        "preserve": ["root bounds supplied by fixture", "rect", "circle"]
+      }
+    },
+    {
+      "path": "corpus/percentage-size-viewbox.svg",
+      "tags": ["m2", "percentage", "dimensions", "viewbox"],
+      "source": "hand-written geometry edge-case fixture",
+      "m2": { "viewBox": [0, 0, 120, 90] },
+      "sanitization": {
+        "remove": [],
+        "preserve": ["percentage dimensions", "viewBox", "path"]
+      }
+    },
+    {
+      "path": "corpus/physical-units-mm-in.svg",
+      "tags": ["m2", "physical-units", "mm", "in"],
+      "source": "hand-written geometry edge-case fixture",
+      "m2": { "viewBox": [0, 0, 192, 144] },
+      "sanitization": {
+        "remove": [],
+        "preserve": ["millimetre width", "inch height", "viewBox"]
+      }
+    },
+    {
+      "path": "corpus/nonzero-viewbox-origin.svg",
+      "tags": ["m2", "viewbox", "nonzero-origin"],
+      "source": "hand-written geometry edge-case fixture",
+      "m2": { "viewBox": [-40, 25, 180, 120] },
+      "sanitization": {
+        "remove": [],
+        "preserve": ["negative viewBox x origin", "positive viewBox y origin"]
+      }
+    },
+    {
+      "path": "corpus/preserve-aspect-none.svg",
+      "tags": ["m2", "preserve-aspect-ratio", "none"],
+      "source": "hand-written geometry edge-case fixture",
+      "m2": { "viewBox": [0, 0, 100, 100] },
+      "sanitization": {
+        "remove": [],
+        "preserve": ["preserveAspectRatio none", "ellipse"]
+      }
+    },
+    {
+      "path": "corpus/preserve-aspect-min-slice.svg",
+      "tags": ["m2", "preserve-aspect-ratio", "slice"],
+      "source": "hand-written geometry edge-case fixture",
+      "m2": { "viewBox": [0, 0, 100, 100] },
+      "sanitization": {
+        "remove": [],
+        "preserve": ["xMinYMin slice", "ellipse"]
+      }
+    },
+    {
+      "path": "corpus/preserve-aspect-max-meet.svg",
+      "tags": ["m2", "preserve-aspect-ratio", "meet"],
+      "source": "hand-written geometry edge-case fixture",
+      "m2": { "viewBox": [0, 0, 100, 100] },
+      "sanitization": {
+        "remove": [],
+        "preserve": ["xMaxYMax meet", "ellipse"]
+      }
+    },
+    {
+      "path": "corpus/nested-svg-own-viewbox.svg",
+      "tags": ["m2", "nested-svg", "nested-viewbox"],
+      "source": "hand-written geometry edge-case fixture",
+      "m2": { "viewBox": [0, 0, 180, 140] },
+      "sanitization": {
+        "remove": [],
+        "preserve": ["nested svg viewport", "nested viewBox", "circle"]
+      }
+    },
+    {
+      "path": "security/script-element.svg",
+      "tags": ["security", "script"],
+      "source": "hand-written security payload",
+      "sanitization": {
+        "remove": ["script element and its executable content"],
+        "preserve": ["rect"]
+      }
+    },
+    {
+      "path": "security/event-attributes.svg",
+      "tags": ["security", "event-attributes"],
+      "source": "hand-written security payload",
+      "sanitization": {
+        "remove": ["onload", "onclick", "onbegin"],
+        "preserve": ["rect geometry"]
+      }
+    },
+    {
+      "path": "security/javascript-href.svg",
+      "tags": ["security", "javascript-url", "href"],
+      "source": "hand-written security payload",
+      "sanitization": {
+        "remove": ["javascript: href"],
+        "preserve": ["anchor text"]
+      }
+    },
+    {
+      "path": "security/external-xlink.svg",
+      "tags": ["security", "external-resource", "xlink"],
+      "source": "hand-written security payload",
+      "sanitization": {
+        "remove": ["external xlink:href"],
+        "preserve": ["image element and dimensions"]
+      }
+    },
+    {
+      "path": "security/foreign-object.svg",
+      "tags": ["security", "foreignObject"],
+      "source": "hand-written security payload",
+      "sanitization": {
+        "remove": ["foreignObject subtree", "nested script"],
+        "preserve": ["circle"]
+      }
+    },
+    {
+      "path": "security/css-import.svg",
+      "tags": ["security", "css-import"],
+      "source": "hand-written security payload",
+      "sanitization": {
+        "remove": ["@import rule"],
+        "preserve": ["local .x fill rule", "rect"]
+      }
+    },
+    {
+      "path": "security/css-external-url.svg",
+      "tags": ["security", "css-url", "external-resource"],
+      "source": "hand-written security payload",
+      "sanitization": {
+        "remove": ["url(https://...) declaration"],
+        "preserve": ["rect geometry"]
+      }
+    },
+    {
+      "path": "security/smil-animate-href.svg",
+      "tags": ["security", "smil", "href"],
+      "source": "hand-written security payload",
+      "sanitization": {
+        "remove": ["animate targeting href"],
+        "preserve": ["anchor and text"]
+      }
+    },
+    {
+      "path": "security/smil-set-xlink.svg",
+      "tags": ["security", "smil", "xlink"],
+      "source": "hand-written security payload",
+      "sanitization": {
+        "remove": ["set targeting xlink:href"],
+        "preserve": ["SVG root"]
+      }
+    },
+    {
+      "path": "security/entity-expansion.svg",
+      "tags": ["security", "entity-expansion", "malformed"],
+      "source": "hand-written bounded entity-expansion payload",
+      "malformed": true,
+      "sanitization": {
+        "remove": ["DOCTYPE and entity declarations"],
+        "preserve": ["text element without expanded entity content"]
+      }
+    },
+    {
+      "path": "security/malformed.svg",
+      "tags": ["security", "malformed"],
+      "source": "hand-written malformed XML security payload",
+      "malformed": true,
+      "sanitization": {
+        "remove": ["unsafe script content"],
+        "preserve": ["parser error is reported; no partial document is trusted"]
+      }
+    },
+    {
+      "path": "security/odd-data-svg.svg",
+      "tags": ["security", "data-url", "svg"],
+      "source": "hand-written security payload",
+      "sanitization": {
+        "remove": ["image/svg+xml data URL"],
+        "preserve": ["image element and dimensions"]
+      }
+    },
+    {
+      "path": "security/odd-data-font-context.svg",
+      "tags": ["security", "data-url", "font-face"],
+      "source": "hand-written security payload",
+      "sanitization": {
+        "remove": ["image/png data URL used as a font"],
+        "preserve": ["font-face declaration without disallowed source", "text"]
+      }
+    },
+    {
+      "path": "security/data-url-whitespace.svg",
+      "tags": ["security", "data-url", "whitespace"],
+      "source": "hand-written security payload",
+      "sanitization": {
+        "remove": ["malformed whitespace data URL"],
+        "preserve": ["image element and dimensions"]
+      }
+    },
+    {
+      "path": "security/css-inline-external.svg",
+      "tags": ["security", "css-url", "inline-style"],
+      "source": "hand-written security payload",
+      "sanitization": {
+        "remove": ["external url() from inline style"],
+        "preserve": ["rect geometry"]
+      }
+    },
+    {
+      "path": "security/href-protocol-relative.svg",
+      "tags": ["security", "external-resource", "href"],
+      "source": "hand-written security payload",
+      "sanitization": {
+        "remove": ["protocol-relative external href"],
+        "preserve": ["image element and dimensions"]
+      }
+    },
+    {
+      "path": "security/javascript-xlink.svg",
+      "tags": ["security", "javascript-url", "xlink"],
+      "source": "hand-written security payload",
+      "sanitization": {
+        "remove": ["case-insensitive javascript: xlink:href"],
+        "preserve": ["anchor text"]
+      }
+    }
+  ]
+}

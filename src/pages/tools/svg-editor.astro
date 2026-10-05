@@ -1,0 +1,19 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import SvgEditor from "../../components/tools/svg-editor/ui/SvgEditor";
+---
+
+<BaseLayout title="SVG Editor" description="A client-side SVG editor.">
+  <div class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
+    <a href="/tools/" class="text-sm text-foreground-muted hover:text-foreground">&larr; All tools</a>
+    <p class="mt-6 font-mono text-sm font-medium text-primary">Tools</p>
+    <h1 class="mt-2">SVG Editor</h1>
+    <p class="mt-3 text-foreground-muted">Inspect and edit SVG files in your browser.</p>
+
+    <SvgEditor client:only="react">
+      <div slot="fallback" class="mt-8 rounded-lg border border-border bg-surface p-6" aria-busy="true">
+        Loading SVG editor…
+      </div>
+    </SvgEditor>
+  </div>
+</BaseLayout>

@@ -1,0 +1,2 @@
+<!DOCTYPE svg [<!ENTITY a "1234567890"><!ENTITY b "&a;&a;&a;&a;&a;&a;&a;&a;&a;&a;">]>
+<svg xmlns="http://www.w3.org/2000/svg"><text>&b;</text></svg>

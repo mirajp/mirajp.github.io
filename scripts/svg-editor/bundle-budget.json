@@ -1,0 +1,254 @@
+{
+  "version": 1,
+  "tolerancePercent": 10,
+  "editor": {
+    "raw": 98511,
+    "gzip": 28825,
+    "sha256": "2ab8a81482fb62f5607071ccd84cc4a53310ab425c95f7605d572c0d1e70a56a",
+    "assets": [
+      {
+        "name": "_astro/SvgEditor.D38rBLTN.js",
+        "raw": 98511,
+        "gzip": 28825,
+        "sha256": "2ab8a81482fb62f5607071ccd84cc4a53310ab425c95f7605d572c0d1e70a56a"
+      }
+    ]
+  },
+  "worker": null,
+  "noIsland": {
+    "page": "about/index.html",
+    "raw": 6122,
+    "gzip": 2621,
+    "sha256": "07074bacb81641ed3bccd6f2c34119148f30474a373baca230ead668dc45792e",
+    "assets": [
+      {
+        "name": "inline-1",
+        "raw": 323,
+        "gzip": 210,
+        "sha256": "751994a23d46d6925d4bed040a1427e0fa5dea595e9cf3ba3b35ca2feb301925"
+      },
+      {
+        "name": "inline-2",
+        "raw": 121,
+        "gzip": 121,
+        "sha256": "304024bde0c7f29e6f8b6bb7668eb2bb0567ac6004a57773440cda309f21d9ea"
+      },
+      {
+        "name": "inline-3",
+        "raw": 182,
+        "gzip": 168,
+        "sha256": "2744ea309704a0ddfa23661113f3813839af545702a14e1aac9a8771ef113f7d"
+      },
+      {
+        "name": "inline-4",
+        "raw": 3206,
+        "gzip": 1085,
+        "sha256": "0320d9dbe5d263617204506a11797206a5e03c0ac574526d9c9ae87e1cedeac0"
+      },
+      {
+        "name": "inline-5",
+        "raw": 843,
+        "gzip": 369,
+        "sha256": "0a2a8ff76fcdb706264e9a55b4f13694a8b62b9b3fc01974474f33ee7ae4a6fb"
+      },
+      {
+        "name": "inline-6",
+        "raw": 1063,
+        "gzip": 409,
+        "sha256": "f06496cdbd2b213b85a4925b6434ea3f10b117d3f58b114c20d08781e29ec1ff"
+      },
+      {
+        "name": "inline-7",
+        "raw": 384,
+        "gzip": 259,
+        "sha256": "94dbebd28da7f385f2eb873d4f7cd63aab38eb99e89b469f38bbe00d12a879a9"
+      }
+    ]
+  },
+  "protectedPages": {
+    "tools/contrast/index.html": {
+      "html": {
+        "raw": 28018,
+        "gzip": 7359,
+        "sha256": "263ed304dba6984666df4b3b5bc38a33e41802bebcd23c91b0f1292d1e58d656"
+      },
+      "js": {
+        "raw": 237051,
+        "gzip": 75376,
+        "sha256": "e1d17bdb0a0196f631ca7b3eacc83db0d7052773c9ff8b9dde9e60315a3fc170",
+        "assets": [
+          {
+            "name": "_astro/client.RMePetAg.js",
+            "raw": 212939,
+            "gzip": 65686,
+            "sha256": "ebccc48f131c1593f379eec3afe3fab8f7a5237205abbfdd032864f1166740ad"
+          },
+          {
+            "name": "_astro/ContrastChecker.DLFZwL6N.js",
+            "raw": 4654,
+            "gzip": 1646,
+            "sha256": "5d94914ed1d68a2e2d19d32b40e8d3055db1c4cd963a37c4df70f7c4789535a7"
+          },
+          {
+            "name": "_astro/jsx-runtime.DvU585tb.js",
+            "raw": 424,
+            "gzip": 294,
+            "sha256": "7bd01f5123e92cd2272ed9c7d1190da068987f9bb7b9a67d20f102be7fbeddb0"
+          },
+          {
+            "name": "_astro/react.yIOJJ3r4.js",
+            "raw": 8402,
+            "gzip": 3229,
+            "sha256": "2041a82019c82a36973c9359ea068c5d791168412a727328cc9c4b3fff1cd4c6"
+          },
+          {
+            "name": "inline-1",
+            "raw": 323,
+            "gzip": 210,
+            "sha256": "751994a23d46d6925d4bed040a1427e0fa5dea595e9cf3ba3b35ca2feb301925"
+          },
+          {
+            "name": "inline-2",
+            "raw": 121,
+            "gzip": 121,
+            "sha256": "304024bde0c7f29e6f8b6bb7668eb2bb0567ac6004a57773440cda309f21d9ea"
+          },
+          {
+            "name": "inline-3",
+            "raw": 182,
+            "gzip": 168,
+            "sha256": "2744ea309704a0ddfa23661113f3813839af545702a14e1aac9a8771ef113f7d"
+          },
+          {
+            "name": "inline-4",
+            "raw": 3206,
+            "gzip": 1085,
+            "sha256": "0320d9dbe5d263617204506a11797206a5e03c0ac574526d9c9ae87e1cedeac0"
+          },
+          {
+            "name": "inline-5",
+            "raw": 843,
+            "gzip": 369,
+            "sha256": "0a2a8ff76fcdb706264e9a55b4f13694a8b62b9b3fc01974474f33ee7ae4a6fb"
+          },
+          {
+            "name": "inline-6",
+            "raw": 1063,
+            "gzip": 409,
+            "sha256": "f06496cdbd2b213b85a4925b6434ea3f10b117d3f58b114c20d08781e29ec1ff"
+          },
+          {
+            "name": "inline-7",
+            "raw": 130,
+            "gzip": 125,
+            "sha256": "433585662f852c8c76ded9e6f52054e1a120c78c7c0ecb8048fd3b99faa897f7"
+          },
+          {
+            "name": "inline-8",
+            "raw": 4380,
+            "gzip": 1775,
+            "sha256": "61ad29518ac2ee73390a7ff4e7a4f256e122cfa7451abce6916ce038dd291745"
+          },
+          {
+            "name": "inline-9",
+            "raw": 384,
+            "gzip": 259,
+            "sha256": "94dbebd28da7f385f2eb873d4f7cd63aab38eb99e89b469f38bbe00d12a879a9"
+          }
+        ]
+      }
+    },
+    "tools/diff/index.html": {
+      "html": {
+        "raw": 24825,
+        "gzip": 7065,
+        "sha256": "0ab5b17f954f2a4c7679e608e8a9890c2cb95680ad244a4cb8ce275cab9a2dbd"
+      },
+      "js": {
+        "raw": 248675,
+        "gzip": 78779,
+        "sha256": "4fc5d3d3c0523d1b361da7c9c72fda5b21238c4d7ca9b6ed48f13ccbc2f3eb26",
+        "assets": [
+          {
+            "name": "_astro/client.RMePetAg.js",
+            "raw": 212939,
+            "gzip": 65686,
+            "sha256": "ebccc48f131c1593f379eec3afe3fab8f7a5237205abbfdd032864f1166740ad"
+          },
+          {
+            "name": "_astro/DiffViewer.RX-g3MBN.js",
+            "raw": 16278,
+            "gzip": 5049,
+            "sha256": "91938b473ebf0ecdd1076fc80f5297e48d6559a3c310d73fdc074a12354eb357"
+          },
+          {
+            "name": "_astro/jsx-runtime.DvU585tb.js",
+            "raw": 424,
+            "gzip": 294,
+            "sha256": "7bd01f5123e92cd2272ed9c7d1190da068987f9bb7b9a67d20f102be7fbeddb0"
+          },
+          {
+            "name": "_astro/react.yIOJJ3r4.js",
+            "raw": 8402,
+            "gzip": 3229,
+            "sha256": "2041a82019c82a36973c9359ea068c5d791168412a727328cc9c4b3fff1cd4c6"
+          },
+          {
+            "name": "inline-1",
+            "raw": 323,
+            "gzip": 210,
+            "sha256": "751994a23d46d6925d4bed040a1427e0fa5dea595e9cf3ba3b35ca2feb301925"
+          },
+          {
+            "name": "inline-2",
+            "raw": 121,
+            "gzip": 121,
+            "sha256": "304024bde0c7f29e6f8b6bb7668eb2bb0567ac6004a57773440cda309f21d9ea"
+          },
+          {
+            "name": "inline-3",
+            "raw": 182,
+            "gzip": 168,
+            "sha256": "2744ea309704a0ddfa23661113f3813839af545702a14e1aac9a8771ef113f7d"
+          },
+          {
+            "name": "inline-4",
+            "raw": 3206,
+            "gzip": 1085,
+            "sha256": "0320d9dbe5d263617204506a11797206a5e03c0ac574526d9c9ae87e1cedeac0"
+          },
+          {
+            "name": "inline-5",
+            "raw": 843,
+            "gzip": 369,
+            "sha256": "0a2a8ff76fcdb706264e9a55b4f13694a8b62b9b3fc01974474f33ee7ae4a6fb"
+          },
+          {
+            "name": "inline-6",
+            "raw": 1063,
+            "gzip": 409,
+            "sha256": "f06496cdbd2b213b85a4925b6434ea3f10b117d3f58b114c20d08781e29ec1ff"
+          },
+          {
+            "name": "inline-7",
+            "raw": 130,
+            "gzip": 125,
+            "sha256": "433585662f852c8c76ded9e6f52054e1a120c78c7c0ecb8048fd3b99faa897f7"
+          },
+          {
+            "name": "inline-8",
+            "raw": 4380,
+            "gzip": 1775,
+            "sha256": "61ad29518ac2ee73390a7ff4e7a4f256e122cfa7451abce6916ce038dd291745"
+          },
+          {
+            "name": "inline-9",
+            "raw": 384,
+            "gzip": 259,
+            "sha256": "94dbebd28da7f385f2eb873d4f7cd63aab38eb99e89b469f38bbe00d12a879a9"
+          }
+        ]
+      }
+    }
+  }
+}

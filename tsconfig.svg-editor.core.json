@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig.svg-editor.json",
+  "include": ["src/components/tools/svg-editor/core/**/*.ts"],
+  "compilerOptions": {
+    "lib": ["ES2022"]
+  }
+}
