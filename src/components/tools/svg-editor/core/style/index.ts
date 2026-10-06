@@ -1,0 +1,1 @@
+export { resolveStyle } from "./resolve";

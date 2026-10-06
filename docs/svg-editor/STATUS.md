@@ -87,3 +87,14 @@
 - Build check: the normal output has no E2E routes and the editor fallback/CSP are present; initial editor integration already changed existing-page HTML/shared React chunk hashes, as detailed in the report.
 - Contracts stayed frozen. The file-by-file change list is in the M1 report.
 - Suggested next task: decide whether to repair/rebaseline the pre-existing site-check and existing-page output gaps before M2.
+
+## Task 3.2
+
+- Status: Complete; cascade tables enabled, with one CSS-spec-disputed row skipped pending review.
+- Changed: added a css-select adapter over the SVG model, css-tree `<style>` parsing, specificity-ranked resolution, inheritance/initial values, `currentColor`, and resolvable `var()`.
+- Unsupported selectors, at-rules, and unresolvable values are recorded in `doc.unsupported` and are not treated as matches.
+- Dependencies: added `css-select`, `css-tree`, `@csstools/selector-specificity`, and its required peer `postcss-selector-parser`; package.json and yarn.lock changed only for these dependencies.
+- Disputed row: `#target` expects a match without `attrs.id="target"`; internal NodeId is not the SVG CSS id, so the row remains unchanged and skipped rather than weakening selector semantics.
+- Validation: `pnpm test:core` passed via Corepack with dependency auto-install disabled (5 files; 108 passed, 1 skipped); editor/core TypeScript, scoped ESLint, and Prettier checks passed.
+- Surprise: ordinary Corepack pnpm attempted dependency installation and hit the existing ignored-esbuild-build guard; generated pnpm metadata was removed and Yarn dependencies restored.
+- Suggested next task: review the disputed currentColor row, then continue with the next style task.
