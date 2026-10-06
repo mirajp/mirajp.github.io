@@ -11,4 +11,5 @@ export const DEFAULT_CONFIG = {
   witchLoopWidth: 1,
   witchLoopHeight: 0.87,
   witchLoopRamp: Math.PI * 0.15,
+  dogWizardCount: 1,
 };

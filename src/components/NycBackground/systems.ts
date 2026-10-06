@@ -1,16 +1,23 @@
 import { DEFAULT_CONFIG } from "./config";
 import { getPaths } from "./paths";
 import { getResetHelicopter } from "./state";
-import { Cloud, Witch, Ship, Helicopter, Bird } from "./types";
+import { Cloud, Witch, Ship, Helicopter, Bird, DogWizard } from "./types";
 import { smoothstep, approachAngle } from "./utils";
 
-export const updateAndDrawClouds = (ctx: CanvasRenderingContext2D, clouds: Cloud[], dt: number, width: number, baseScale: number) => {
+export const updateAndDrawClouds = (
+  ctx: CanvasRenderingContext2D,
+  clouds: Cloud[],
+  dt: number,
+  width: number,
+  baseScale: number,
+) => {
   clouds.forEach((cloud) => {
-    // Physics
     cloud.x += cloud.speed * dt;
-    if (cloud.x > width + 100) cloud.x = -100;
 
-    // Render
+    if (cloud.x > width + 100) {
+      cloud.x = -100;
+    }
+
     ctx.save();
     ctx.translate(cloud.x, cloud.y);
     ctx.scale(baseScale * cloud.scale, baseScale * cloud.scale);
@@ -25,20 +32,32 @@ export const updateAndDrawClouds = (ctx: CanvasRenderingContext2D, clouds: Cloud
   });
 };
 
-export const updateAndDrawWitches = (ctx: CanvasRenderingContext2D, witches: Witch[], dt: number, width: number, height: number, baseScale: number, config: typeof DEFAULT_CONFIG) => {
+export const updateAndDrawWitches = (
+  ctx: CanvasRenderingContext2D,
+  witches: Witch[],
+  dt: number,
+  width: number,
+  height: number,
+  baseScale: number,
+  config: typeof DEFAULT_CONFIG,
+) => {
   const paths = getPaths();
   witches.forEach((witch) => {
     const s = baseScale * witch.scale;
     const r = config.witchLoopRadius * s;
     const dir = witch.direction;
 
-    // Start loop
-    if (!witch.isLooping && witch.baseY - 2 * r > 0 && Math.random() < config.witchLoopChance * dt) {
+    if (
+      !witch.isLooping &&
+      witch.baseY - 2 * r > 0 &&
+      Math.random() < config.witchLoopChance * dt
+    ) {
       witch.isLooping = true;
       witch.loopProgress = 0;
     }
 
-    witch.bobAngle += (0.025 * Math.random()) * dt;
+    witch.bobAngle += 0.025 * Math.random() * dt;
+
     let loopBlend = 0;
     let loopVX = 0;
     let loopVY = 0;
@@ -52,9 +71,10 @@ export const updateAndDrawWitches = (ctx: CanvasRenderingContext2D, witches: Wit
       loopBlend = enter * exit;
 
       const speedFactor = 1 - 0.35 * Math.sin(p / 2) ** 2;
-      const angularSpeed = (witch.speed / r) * speedFactor * (0.2 + 0.8 * loopBlend);
-
+      const angularSpeed =
+        (witch.speed / r) * speedFactor * (0.2 + 0.8 * loopBlend);
       witch.loopProgress += angularSpeed * dt;
+
       offsetX = Math.sin(p) * r * config.witchLoopWidth * dir;
       offsetY = -(1 - Math.cos(p)) * r * config.witchLoopHeight;
 
@@ -67,7 +87,8 @@ export const updateAndDrawWitches = (ctx: CanvasRenderingContext2D, witches: Wit
       }
     }
 
-    const forwardSpeed = witch.speed * (1 - (1 - config.witchLoopDrift) * loopBlend);
+    const forwardSpeed =
+      witch.speed * (1 - (1 - config.witchLoopDrift) * loopBlend);
     const flightVX = forwardSpeed * dir;
     witch.baseX += flightVX * dt;
     witch.baseY += (Math.random() - 0.5) * 0.3 * dt;
@@ -92,7 +113,10 @@ export const updateAndDrawWitches = (ctx: CanvasRenderingContext2D, witches: Wit
     const velocityX = flightVX + loopVX;
     const velocityY = loopVY + bobVY;
     const worldAngle = Math.atan2(velocityY, velocityX);
-    const localAngle = Math.atan2(Math.sin(worldAngle), dir * Math.cos(worldAngle));
+    const localAngle = Math.atan2(
+      Math.sin(worldAngle),
+      dir * Math.cos(worldAngle),
+    );
 
     if (!witch.rotationInitialized) {
       witch.rotation = localAngle;
@@ -110,7 +134,13 @@ export const updateAndDrawWitches = (ctx: CanvasRenderingContext2D, witches: Wit
   });
 };
 
-export const updateAndDrawShips = (ctx: CanvasRenderingContext2D, ships: Ship[], dt: number, width: number, baseScale: number) => {
+export const updateAndDrawShips = (
+  ctx: CanvasRenderingContext2D,
+  ships: Ship[],
+  dt: number,
+  width: number,
+  baseScale: number,
+) => {
   const paths = getPaths();
   ships.forEach((ship) => {
     ship.x += ship.speed * ship.direction * dt;
@@ -133,15 +163,26 @@ export const updateAndDrawShips = (ctx: CanvasRenderingContext2D, ships: Ship[],
   });
 };
 
-export const updateAndDrawHelicopters = (ctx: CanvasRenderingContext2D, helicopters: Helicopter[], dt: number, width: number, height: number, baseScale: number) => {
+export const updateAndDrawHelicopters = (
+  ctx: CanvasRenderingContext2D,
+  helicopters: Helicopter[],
+  dt: number,
+  width: number,
+  height: number,
+  baseScale: number,
+) => {
   helicopters.forEach((heli) => {
     heli.x += heli.speed * heli.direction * dt;
     heli.rotorAngle += 0.25 * dt;
 
     if (heli.x > width + 100 || heli.x < -100) {
-      Object.assign(heli, getResetHelicopter(ctx.canvas.width,  ctx.canvas.height), {
-        x: heli.x < 0 ? width + 100 : -100
-      })
+      Object.assign(
+        heli,
+        getResetHelicopter(ctx.canvas.width, ctx.canvas.height),
+        {
+          x: heli.x < 0 ? width + 100 : -100,
+        },
+      );
     }
 
     ctx.save();
@@ -163,7 +204,14 @@ export const updateAndDrawHelicopters = (ctx: CanvasRenderingContext2D, helicopt
   });
 };
 
-export const updateAndDrawBirds = (ctx: CanvasRenderingContext2D, birds: Bird[], dt: number, width: number, height: number, baseScale: number) => {
+export const updateAndDrawBirds = (
+  ctx: CanvasRenderingContext2D,
+  birds: Bird[],
+  dt: number,
+  width: number,
+  height: number,
+  baseScale: number,
+) => {
   birds.forEach((bird) => {
     bird.x += bird.speed * dt;
     bird.y += (Math.random() - 0.5) * 0.15 * dt;
@@ -183,6 +231,194 @@ export const updateAndDrawBirds = (ctx: CanvasRenderingContext2D, birds: Bird[],
     ctx.quadraticCurveTo(-5, 0, 0, 5);
     ctx.quadraticCurveTo(5, 0, 10, -5 + flapOffset);
     ctx.stroke();
+    ctx.restore();
+  });
+};
+
+// ============================================================
+// DOG WIZARD
+//
+// Animated components:
+//   - Entire dog drifts horizontally
+//   - Body gently bobs
+//   - Hat has subtle independent wobble
+//   - Cape has secondary sway
+//   - Broom has slight rotation
+//   - Bristles have secondary wiggle
+//
+// Only hat + cape are filled.
+// Everything else is outline-only.
+// ============================================================
+export const updateAndDrawDogWizards = (
+  ctx: CanvasRenderingContext2D,
+  dogs: DogWizard[],
+  dt: number,
+  width: number,
+  height: number,
+  baseScale: number,
+  sketchColor: string,
+) => {
+  const paths = getPaths();
+
+  dogs.forEach((dog) => {
+    // Update movement.
+    dog.x += dog.speed * dog.direction * dt;
+    dog.bobAngle += dog.bobSpeed * dt;
+    dog.broomAngle += dog.broomSpeed * dt;
+    dog.capeAngle += dog.capeSpeed * dt;
+    dog.hatAngle += dog.hatSpeed * dt;
+
+    // Reset when the dog leaves the screen.
+    if (dog.direction === 1 && dog.x > width + 100) {
+      dog.x = -100;
+      dog.y = height * (0.42 + Math.random() * 0.28);
+    } else if (dog.direction === -1 && dog.x < -100) {
+      dog.x = width + 100;
+      dog.y = height * (0.42 + Math.random() * 0.28);
+    }
+
+    const bobY = Math.sin(dog.bobAngle) * 4;
+    const bodyTilt = Math.cos(dog.bobAngle) * 0.015;
+    const capeSwing = Math.sin(dog.capeAngle) * 0.06;
+    const capeFlutter = Math.sin(dog.capeAngle * 1.7) * 0.035;
+    const hatSwing = Math.sin(dog.hatAngle) * 0.012;
+    const broomSwing = Math.sin(dog.broomAngle) * 0.012;
+    const s = baseScale * dog.scale;
+
+    ctx.save();
+    ctx.translate(dog.x, dog.y + bobY);
+    ctx.scale(dog.direction * s, s);
+    ctx.rotate(bodyTilt);
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = sketchColor;
+    ctx.lineWidth = 4;
+
+    // Draw broom behind the dog.
+    ctx.save();
+    const broomPivotX = 160;
+    const broomPivotY = 105;
+    ctx.translate(broomPivotX, broomPivotY);
+    ctx.rotate(broomSwing);
+    ctx.translate(-broomPivotX, -broomPivotY);
+    ctx.stroke(paths.dogWizard.broom);
+    ctx.lineWidth = 2.5;
+    ctx.stroke(paths.dogWizard.broomGrain1);
+    ctx.stroke(paths.dogWizard.broomGrain2);
+    ctx.stroke(paths.dogWizard.broomGrain3);
+    ctx.lineWidth = 4;
+    ctx.stroke(paths.dogWizard.bristles);
+    ctx.stroke(paths.dogWizard.bristle1);
+    ctx.stroke(paths.dogWizard.bristle2);
+    ctx.stroke(paths.dogWizard.bristle3);
+    ctx.stroke(paths.dogWizard.bristle4);
+    ctx.restore();
+
+    // Draw dog body.
+    ctx.lineWidth = 4;
+    ctx.stroke(paths.dogWizard.body);
+    ctx.stroke(paths.dogWizard.ear);
+    ctx.stroke(paths.dogWizard.chest);
+    ctx.stroke(paths.dogWizard.belly);
+    ctx.stroke(paths.dogWizard.tail);
+
+    // Draw legs.
+    ctx.stroke(paths.dogWizard.frontLeg);
+    ctx.stroke(paths.dogWizard.frontPaw);
+    ctx.stroke(paths.dogWizard.rearLeg);
+    ctx.stroke(paths.dogWizard.rearPaw);
+
+    // Draw cape with layered movement.
+    ctx.save();
+
+    const capePivotX = 120;
+    const capePivotY = 45;
+
+    ctx.translate(capePivotX, capePivotY);
+    ctx.rotate(capeSwing);
+    ctx.translate(-capePivotX, -capePivotY);
+
+    ctx.fillStyle = "rgba(20, 20, 20, 1)";
+    ctx.strokeStyle = sketchColor;
+    ctx.lineWidth = 4;
+
+    ctx.fill(paths.dogWizard.cape);
+    ctx.stroke(paths.dogWizard.cape);
+
+    // Animate the upper cape fold.
+    ctx.save();
+    ctx.translate(70, 80);
+    ctx.rotate(capeFlutter);
+    ctx.translate(-70, -80);
+    ctx.stroke(paths.dogWizard.capeFold1);
+    ctx.restore();
+
+    // Animate the second cape fold.
+    ctx.save();
+    ctx.translate(50, 100);
+    ctx.rotate(capeFlutter * 1.2);
+    ctx.translate(-50, -100);
+    ctx.stroke(paths.dogWizard.capeFold2);
+    ctx.restore();
+
+    // Animate the third cape fold.
+    ctx.save();
+    ctx.translate(35, 120);
+    ctx.rotate(capeFlutter * 1.4);
+    ctx.translate(-35, -120);
+    ctx.stroke(paths.dogWizard.capeFold3);
+    ctx.restore();
+
+    // Animate the lower cape fold.
+    ctx.save();
+    ctx.translate(20, 135);
+    ctx.rotate(capeFlutter * 1.6);
+    ctx.translate(-20, -135);
+    ctx.stroke(paths.dogWizard.capeFold4);
+    ctx.restore();
+
+    ctx.restore();
+
+    // Draw collar and tag.
+    ctx.stroke(paths.dogWizard.collar);
+    ctx.stroke(paths.dogWizard.clasp);
+    ctx.stroke(paths.dogWizard.tag);
+
+    // Draw hands over the broom.
+    ctx.stroke(paths.dogWizard.handFront);
+    ctx.stroke(paths.dogWizard.handRear);
+    ctx.stroke(paths.dogWizard.fingers1);
+    ctx.stroke(paths.dogWizard.fingers2);
+    ctx.stroke(paths.dogWizard.fingers3);
+
+    // Draw face.
+    ctx.stroke(paths.dogWizard.nose);
+    ctx.stroke(paths.dogWizard.leftEye);
+    ctx.stroke(paths.dogWizard.rightEye);
+    ctx.stroke(paths.dogWizard.smile);
+    ctx.stroke(paths.dogWizard.mouthCorner);
+
+    // Draw hat.
+    ctx.save();
+
+    const hatPivotX = 65;
+    const hatPivotY = -60;
+
+    ctx.translate(hatPivotX, hatPivotY);
+    ctx.rotate(hatSwing);
+    ctx.translate(-hatPivotX, -hatPivotY);
+
+    ctx.fillStyle = "rgba(48, 48, 48, 1)";
+    ctx.strokeStyle = sketchColor;
+    ctx.lineWidth = 4;
+
+    ctx.fill(paths.dogWizard.hat);
+    ctx.stroke(paths.dogWizard.hat);
+    ctx.stroke(paths.dogWizard.hatBrim);
+    ctx.stroke(paths.dogWizard.hatBand);
+    ctx.stroke(paths.dogWizard.hatBuckle);
+
+    ctx.restore();
     ctx.restore();
   });
 };

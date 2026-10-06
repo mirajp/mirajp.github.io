@@ -1,4 +1,4 @@
-import { Cloud, Bird, Witch, Ship, Helicopter } from "./types";
+import { Cloud, Bird, Witch, Ship, Helicopter, DogWizard } from "./types";
 
 export class SceneState {
   clouds: Cloud[] = [];
@@ -6,6 +6,7 @@ export class SceneState {
   witches: Witch[] = [];
   ships: Ship[] = [];
   helicopters: Helicopter[] = [];
+  dogWizards: DogWizard[] = [];
   skylineImg: HTMLImageElement;
 
   constructor() {
@@ -14,7 +15,11 @@ export class SceneState {
   }
 }
 
-export const initClouds = (count: number, width: number, height: number): Cloud[] =>
+export const initClouds = (
+  count: number,
+  width: number,
+  height: number,
+): Cloud[] =>
   Array.from({ length: count }).map(() => ({
     x: Math.random() * width,
     y: (0.05 + Math.random() * 0.35) * height,
@@ -22,7 +27,11 @@ export const initClouds = (count: number, width: number, height: number): Cloud[
     scale: 0.2 + Math.random() * 2,
   }));
 
-export const initBirds = (count: number, width: number, height: number): Bird[] =>
+export const initBirds = (
+  count: number,
+  width: number,
+  height: number,
+): Bird[] =>
   Array.from({ length: count }).map(() => ({
     x: Math.random() * width,
     y: Math.random() * (height * 0.4),
@@ -33,7 +42,7 @@ export const initBirds = (count: number, width: number, height: number): Bird[] 
   }));
 
 export function getResetWitch(width: number, height: number): Witch {
-return {
+  return {
     baseX: Math.random() * width,
     baseY: height * (0.5 + Math.random() * 0.4),
     speed: 0.6 + Math.random() * 0.8,
@@ -47,17 +56,30 @@ return {
   };
 }
 
-export const initWitches = (count: number, width: number, height: number): Witch[] =>
+export const initWitches = (
+  count: number,
+  width: number,
+  height: number,
+): Witch[] =>
   Array.from({ length: count }).map(() => getResetWitch(width, height));
 
-export const initShips = (count: number, width: number, height: number): Ship[] => {
+export const initShips = (
+  count: number,
+  width: number,
+  height: number,
+): Ship[] => {
   const shipTypes = ["ferry", "catamaran", "tugboat", "cargo", "sailboat"];
   return Array.from({ length: count }).map(() => {
     const type = shipTypes[Math.floor(Math.random() * shipTypes.length)];
     let speed = 0.1 + Math.random() * 0.05;
-    if (type === "catamaran") speed = 0.5 + Math.random() * 0.1;
-    else if (type === "ferry") speed = 0.15 + Math.random() * 0.1;
-    else if (type === "cargo") speed = 0.02 + Math.random() * 0.05;
+
+    if (type === "catamaran") {
+      speed = 0.5 + Math.random() * 0.1;
+    } else if (type === "ferry") {
+      speed = 0.15 + Math.random() * 0.1;
+    } else if (type === "cargo") {
+      speed = 0.02 + Math.random() * 0.05;
+    }
 
     const isDesktop = document.documentElement.clientWidth >= 1024;
     const shipBottomOffset = isDesktop ? 30 : 15;
@@ -82,5 +104,42 @@ export function getResetHelicopter(width: number, height: number): Helicopter {
     rotorAngle: 0,
   };
 }
-export const initHelicopters = (count: number, width: number, height: number): Helicopter[] =>
+
+export const initHelicopters = (
+  count: number,
+  width: number,
+  height: number,
+): Helicopter[] =>
   Array.from({ length: count }).map(() => getResetHelicopter(width, height));
+
+export function getResetDogWizard(width: number, height: number): DogWizard {
+  return {
+    // Keep the initial position inside the screen.
+    x: Math.random() * width,
+
+    // Dog Wizard flies in the lower-middle portion
+    // of the scene rather than with the birds.
+    y: height * (0.42 + Math.random() * 0.28),
+    speed: 0.55 + Math.random() * 0.4,
+    direction: Math.random() > 0.5 ? 1 : -1,
+    bobAngle: Math.random() * Math.PI * 2,
+    bobSpeed: 0.03 + Math.random() * 0.015,
+    broomAngle: (Math.random() - 0.5) * 0.04,
+    broomSpeed: 0.0015 + Math.random() * 0.001,
+    capeAngle: (Math.random() - 0.5) * 0.04,
+    capeSpeed: 0.025 + Math.random() * 0.015,
+    hatAngle: (Math.random() - 0.5) * 0.025,
+    hatSpeed: 0.018 + Math.random() * 0.012,
+
+    // Smaller because the Dog Wizard path geometry
+    // is much larger than the witch geometry.
+    scale: 0.15 + Math.random() * 0.15,
+  };
+}
+
+export const initDogWizards = (
+  count: number,
+  width: number,
+  height: number,
+): DogWizard[] =>
+  Array.from({ length: count }).map(() => getResetDogWizard(width, height));
