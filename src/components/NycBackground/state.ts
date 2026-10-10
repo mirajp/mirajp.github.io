@@ -1,4 +1,12 @@
-import { Cloud, Bird, Witch, Ship, Helicopter, DogWizard } from "./types";
+import {
+  Cloud,
+  Bird,
+  Witch,
+  Ship,
+  Helicopter,
+  DogWizard,
+  CharonFerry,
+} from "./types";
 
 export class SceneState {
   clouds: Cloud[] = [];
@@ -7,6 +15,7 @@ export class SceneState {
   ships: Ship[] = [];
   helicopters: Helicopter[] = [];
   dogWizards: DogWizard[] = [];
+  charonFerrys: CharonFerry[] = [];
   skylineImg: HTMLImageElement;
 
   constructor() {
@@ -143,3 +152,33 @@ export const initDogWizards = (
   height: number,
 ): DogWizard[] =>
   Array.from({ length: count }).map(() => getResetDogWizard(width, height));
+
+export function getResetCharonFerry(
+  width: number,
+  height: number,
+): CharonFerry {
+  const isDesktop =
+    typeof document !== "undefined" &&
+    document.documentElement.clientWidth >= 1024;
+  const shipBottomOffset = isDesktop ? 30 : 15;
+  const shipBottomOffsetMultiplier = isDesktop ? 20 : 10;
+
+  return {
+    x: Math.random() * width,
+    y: height - shipBottomOffset + Math.random() * shipBottomOffsetMultiplier,
+    speed: 0.12 + Math.random() * 0.08,
+    direction: Math.random() > 0.5 ? 1 : -1,
+    type: "river_styx_ferry",
+    bobAngle: Math.random() * Math.PI * 2,
+    bobSpeed: 0.03 + Math.random() * 0.015,
+    paddleAngle: Math.random() * Math.PI * 2,
+    paddleSpeed: 0.045 + Math.random() * 0.015,
+  };
+}
+
+export const initCharonFerrys = (
+  count: number,
+  width: number,
+  height: number,
+): CharonFerry[] =>
+  Array.from({ length: count }).map(() => getResetCharonFerry(width, height));

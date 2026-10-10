@@ -5,6 +5,8 @@ export interface NycBackgroundProps {
   witchCount?: number;
   shipCount?: number;
   helicopterCount?: number;
+  dogWizardCount?: number;
+  charonFerryCount?: number;
 }
 
 export interface Cloud {
@@ -66,4 +68,16 @@ export interface DogWizard {
   capeSpeed: number;
   hatAngle: number;
   hatSpeed: number;
+}
+
+export interface CharonFerry {
+  x: number;
+  y: number;
+  speed: number;
+  direction: number;
+  type: string;
+  bobAngle: number;
+  bobSpeed: number;
+  paddleAngle: number;
+  paddleSpeed: number;
 }

@@ -2,6 +2,8 @@ let pathsCache: {
   witch: Path2D;
   ships: Record<string, Path2D>;
   dogWizard: Record<string, Path2D>;
+  charonFerrys: Record<string, Path2D>;
+  charonSkeletons: Record<string, Path2D>;
 } | null = null;
 
 export const getPaths = () => {
@@ -47,6 +49,36 @@ export const getPaths = () => {
 
     sailboat: new Path2D(
       "M -15 0 L 15 0 Q 0 8 -15 0 " + "M 0 0 L 0 -35 L 15 -5 L 0 -5",
+    ),
+  };
+
+  const charonFerrys: Record<string, Path2D> = {
+    river_styx_ferry: new Path2D(
+      "M -35 0 L 35 0 Q 38 10, 0 10 Q -32 10, -35 0 Z " +
+        "M -30 0 L 30 0 " + // Deck surface line
+        "M -28 0 Q 0 8, 28 0",
+    ),
+  };
+
+  const charonSkeletons: Record<string, Path2D> = {
+    river_styx_ferry: new Path2D(
+      "M -35 0 C -38 -5, -32 -10, -28 -5 " +
+        "M -34 -2 Q -35 -4, -33 -4 Q -31 -4, -32 -2 " +
+        "M -31 -6 L -29 -6 " +
+        "M -33 -1 L -31 -1 " +
+        "M 4 -36 C 3 -44, 13 -44, 12 -36 L 10 -34 L 6 -34 Z " + // Cranium and jaw
+        "M 5.5 -38.5 a 1.2 1.2 0 1 0 2.4 0 a 1.2 1.2 0 1 0 -2.4 0 " +
+        "M 6 -34 L 6 -35.5 M 8 -34 L 8 -35.5 M 10 -34 L 10 -35.5 " +
+        "M 8 -34 L 8 -14 " +
+        "M 3 -31 L 13 -31 " +
+        "M 4 -29 Q 8 -27, 12 -29 " +
+        "M 4.5 -26 Q 8 -24, 11.5 -26 " +
+        "M 5 -23 Q 8 -21, 11 -23 " +
+        "M 4 -14 Q 8 -10, 12 -14 L 11 -12 Q 8 -9, 5 -12 Z " +
+        "M 5 -12 L 4 -6 L 4 0 " +
+        "M 11 -12 L 12 -6 L 12 0 " +
+        "M 4 0 L 0 0 M 12 0 L 8 0 " +
+        "M -40 8 Q -20 12, 0 10 Q 20 8, 40 10",
     ),
   };
 
@@ -396,8 +428,13 @@ export const getPaths = () => {
 
   pathsCache = {
     witch,
-    ships,
+    ships: {
+      ...ships,
+      ...charonFerrys,
+    },
     dogWizard,
+    charonFerrys,
+    charonSkeletons,
   };
 
   return pathsCache;

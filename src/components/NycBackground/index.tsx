@@ -10,6 +10,7 @@ import {
   initShips,
   initHelicopters,
   initDogWizards,
+  initCharonFerrys,
 } from "./state";
 
 import {
@@ -19,6 +20,7 @@ import {
   updateAndDrawHelicopters,
   updateAndDrawBirds,
   updateAndDrawDogWizards,
+  updateAndDrawCharonFerrys,
 } from "./systems";
 
 export default function NycBackground(props: NycBackgroundProps) {
@@ -52,6 +54,11 @@ export default function NycBackground(props: NycBackgroundProps) {
     scene.ships = initShips(config.shipCount, width, height);
     scene.helicopters = initHelicopters(config.helicopterCount, width, height);
     scene.dogWizards = initDogWizards(config.dogWizardCount, width, height);
+    scene.charonFerrys = initCharonFerrys(
+      config.charonFerryCount,
+      width,
+      height,
+    );
 
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
@@ -112,6 +119,15 @@ export default function NycBackground(props: NycBackgroundProps) {
         baseScale,
       );
       updateAndDrawShips(ctx, scene.ships, dt, width, baseScale);
+      updateAndDrawCharonFerrys(
+        ctx,
+        scene.charonFerrys,
+        dt,
+        width,
+        height,
+        baseScale,
+        config.sketchColor,
+      );
 
       animationFrameId = requestAnimationFrame(render);
     };
@@ -130,6 +146,7 @@ export default function NycBackground(props: NycBackgroundProps) {
     config.shipCount,
     config.helicopterCount,
     config.dogWizardCount,
+    config.charonFerryCount,
     config.sketchColor,
   ]);
 

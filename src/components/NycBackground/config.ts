@@ -12,4 +12,5 @@ export const DEFAULT_CONFIG = {
   witchLoopHeight: 0.87,
   witchLoopRamp: Math.PI * 0.15,
   dogWizardCount: 1,
+  charonFerryCount: 2,
 };

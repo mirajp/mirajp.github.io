@@ -1,7 +1,15 @@
 import { DEFAULT_CONFIG } from "./config";
 import { getPaths } from "./paths";
 import { getResetHelicopter } from "./state";
-import { Cloud, Witch, Ship, Helicopter, Bird, DogWizard } from "./types";
+import {
+  Cloud,
+  Witch,
+  Ship,
+  Helicopter,
+  Bird,
+  DogWizard,
+  CharonFerry,
+} from "./types";
 import { smoothstep, approachAngle } from "./utils";
 
 export const updateAndDrawClouds = (
@@ -156,8 +164,105 @@ export const updateAndDrawShips = (
     if (shipPath) {
       ctx.save();
       ctx.translate(ship.x, ship.y);
-      ctx.scale(ship.direction * baseScale * 0.8, baseScale * 0.8);
+      const dirScale =
+        ship.type === "river_styx_ferry" ? -ship.direction : ship.direction;
+      ctx.scale(dirScale * baseScale * 0.8, baseScale * 0.8);
       ctx.stroke(shipPath);
+      ctx.restore();
+    }
+  });
+};
+
+export const updateAndDrawCharonFerrys = (
+  ctx: CanvasRenderingContext2D,
+  charonFerrys: CharonFerry[],
+  dt: number,
+  width: number,
+  height: number,
+  baseScale: number,
+  sketchColor: string,
+) => {
+  const paths = getPaths();
+  charonFerrys.forEach((ship) => {
+    ship.x += ship.speed * ship.direction * dt;
+    ship.bobAngle += ship.bobSpeed * dt;
+    ship.paddleAngle += ship.paddleSpeed * dt;
+
+    if (ship.direction === 1 && ship.x > width + 100) {
+      ship.x = -100;
+      const isDesktop =
+        typeof document !== "undefined" &&
+        document.documentElement.clientWidth >= 1024;
+      const shipBottomOffset = isDesktop ? 30 : 15;
+      const shipBottomOffsetMultiplier = isDesktop ? 20 : 10;
+      ship.y =
+        height - shipBottomOffset + Math.random() * shipBottomOffsetMultiplier;
+    } else if (ship.direction === -1 && ship.x < -100) {
+      ship.x = width + 100;
+      const isDesktop =
+        typeof document !== "undefined" &&
+        document.documentElement.clientWidth >= 1024;
+      const shipBottomOffset = isDesktop ? 30 : 15;
+      const shipBottomOffsetMultiplier = isDesktop ? 20 : 10;
+      ship.y =
+        height - shipBottomOffset + Math.random() * shipBottomOffsetMultiplier;
+    }
+
+    const shipPath = paths.charonFerrys[ship.type] || paths.ships[ship.type];
+    const skeletonPath = paths.charonSkeletons[ship.type];
+    if (shipPath) {
+      const bobY = Math.sin(ship.bobAngle) * 2;
+      const rockAngle = Math.cos(ship.bobAngle) * 0.025;
+
+      ctx.save();
+      ctx.translate(ship.x, ship.y + bobY);
+      ctx.strokeStyle = sketchColor;
+      ctx.lineWidth = 1;
+      // river_styx_ferry prow faces left (-x), so invert direction scale for forward-facing motion
+      const dirScale =
+        ship.type === "river_styx_ferry" ? -ship.direction : ship.direction;
+      ctx.scale(dirScale * baseScale * 0.8, baseScale * 0.8);
+      ctx.rotate(rockAngle);
+      ctx.stroke(shipPath);
+      if (skeletonPath) {
+        ctx.stroke(skeletonPath);
+        const stroke = Math.sin(ship.paddleAngle);
+        const oarAngle = 0.84 + stroke * 0.2;
+        const gripX = 6 + stroke * 1.2;
+        const gripY = -24 + Math.cos(ship.paddleAngle) * 0.7;
+        const handDistance = 12.5;
+        const hand2X = gripX + Math.cos(oarAngle) * handDistance;
+        const hand2Y = gripY + Math.sin(oarAngle) * handDistance;
+
+        ctx.save();
+        ctx.translate(gripX, gripY);
+        ctx.rotate(oarAngle);
+        ctx.beginPath();
+        ctx.moveTo(-11, 0);
+        ctx.lineTo(60, 0);
+        ctx.moveTo(47, -2);
+        ctx.lineTo(52, -8);
+        ctx.lineTo(60, -8);
+        ctx.lineTo(60, 8);
+        ctx.lineTo(52, 8);
+        ctx.lineTo(47, 2);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.restore();
+
+        ctx.beginPath();
+        ctx.moveTo(4, -31);
+        ctx.lineTo(1, -25);
+        ctx.lineTo(gripX, gripY);
+        ctx.moveTo(12, -31);
+        ctx.lineTo(15, -23);
+        ctx.lineTo(hand2X, hand2Y);
+        ctx.moveTo(gripX - 1, gripY + 1);
+        ctx.lineTo(gripX + 1.5, gripY + 3);
+        ctx.moveTo(hand2X - 1.5, hand2Y + 1.5);
+        ctx.lineTo(hand2X + 1, hand2Y + 3.5);
+        ctx.stroke();
+      }
       ctx.restore();
     }
   });
