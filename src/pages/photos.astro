@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import Lightbox from "../components/Lightbox.astro";
 import PhotoCard from "../components/PhotoCard.astro";
 import { photos } from "../data/photos";
 ---
@@ -24,4 +25,5 @@ import { photos } from "../data/photos";
       {photos.map((photo, index) => <PhotoCard photo={photo} index={index} />)}
     </div>
   </div>
+  <Lightbox />
 </BaseLayout>

@@ -1,0 +1,74 @@
+<dialog
+  id="photo-lightbox"
+  aria-label="Photo viewer"
+  class="fixed inset-0 m-0 h-dvh max-h-none w-dvw max-w-none border-0 bg-gray-950/95 p-4 text-gray-50 backdrop:bg-gray-950/95 sm:p-6"
+>
+  <div class="flex h-full flex-col">
+    <div class="flex justify-end">
+      <button
+        type="button"
+        data-lightbox-close
+        class="rounded-md border border-white/30 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white active:scale-[0.98]"
+      >
+        Close
+      </button>
+    </div>
+    <div class="flex min-h-0 flex-1 items-center justify-center py-3">
+      <img
+        data-lightbox-image
+        class="max-h-full max-w-full object-contain"
+        alt=""
+      />
+    </div>
+    <p
+      data-lightbox-caption
+      class="min-h-5 text-center text-sm text-white/80"
+    >
+    </p>
+  </div>
+</dialog>
+
+<script>
+  const lightbox = document.querySelector("#photo-lightbox");
+  const lightboxImage = lightbox?.querySelector("[data-lightbox-image]");
+  const lightboxCaption = lightbox?.querySelector("[data-lightbox-caption]");
+  const closeButton = lightbox?.querySelector("[data-lightbox-close]");
+
+  if (
+    lightbox instanceof HTMLDialogElement &&
+    lightboxImage instanceof HTMLImageElement &&
+    lightboxCaption instanceof HTMLParagraphElement &&
+    closeButton instanceof HTMLButtonElement
+  ) {
+    document.addEventListener("click", (event) => {
+      if (!(event.target instanceof Element)) return;
+
+      const trigger = event.target.closest("[data-lightbox-trigger]");
+      if (!(trigger instanceof HTMLButtonElement)) return;
+
+      const src = trigger.dataset.lightboxSrc;
+      if (!src) {
+        console.error("Photo lightbox trigger is missing its image source.");
+        return;
+      }
+
+      lightboxImage.src = src;
+      lightboxImage.alt = trigger.dataset.lightboxAlt ?? "";
+      lightboxCaption.textContent = trigger.dataset.lightboxCaption ?? "";
+      lightbox.showModal();
+      closeButton.focus();
+    });
+
+    closeButton.addEventListener("click", () => lightbox.close());
+
+    lightbox.addEventListener("click", (event) => {
+      if (event.target === lightbox) lightbox.close();
+    });
+
+    lightbox.addEventListener("close", () => {
+      lightboxImage.removeAttribute("src");
+      lightboxImage.alt = "";
+      lightboxCaption.textContent = "";
+    });
+  }
+</script>

@@ -1,5 +1,5 @@
 ---
-import { Image } from "astro:assets";
+import { getImage, Image } from "astro:assets";
 import type { PhotoProps } from "../data/photos";
 
 interface Props {
@@ -25,6 +25,13 @@ const aspectClass =
   orientation === "landscape" ? "aspect-[4/3]" : "aspect-[4/5]";
 
 const objectPosition = photo.objectPosition ?? "center";
+const lightboxImage = photo.src
+  ? await getImage({
+      src: photo.src,
+      width: Math.min(photo.src.width, 1600),
+      format: "webp",
+    })
+  : undefined;
 ---
 
 <figure class={`${tiltClass} transition-transform duration-200 ease-[var(--ease-standard)]`}>
@@ -36,13 +43,23 @@ const objectPosition = photo.objectPosition ?? "center";
 
     {
       photo.src ? (
-        <Image
-          src={photo.src}
-          alt={photo.title ?? "Travel photo"}
-          width={640}
-          class={`${aspectClass} w-full rounded-sm object-cover`}
-          style={`object-position: ${objectPosition};`}
-        />
+        <button
+          type="button"
+          class="block w-full cursor-zoom-in rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+          data-lightbox-trigger
+          data-lightbox-src={lightboxImage?.src}
+          data-lightbox-alt={photo.title ?? "Travel photo"}
+          data-lightbox-caption={photo.title}
+        >
+          <Image
+            src={photo.src}
+            alt={photo.title ?? "Travel photo"}
+            width={640}
+            class={`${aspectClass} w-full rounded-sm object-cover`}
+            style={`object-position: ${objectPosition};`}
+          />
+          <span class="sr-only">View full-size photo</span>
+        </button>
       ) : (
         <div
           class={`flex ${aspectClass} w-full items-center justify-center rounded-sm`}
