@@ -1,0 +1,17 @@
+---
+import PhotoEditor from "../../components/tools/PhotoEditor";
+import { site } from "../../data/site";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const description =
+  "Client-side photo editor with 135 presets, 46 colour-grading, skin, and tilt-shift focus controls, and lossless JPEG EXIF/XMP/ICC metadata export.";
+---
+
+<BaseLayout
+  title={`Photo Editor · ${site.name}`}
+  description={description}
+  canonicalPath="/tools/photo-editor/"
+  studio
+>
+  <PhotoEditor client:load />
+</BaseLayout>

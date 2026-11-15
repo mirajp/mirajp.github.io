@@ -2,7 +2,7 @@
 
 Repository instructions for `mirajp.github.io`
 (`https://www.miraj.dev`), a static Astro 7 portfolio, technical blog,
-and six-app browser tool suite. `public/DESIGN.md` (v2.0) is the
+and seven-app browser tool suite. `public/DESIGN.md` (v2.0) is the
 authoritative design specification.
 
 ## Commands and Verification
@@ -32,7 +32,7 @@ npm run generate:og # Regenerate public/og-image.png
   initializer (`src/components/ThemeInit.astro`), and header switcher
   (`src/components/ThemeToggle.astro`) in plain JavaScript.
 - Restrict React 19 islands to `<NycHero>`
-  (`src/components/NycBackground/`) and the six `/tools/*` apps
+  (`src/components/NycBackground/`) and the seven `/tools/*` apps
   (`src/components/tools/*.tsx`).
 - Edit structured data in `src/data/` (`site.ts`, `experience.ts`,
   `projects.ts`, `photos.ts`) and posts in `src/content/blog/`. Do not
@@ -131,8 +131,8 @@ radii, or shared UI components. Keep `public/DESIGN.md` and
 
 ## Tools, Accessibility, SEO, and Print
 
-- List all six browser tools (`contrast`, `diff`, `paint`, `pomodoro`,
-  `scratchpad`, `svg-editor`) on `/tools/` in a 3×2 grid.
+- List all seven browser tools (`contrast`, `diff`, `paint`,
+  `photo-editor`, `pomodoro`, `scratchpad`, `svg-editor`) on `/tools/`.
 - Keep all `/tools/*` apps 100% client-side with zero network telemetry.
   Degrade cleanly to in-memory session state when `localStorage` or
   notifications are unavailable.

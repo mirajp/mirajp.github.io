@@ -44,6 +44,7 @@ export default defineConfig({
     "/diff": "/tools/diff",
     "/markdown": "/tools/scratchpad",
     "/paint": "/tools/paint",
+    "/photo-editor": "/tools/photo-editor",
     "/scratchpad": "/tools/scratchpad",
   },
 });

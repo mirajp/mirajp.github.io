@@ -777,7 +777,8 @@
   [data-easter-egg],
   .sandbox-toolbar,
   .scratchpad-toolbar,
-  .scratchpad-editor {
+  .scratchpad-editor,
+  .photo-editor-shell {
     display: none !important;
   }
 

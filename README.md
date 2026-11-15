@@ -1,7 +1,7 @@
 # Miraj Patel — Portfolio (`miraj.dev`)
 
 Personal engineering site at [www.miraj.dev](https://www.miraj.dev):
-portfolio, technical blog, photography, and a six-app browser tool
+portfolio, technical blog, photography, and a seven-app browser tool
 suite. Built with [Astro](https://astro.build) (islands architecture),
 TypeScript, Tailwind CSS v4, and MDX. Astro builds static HTML with no
 server or database, so the site deploys directly to GitHub Pages.
@@ -19,17 +19,19 @@ server or database, so the site deploys directly to GitHub Pages.
   - `<NycHero>` (`src/components/NycBackground/`, `client:only="react"`)
     renders 10 seasonal and holiday SVG scenes (`[-4, +3]` day windows).
     Clicking the Empire State Building opens a hidden 3D season spinner.
-  - Six `/tools/` apps use React islands: Contrast (`/tools/contrast/`),
-    Diff (`/tools/diff/`), Paint (`/tools/paint/`), Pomodoro
-    (`/tools/pomodoro/`), Scratchpad (`/tools/scratchpad/`), and SVG
-    Editor (`/tools/svg-editor/`).
+  - Seven `/tools/` apps use React islands:
+    - Contrast (`/tools/contrast/`), Diff (`/tools/diff/`), and Paint
+      (`/tools/paint/`).
+    - Photo Editor (`/tools/photo-editor/`), Pomodoro
+      (`/tools/pomodoro/`), Scratchpad (`/tools/scratchpad/`), and SVG
+      Editor (`/tools/svg-editor/`).
   - Content pages ship zero framework JavaScript. Both the command
     palette (`⌘K` on a native `<dialog id="cmdk-dialog">`) and the
     `[Theme ▾ | ☀/☾]` header switcher (`ThemeToggle.astro`) use plain
     JavaScript.
 - **Design system (`DESIGN.md` v2.0)** — ships three user-selectable
   themes across light and dark modes, verified against WCAG 2.2 AA
-  across all six combinations:
+  across all six theme-and-mode combinations:
   1. **Crisp Forest (`crisp-forest`, default):** Warm alabaster paper
      and pine teal with vermilion accents, set in `Bricolage Grotesque`,
      `Plus Jakarta Sans`, and `JetBrains Mono`.
@@ -100,7 +102,7 @@ src/
   data/               Structured site data: experience.ts, projects.ts,
                       site.ts, photos.ts
   components/         Shared .astro UI, NycBackground/ hero island, and
-                      tools/*.tsx React islands
+                      tools/*.tsx React islands (plus tools/photo-editor/)
   layouts/            BaseLayout (SEO, ThemeInit, header/footer), BlogPostLayout
   pages/              File-based routes (/, /about, /blog, /colophon, /photos,
                       /projects, /resume, /tools/*) + themes/*.css.ts endpoints
@@ -169,8 +171,9 @@ Jekyll processing so built CSS, JS, and font chunks load properly.
 
 ## Browser support and privacy for `/tools/*`
 
-All six tools under `/tools/` run 100% client-side and send zero user
-data over the network. Pomodoro notifications stay off unless granted,
-and Scratchpad autosave falls back to in-memory session state when
-`localStorage` is unavailable (such as in restricted private-browsing
-contexts).
+All seven tools under `/tools/` run 100% client-side and send zero user
+data over the network. Photo Editor decodes images locally and preserves
+JPEG EXIF, GPS, XMP, IPTC, and ICC metadata on export. It falls back
+from Display P3 to sRGB when needed. Pomodoro notifications stay off
+unless granted, and Scratchpad autosave falls back to in-memory session
+state when `localStorage` is unavailable.
