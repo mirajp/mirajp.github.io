@@ -154,6 +154,8 @@ export default function PhotoEditor(): React.JSX.Element {
   }>({ query: "", ids: new Set() });
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const holdButtonRef = useRef<HTMLButtonElement | null>(null);
+  const lastPointerWasTouchRef = useRef(false);
   const previewCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const previewBufferRef = useRef<PreviewBuffer | null>(null);
   const presetButtonRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
@@ -276,6 +278,21 @@ export default function PhotoEditor(): React.JSX.Element {
         photo.bitmap.close();
       }
       tracked.clear();
+    };
+  }, []);
+
+  // Prevent iOS Safari / Android long-press text selection on the Hold button
+  useEffect(() => {
+    const btn = holdButtonRef.current;
+    if (btn == null) return;
+    const onTouchStart = (e: TouchEvent) => {
+      if (!btn.disabled && e.cancelable) {
+        e.preventDefault();
+      }
+    };
+    btn.addEventListener("touchstart", onTouchStart, { passive: false });
+    return () => {
+      btn.removeEventListener("touchstart", onTouchStart);
     };
   }, []);
 
@@ -1187,15 +1204,38 @@ export default function PhotoEditor(): React.JSX.Element {
           {/* Stage Action Bar */}
           <div className="flex flex-wrap items-center gap-1.5 border-t border-border-subtle bg-surface px-2.5 py-1.5">
             <button
+              ref={holdButtonRef}
               type="button"
               disabled={currentItem == null || busy}
               title="Hold to see the original (key: B)"
-              onPointerDown={() => {
-                if (currentItem != null) setComparing(true);
+              onPointerDown={(e) => {
+                lastPointerWasTouchRef.current = e.pointerType === "touch";
+                if (currentItem == null) return;
+                if (e.pointerType === "touch") {
+                  try {
+                    e.currentTarget.setPointerCapture(e.pointerId);
+                  } catch {
+                    // Synthetic test events may not carry an active pointerId.
+                  }
+                }
+                setComparing(true);
               }}
               onPointerUp={() => setComparing(false)}
-              onPointerLeave={() => setComparing(false)}
+              onPointerLeave={(e) => {
+                if (e.pointerType !== "touch") {
+                  setComparing(false);
+                }
+              }}
               onPointerCancel={() => setComparing(false)}
+              onLostPointerCapture={() => setComparing(false)}
+              onContextMenu={(e) => {
+                if (
+                  lastPointerWasTouchRef.current ||
+                  window.matchMedia("(pointer: coarse)").matches
+                ) {
+                  e.preventDefault();
+                }
+              }}
               onBlur={() => setComparing(false)}
               onKeyDown={(e) => {
                 if ((e.key === " " || e.key === "Enter") && currentItem != null) {
@@ -1203,7 +1243,7 @@ export default function PhotoEditor(): React.JSX.Element {
                 }
               }}
               onKeyUp={() => setComparing(false)}
-              className={compactBtnClass}
+              className={`${compactBtnClass} pointer-coarse:touch-none pointer-coarse:select-none pointer-coarse:[-webkit-touch-callout:none] pointer-coarse:[-webkit-user-select:none]`}
             >
               Hold: original
             </button>
