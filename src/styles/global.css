@@ -733,6 +733,26 @@
 }
 
 /* ---------------------------------------------------------------------------
+ * Hero SVG pen-and-ink self-drawing stroke animation
+ * ------------------------------------------------------------------------ */
+
+@keyframes nyc-ink-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.nyc-ink-path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: nyc-ink-draw 1.15s var(--ease-standard) forwards;
+  animation-delay: var(--draw-delay, 0ms);
+}
+
+/* ---------------------------------------------------------------------------
  * Reduced motion — respected globally, no exceptions
  * ------------------------------------------------------------------------ */
 
