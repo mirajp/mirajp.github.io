@@ -187,11 +187,11 @@ export function renderSpringSummerSvgElements(
     accent: string;
     primary: string;
     gold: string;
+    paperMask?: string;
   },
 ) {
-  const paperMaskFill = isDark
-    ? "rgba(18, 24, 23, 0.92)"
-    : "rgba(250, 249, 246, 0.92)";
+  const paperMaskFill =
+    colors.paperMask ?? "color-mix(in srgb, var(--background) 92%, transparent)";
 
   return (
     <>

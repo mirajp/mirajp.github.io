@@ -1,3 +1,8 @@
+export type DesignThemeId =
+  | "crisp-forest"
+  | "swiss-drafting"
+  | "press-darkroom";
+
 export type SeasonTheme =
   | "auto"
   | "stPatricks"

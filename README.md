@@ -1,48 +1,74 @@
-# Miraj Patel — Portfolio
+# Miraj Patel — Portfolio (`miraj.dev`)
 
-Personal site: portfolio, technical blog, and a couple of small client-side
-productivity tools. Built with [Astro](https://astro.build) (islands
-architecture — static by default, React only where something is genuinely
-interactive), TypeScript, Tailwind CSS v4, and MDX. Fully static output —
-no server, no database — so it deploys straight to GitHub Pages.
+Personal engineering site at [www.miraj.dev](https://www.miraj.dev):
+portfolio, technical blog, photography, and a six-app browser tool
+suite. Built with [Astro](https://astro.build) (islands architecture),
+TypeScript, Tailwind CSS v4, and MDX. Astro builds static HTML with no
+server or database, so the site deploys directly to GitHub Pages.
 
 ## Stack notes
 
-- **Astro 7**, output: `static`.
-- **Tailwind v4** via the `@tailwindcss/vite` plugin, _not_ the `tailwind.config.ts` +
-  `@astrojs/tailwind` setup shown in `design_system.md` — that integration doesn't
-  support Astro 7's peer range. All the same tokens (colors, spacing, radius,
-  shadows, type scale) are ported 1:1, just defined in `src/styles/global.css`
-  under `@theme` instead of a `.ts` config file.
-- **React 19** islands (`client:load`) for the 4 places that need real
-  interactivity: the contact form, the Pomodoro timer, the Markdown
-  scratchpad, and the contrast checker under `/tools`. Every other page
-  ships **zero** JavaScript framework code. The command palette (`⌘K`) is
-  deliberately _not_ React, even though it's interactive and site-wide —
-  it's plain JS on a native `<dialog>`, so pages with no other island still
-  ship zero component JS just to get search.
-- **Type & color (v2 redesign)** — headlines in Bricolage Grotesque, body in
-  Inter, code in JetBrains Mono. Palette is "Editorial teal": warm paper
-  neutrals instead of stark white/black, deep pine teal primary + coral
-  secondary instead of the generic blue every AI-scaffolded site defaults
-  to. Every foreground/background pairing — including white-on-button in
-  both themes — is contrast-checked against WCAG AA computationally (see
-  `/colophon` for the reasoning, or `src/styles/global.css` for the actual
-  token values).
-- **Content collections** (`src/content/blog/`) for blog posts, in Markdown
-  or MDX.
-- **Dark mode** via a `data-theme` attribute (not the OS-only media query),
-  toggled by the header button and persisted to `localStorage`.
+- **Astro 7**, `output: "static"`.
+- **Tailwind CSS v4** via `@tailwindcss/vite`. Semantic design tokens,
+  responsive typography, per-theme corner radii, and print resets live
+  in `src/styles/global.css` (`@theme inline`) and follow
+  `public/DESIGN.md` (v2.0). Tailwind's `dark:` variant binds
+  `[data-mode="dark"]`.
+- **React 19 islands** only on routes that need stateful client
+  rendering:
+  - `<NycHero>` (`src/components/NycBackground/`, `client:only="react"`)
+    renders 10 seasonal and holiday SVG scenes (`[-4, +3]` day windows).
+    Clicking the Empire State Building opens a hidden 3D season spinner.
+  - Six `/tools/` apps use React islands: Contrast (`/tools/contrast/`),
+    Diff (`/tools/diff/`), Paint (`/tools/paint/`), Pomodoro
+    (`/tools/pomodoro/`), Scratchpad (`/tools/scratchpad/`), and SVG
+    Editor (`/tools/svg-editor/`).
+  - Content pages ship zero framework JavaScript. Both the command
+    palette (`⌘K` on a native `<dialog id="cmdk-dialog">`) and the
+    `[Theme ▾ | ☀/☾]` header switcher (`ThemeToggle.astro`) use plain
+    JavaScript.
+- **Design system (`DESIGN.md` v2.0)** — ships three user-selectable
+  themes across light and dark modes, verified against WCAG 2.2 AA
+  across all six combinations:
+  1. **Crisp Forest (`crisp-forest`, default):** Warm alabaster paper
+     and pine teal with vermilion accents, set in `Bricolage Grotesque`,
+     `Plus Jakarta Sans`, and `JetBrains Mono`.
+  2. **Swiss Drafting (`swiss-drafting`):** Architectural vellum and
+     cobalt with `2px–4px` corners and `[word]` bracket emphasis, set in
+     `Space Grotesk`, `Public Sans`, and `Azeret Mono`.
+  3. **Press & Darkroom (`press-darkroom`):** Cotton newsprint and
+     claret ink with `3px` double masthead rules and italic display
+     stress, set in `Newsreader`, `Plus Jakarta Sans`, and
+     `JetBrains Mono`.
+  - Filled controls pair `primary` with `on-primary` and `accent` with
+    `on-accent`. Interactive inputs and compact `32px` studio toolbars
+    use `border-control` (`>= 3.0:1`).
+  - Only Crisp Forest `.woff2` fonts preload in `<head>`. Static
+    endpoints `/themes/swiss-drafting.css` and
+    `/themes/press-darkroom.css` load on demand when a user opens the
+    theme menu or picks an alternate theme.
+- **Orthogonal theme & mode state** on
+  `<html data-theme="crisp-forest" data-mode="light">`:
+  - `data-theme` persists in `localStorage["miraj_theme"]`.
+  - `data-mode` persists in `localStorage["miraj_mode"]` and falls back
+    to OS `prefers-color-scheme`.
+  - Every change dispatches
+    `CustomEvent("miraj:themechange", { detail: { theme, mode } })` so
+    `/tools/contrast/`, `/tools/paint/`, `<NycHero>`, and Shiki code
+    blocks update immediately.
+- **Content collections** (`src/content/blog/`) for Markdown and MDX
+  articles.
 
 ## Requirements
 
-Astro 7 requires **Node.js ≥ 22.12** and npm ≥ 9.6. Check what you have in WSL:
+Astro 7 requires **Node.js ≥ 22.12** and **npm ≥ 9.6**. Check your
+version:
 
 ```bash
 node -v
 ```
 
-If you're below that, install a current Node via [nvm](https://github.com/nvm-sh/nvm):
+If needed, install Node 22+ with [nvm](https://github.com/nvm-sh/nvm):
 
 ```bash
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
@@ -54,100 +80,97 @@ nvm use 22
 
 ```bash
 npm install
-npm run dev       # http://localhost:4321
+npm run dev         # http://localhost:4321
 ```
 
 Other scripts:
 
 ```bash
-npm run build      # production build → dist/
-npm run preview    # serve the production build locally
-npm run check      # type-check .astro/.ts/.tsx files
+npm run build       # production build -> dist/
+npm run preview     # serve the production build locally
+npm run check       # type-check .astro, .ts, and .tsx files
 npm run generate:og # regenerate public/og-image.png
 ```
 
 ## Project structure
 
-```
+```text
 src/
   content/blog/       Blog posts (.md / .mdx)
-  data/                Resume-derived + editable content: experience.ts,
-                       projects.ts, site.ts, photos.ts, etc.
-  components/          Shared .astro components + tools/*.tsx (React islands)
-  layouts/             BaseLayout (SEO/head/shell), BlogPostLayout
-  pages/               File-based routes — includes /uses and /colophon,
-                       linked from the footer rather than primary nav
-public/                Static files copied as-is (favicon, resume.pdf, robots.txt)
+  data/               Structured site data: experience.ts, projects.ts,
+                      site.ts, photos.ts
+  components/         Shared .astro UI, NycBackground/ hero island, and
+                      tools/*.tsx React islands
+  layouts/            BaseLayout (SEO, ThemeInit, header/footer), BlogPostLayout
+  pages/              File-based routes (/, /about, /blog, /colophon, /photos,
+                      /projects, /resume, /tools/*) + themes/*.css.ts endpoints
+  styles/             global.css + lazy theme font bundles
+public/               Static assets copied as-is (DESIGN.md, skyline.png,
+                      favicon, resume.pdf, robots.txt, .nojekyll)
 ```
 
 ### Adding a blog post
 
-Drop a `.md` (or `.mdx`, if it needs a component) file into `src/content/blog/`
-with this frontmatter:
+Add a `.md` or `.mdx` file in `src/content/blog/` with this frontmatter:
 
 ```yaml
 ---
 title: "Post title"
-description: "One or two sentences — used in cards and meta tags."
+description: "One or two sentences for cards and meta tags."
 publishDate: 2026-08-01
 tags: ["frontend", "typescript"]
 ---
 ```
 
-It'll automatically show up in `/blog/`, the tag filter, and the sitemap.
-Reading time is computed from word count — no field to fill in.
+New posts appear automatically on `/blog/`, in tag filters, and in the
+sitemap. Reading time comes from word count automatically.
 
 ### Editing resume-based content
 
-`src/data/experience.ts`, `projects.ts`, and `site.ts` hold everything pulled
-from your resume — edit the data, not the `.astro` page files.
+Update `src/data/experience.ts`, `src/data/projects.ts`, and
+`src/data/site.ts` directly rather than editing `.astro` page templates.
 
 ## Deploying to GitHub Pages
 
-### 1. Push this to a GitHub repo
+### 1. Push to GitHub
 
-The included workflow (`.github/workflows/deploy.yml`) builds and deploys
-automatically on every push to `main` — no manual `git` steps needed beyond
-creating the repo and pushing.
+The workflow in `.github/workflows/deploy.yml` builds and deploys
+automatically on every push to `main`.
 
-### 2. Set the deployment URL correctly
+### 2. Keep the canonical site URL in sync
 
-This matters — get it wrong and the CSS/JS won't load. In `astro.config.mjs`:
+`astro.config.mjs`, `src/data/site.ts` (`url`), and `public/robots.txt`
+(`Sitemap:`) must share the same origin:
 
-- **Repo named exactly `mirajp.github.io`** (a GitHub _user_ site, publishes
-  at the domain root): no change needed, this is what's already configured.
-- **Any other repo name** (a _project_ site, e.g. `portfolio`): uncomment
-  and set the `base` line, and update `site` to match:
+- **Custom domain (`https://www.miraj.dev`) or user site
+  (`mirajp.github.io`)**: keep `site: "https://www.miraj.dev"` with no
+  `base` path.
+- **Project site subpath (for example, `/portfolio`)**: set both `site`
+  and `base` in `astro.config.mjs`:
 
   ```js
   export default defineConfig({
     site: "https://mirajp.github.io",
-    base: "/portfolio", // ← your repo name
-    ...
+    base: "/portfolio",
+    // ...
+  });
   ```
 
-  Also update the two matching spots: `public/robots.txt` (the `Sitemap:`
-  line) and `src/data/site.ts` (the `url` field).
+### 3. Enable GitHub Actions Pages deployment
 
-### 3. Turn on Pages in the repo settings
+Open **Settings → Pages** and set **Source** to **GitHub Actions** once
+per repository.
 
-**Settings → Pages → Source: "GitHub Actions."** (It defaults to "Deploy
-from a branch," which will _not_ use the included workflow.) This is a
-one-time setting per repo.
+### GitHub Pages underscore folder rule
 
-Push to `main` and the Actions tab will show the build/deploy run.
+GitHub Pages runs Jekyll by default and ignores `_astro/` asset
+directories unless `.nojekyll` exists. `public/.nojekyll` disables
+Jekyll processing so built CSS, JS, and font chunks load properly.
 
-### GitHub Pages gotcha already handled
+## Browser support and privacy for `/tools/*`
 
-Pages runs Jekyll by default, which ignores any folder starting with an
-underscore — including Astro's `_astro/` asset folder, which would silently
-break all CSS and JS. `public/.nojekyll` is already in place to disable
-that.
-
-## Browser support for the tools
-
-The Pomodoro timer's notification prompt and the scratchpad's autosave both
-degrade gracefully — notifications just stay off, and the scratchpad falls
-back to session-only (no persistence) if `localStorage` is unavailable
-(e.g. private browsing in some browsers). Nothing in either tool sends data
-anywhere; both are 100% client-side.
+All six tools under `/tools/` run 100% client-side and send zero user
+data over the network. Pomodoro notifications stay off unless granted,
+and Scratchpad autosave falls back to in-memory session state when
+`localStorage` is unavailable (such as in restricted private-browsing
+contexts).

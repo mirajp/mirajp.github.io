@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { DEFAULT_CONFIG, resolveSeason } from "./config";
+import {
+  DEFAULT_CONFIG,
+  THEME_INK_PALETTES,
+  resolveSeason,
+} from "./config";
 import SeasonSpinner from "./SeasonSpinner";
 import { createSceneState } from "./state";
 import {
@@ -8,10 +12,29 @@ import {
   updateSceneDom,
 } from "./systems";
 import type {
+  DesignThemeId,
   NycBackgroundProps,
   ResolvedSeasonTheme,
   SeasonTheme,
 } from "./types";
+
+function readThemeState(): { designTheme: DesignThemeId; isDark: boolean } {
+  if (typeof document === "undefined") {
+    return { designTheme: "crisp-forest", isDark: false };
+  }
+  const root = document.documentElement;
+  const rawTheme = root.getAttribute("data-theme");
+  const rawMode = root.getAttribute("data-mode");
+  const designTheme: DesignThemeId =
+    rawTheme === "swiss-drafting" || rawTheme === "press-darkroom"
+      ? rawTheme
+      : "crisp-forest";
+  // Must match `global.css` (`@custom-variant dark` -> `[data-mode="dark"]`) 1:1.
+  // Never fall back to `data-theme === "dark"` when `data-mode` is absent, or
+  // dark-mode fills/windows will paint onto a light-mode page canvas.
+  const isDark = rawMode === "dark";
+  return { designTheme, isDark };
+}
 
 export interface NycHeroControlDetail {
   season?: SeasonTheme;
@@ -72,11 +95,7 @@ export default function NycBackground(props: NycBackgroundProps) {
   const [inspectInk, setInspectInk] = useState(false);
   const [esbHovered, setEsbHovered] = useState(false);
   const [skylineReady, setSkylineReady] = useState(false);
-  const [isDark, setIsDark] = useState(() =>
-    typeof document !== "undefined"
-      ? document.documentElement.getAttribute("data-theme") === "dark"
-      : false,
-  );
+  const [{ designTheme, isDark }, setThemeState] = useState(readThemeState);
   const [size, setSize] = useState(() => ({
     width: typeof window !== "undefined" ? window.innerWidth : 1440,
     height: 480,
@@ -553,16 +572,29 @@ export default function NycBackground(props: NycBackgroundProps) {
     return () => ro.disconnect();
   }, []);
 
-  // Observe Crisp Forest [data-theme="dark"] changes on <html>
+  // Observe orthogonal DESIGN.md v2.0 `[data-theme]` + `[data-mode]` attributes and `miraj:themechange` events
   useEffect(() => {
     const root = document.documentElement;
-    const syncTheme = () =>
-      setIsDark(root.getAttribute("data-theme") === "dark");
+    const syncTheme = () => {
+      const next = readThemeState();
+      setThemeState((prev) =>
+        prev.designTheme !== next.designTheme || prev.isDark !== next.isDark
+          ? next
+          : prev,
+      );
+    };
     syncTheme();
 
     const mo = new MutationObserver(syncTheme);
-    mo.observe(root, { attributes: true, attributeFilter: ["data-theme"] });
-    return () => mo.disconnect();
+    mo.observe(root, {
+      attributes: true,
+      attributeFilter: ["data-theme", "data-mode"],
+    });
+    window.addEventListener("miraj:themechange", syncTheme);
+    return () => {
+      mo.disconnect();
+      window.removeEventListener("miraj:themechange", syncTheme);
+    };
   }, []);
 
   // Listen for sandbox toolbar events (season switch, ink-draw replay, pause, ink contrast)
@@ -635,9 +667,9 @@ export default function NycBackground(props: NycBackgroundProps) {
 
     const imageData = ctx.getImageData(0, yStart, w, regionH);
     const data = imageData.data;
-    const targetR = isDark ? 154 : 69;
-    const targetG = isDark ? 166 : 79;
-    const targetB = isDark ? 162 : 76;
+    const activePalette =
+      THEME_INK_PALETTES[designTheme][isDark ? "dark" : "light"];
+    const [targetR, targetG, targetB] = activePalette.skylineRgb;
     const skylineAlphaScale = (isDark ? 0.34 : 0.26) * (inspectInk ? 1.55 : 0.85);
 
     const nw = img.naturalWidth;
@@ -706,7 +738,7 @@ export default function NycBackground(props: NycBackgroundProps) {
       ctx.drawImage(libertyLightCanvasRef.current, 0, drawY, w, drawH);
       ctx.restore();
     }
-  }, [skylineReady, size.width, size.height, isDark, inspectInk]);
+  }, [skylineReady, size.width, size.height, designTheme, isDark, inspectInk]);
 
   const baseScale = Math.max(0.42, Math.min(0.76, size.width / 1920));
 
@@ -768,33 +800,20 @@ export default function NycBackground(props: NycBackgroundProps) {
     return () => cancelAnimationFrame(rafId);
   }, [scene, size.width, size.height, baseScale, paused]);
 
+  const themePalette =
+    THEME_INK_PALETTES[designTheme][isDark ? "dark" : "light"];
   const colors = {
-    sketch: withAlpha(
-      props.sketchColor ??
-        (isDark
-          ? DEFAULT_CONFIG.sketchColorDark
-          : DEFAULT_CONFIG.sketchColorLight),
-      inkMultiplier,
-    ),
+    sketch: withAlpha(props.sketchColor ?? themePalette.sketch, inkMultiplier),
     accent: withAlpha(
-      props.accentColor ??
-        (isDark
-          ? DEFAULT_CONFIG.accentColorDark
-          : DEFAULT_CONFIG.accentColorLight),
+      props.accentColor ?? themePalette.accent,
       Math.min(1, inkMultiplier * 1.15),
     ),
     primary: withAlpha(
-      isDark
-        ? DEFAULT_CONFIG.primaryColorDark
-        : DEFAULT_CONFIG.primaryColorLight,
+      themePalette.primary,
       Math.min(1, inkMultiplier * 1.15),
     ),
-    gold: withAlpha(
-      isDark
-        ? DEFAULT_CONFIG.goldColorDark
-        : DEFAULT_CONFIG.goldColorLight,
-      Math.min(1, inkMultiplier * 1.15),
-    ),
+    gold: withAlpha(themePalette.gold, Math.min(1, inkMultiplier * 1.15)),
+    paperMask: themePalette.paperMask,
   };
 
   return (

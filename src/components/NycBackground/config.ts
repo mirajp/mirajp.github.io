@@ -1,15 +1,90 @@
-import type { ResolvedSeasonTheme, SeasonTheme } from "./types";
+import type {
+  DesignThemeId,
+  ResolvedSeasonTheme,
+  SeasonTheme,
+} from "./types";
+
+export interface ThemeInkPalette {
+  sketch: string;
+  primary: string;
+  accent: string;
+  gold: string;
+  skylineRgb: readonly [number, number, number];
+  paperMask: string;
+}
+
+const CSS_PAPER_MASK = "color-mix(in srgb, var(--background) 92%, transparent)";
+
+export const THEME_INK_PALETTES: Record<
+  DesignThemeId,
+  { light: ThemeInkPalette; dark: ThemeInkPalette }
+> = {
+  "crisp-forest": {
+    light: {
+      sketch: "rgba(78, 91, 88, 0.95)",
+      primary: "rgba(13, 107, 88, 0.9)",
+      accent: "rgba(179, 65, 37, 0.9)",
+      gold: "rgba(180, 83, 9, 0.9)",
+      skylineRgb: [64, 78, 75],
+      paperMask: CSS_PAPER_MASK,
+    },
+    dark: {
+      sketch: "rgba(155, 168, 164, 0.92)",
+      primary: "rgba(71, 196, 165, 0.9)",
+      accent: "rgba(235, 132, 104, 0.92)",
+      gold: "rgba(240, 182, 76, 0.92)",
+      skylineRgb: [155, 168, 164],
+      paperMask: CSS_PAPER_MASK,
+    },
+  },
+  "swiss-drafting": {
+    light: {
+      sketch: "rgba(74, 83, 98, 0.95)",
+      primary: "rgba(24, 73, 169, 0.9)",
+      accent: "rgba(196, 50, 26, 0.9)",
+      gold: "rgba(180, 83, 9, 0.9)",
+      skylineRgb: [58, 68, 84],
+      paperMask: CSS_PAPER_MASK,
+    },
+    dark: {
+      sketch: "rgba(150, 161, 179, 0.92)",
+      primary: "rgba(126, 178, 255, 0.9)",
+      accent: "rgba(255, 139, 115, 0.92)",
+      gold: "rgba(240, 182, 76, 0.92)",
+      skylineRgb: [150, 161, 179],
+      paperMask: CSS_PAPER_MASK,
+    },
+  },
+  "press-darkroom": {
+    light: {
+      sketch: "rgba(87, 82, 78, 0.95)",
+      primary: "rgba(142, 27, 44, 0.9)",
+      accent: "rgba(29, 78, 107, 0.9)",
+      gold: "rgba(164, 92, 18, 0.9)",
+      skylineRgb: [68, 63, 59],
+      paperMask: CSS_PAPER_MASK,
+    },
+    dark: {
+      sketch: "rgba(168, 161, 155, 0.92)",
+      primary: "rgba(242, 148, 159, 0.9)",
+      accent: "rgba(124, 194, 232, 0.92)",
+      gold: "rgba(240, 182, 76, 0.92)",
+      skylineRgb: [168, 161, 155],
+      paperMask: CSS_PAPER_MASK,
+    },
+  },
+};
 
 export const DEFAULT_CONFIG = {
   season: "auto" as SeasonTheme,
-  sketchColorLight: "rgba(87, 99, 96, 0.95)",
-  sketchColorDark: "rgba(154, 166, 162, 0.92)",
-  accentColorLight: "rgba(193, 78, 50, 0.9)",
-  accentColorDark: "rgba(224, 120, 92, 0.92)",
-  primaryColorLight: "rgba(15, 110, 92, 0.88)",
-  primaryColorDark: "rgba(63, 191, 159, 0.9)",
-  goldColorLight: "rgba(184, 118, 20, 0.9)",
-  goldColorDark: "rgba(240, 182, 76, 0.92)",
+  sketchColorLight: THEME_INK_PALETTES["crisp-forest"].light.sketch,
+  sketchColorDark: THEME_INK_PALETTES["crisp-forest"].dark.sketch,
+  accentColorLight: THEME_INK_PALETTES["crisp-forest"].light.accent,
+  accentColorDark: THEME_INK_PALETTES["crisp-forest"].dark.accent,
+  primaryColorLight: THEME_INK_PALETTES["crisp-forest"].light.primary,
+  primaryColorDark: THEME_INK_PALETTES["crisp-forest"].dark.primary,
+  goldColorLight: THEME_INK_PALETTES["crisp-forest"].light.gold,
+  goldColorDark: THEME_INK_PALETTES["crisp-forest"].dark.gold,
   cloudCount: 7,
   birdCount: 10,
   witchCount: 5,

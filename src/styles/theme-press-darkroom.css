@@ -1,0 +1,9 @@
+/* Lazy-loaded font bundle for the "Press & Darkroom" theme (`data-theme="press-darkroom"`).
+   Plus Jakarta Sans and JetBrains Mono are already loaded by the default Crisp Forest bundle,
+   so only Newsreader display weights and italics are fetched on demand. */
+@import "@fontsource/newsreader/400.css";
+@import "@fontsource/newsreader/400-italic.css";
+@import "@fontsource/newsreader/600.css";
+@import "@fontsource/newsreader/600-italic.css";
+@import "@fontsource/newsreader/700.css";
+@import "@fontsource/newsreader/700-italic.css";

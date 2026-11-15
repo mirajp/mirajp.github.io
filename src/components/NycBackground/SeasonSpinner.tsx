@@ -17,8 +17,8 @@ const SPINNER_OPTIONS: SpinnerOption[] = [
     id: "auto",
     label: "Auto",
     badge: "Calendar",
-    swatchLight: "#0f6e5c",
-    swatchDark: "#3fbf9f",
+    swatchLight: "#0d6b58",
+    swatchDark: "#47c4a5",
   },
   {
     id: "stPatricks",
@@ -483,14 +483,14 @@ export default function SeasonSpinner({
               top: `${anchorPos.top}px`,
               width: "248px",
             }}
-            className="fixed z-150 select-none rounded-lg border border-border bg-background/95 p-3 shadow-lg backdrop-blur-md"
+            className="fixed z-150 select-none rounded-lg border border-border-subtle bg-surface/95 p-3 shadow-lg backdrop-blur-md"
           >
             {/* Subtle directional diamond notch pointing to the Empire State spire */}
             {anchorPos.side !== "center" && (
               <span
                 aria-hidden="true"
                 style={{ top: `${anchorPos.notchY - 6}px` }}
-                className={`absolute h-3 w-3 rotate-45 border-border bg-background/95 ${
+                className={`absolute h-3 w-3 rotate-45 border-border-subtle bg-surface/95 ${
                   anchorPos.side === "right"
                     ? "-left-1.5 border-b border-l"
                     : "-right-1.5 border-t border-r"
@@ -499,7 +499,7 @@ export default function SeasonSpinner({
             )}
 
             {/* Header */}
-            <div className="flex items-center justify-between gap-2 border-b border-border pb-2">
+            <div className="flex items-center justify-between gap-2 border-b border-border-subtle pb-2">
               <div className="flex items-center gap-1.5">
                 <span
                   aria-hidden="true"
@@ -519,7 +519,7 @@ export default function SeasonSpinner({
                   type="button"
                   onClick={spinRandom}
                   title="Spin the wheel to a surprise season"
-                  className="rounded-sm border border-border bg-surface px-1.5 py-0.5 font-mono text-[10px] font-medium text-foreground-muted transition-colors hover:bg-surface-hover hover:text-foreground"
+                  className="rounded-sm border border-border-control bg-background px-1.5 py-0.5 font-mono text-[10px] font-medium text-foreground transition-colors duration-150 ease-out hover:bg-surface-hover"
                 >
                   Spin
                 </button>
@@ -527,7 +527,7 @@ export default function SeasonSpinner({
                   type="button"
                   onClick={() => setOpen(false)}
                   aria-label="Close season spinner"
-                  className="inline-flex h-5 w-5 items-center justify-center rounded-sm font-mono text-xs text-foreground-muted transition-colors hover:bg-surface-hover hover:text-foreground"
+                  className="inline-flex h-5 w-5 items-center justify-center rounded-sm font-mono text-xs text-foreground-muted transition-colors duration-150 ease-out hover:bg-surface-hover hover:text-foreground"
                 >
                   ×
                 </button>
@@ -553,12 +553,12 @@ export default function SeasonSpinner({
                   maskImage:
                     "linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%)",
                 }}
-                className="relative flex-1 cursor-grab touch-none overflow-hidden rounded-md bg-surface/55 focus:outline-none focus-visible:ring-1 focus-visible:ring-primary active:cursor-grabbing"
+                className="relative flex-1 cursor-grab touch-none overflow-hidden rounded-md border border-border-subtle bg-surface-sunken focus:outline-none focus-visible:ring-1 focus-visible:ring-primary active:cursor-grabbing"
               >
                 {/* Center active detent selection window */}
                 <div
                   aria-hidden="true"
-                  className="pointer-events-none absolute inset-x-1.5 top-1/2 z-0 h-8 -translate-y-1/2 rounded-sm border-y border-primary/40 bg-primary/10"
+                  className="pointer-events-none absolute inset-x-1.5 top-1/2 z-0 h-8 -translate-y-1/2 rounded-sm border-y border-primary/50 bg-primary-soft/80"
                 />
 
                 {/* 5 cylindrical drum faces rotating smoothly in 3D */}
@@ -598,9 +598,9 @@ export default function SeasonSpinner({
                           transform: `translate3d(0, ${yPx.toFixed(1)}px, ${zPx.toFixed(1)}px) rotateX(${(-angleDeg).toFixed(1)}deg) scale(${scale.toFixed(3)})`,
                           opacity: +opacity.toFixed(2),
                         }}
-                        className={`absolute inset-x-2 top-1/2 z-10 flex h-8 -translate-y-1/2 items-center justify-between gap-2 px-2 font-mono text-[11px] ${
+                        className={`absolute inset-x-2 top-1/2 z-10 flex h-8 -translate-y-1/2 items-center justify-between gap-2 px-2 font-mono text-[11px] tabular-nums ${
                           isCenter
-                            ? "font-semibold text-foreground"
+                            ? "font-semibold text-on-primary-soft"
                             : "cursor-pointer font-normal text-foreground-muted"
                         }`}
                       >
@@ -612,7 +612,13 @@ export default function SeasonSpinner({
                           />
                           <span className="truncate">{opt.label}</span>
                         </span>
-                        <span className="shrink-0 text-[9px] text-foreground-muted">
+                        <span
+                          className={`shrink-0 text-[9px] tabular-nums ${
+                            isCenter
+                              ? "text-on-primary-soft/85"
+                              : "text-foreground-muted"
+                          }`}
+                        >
                           {opt.id === "auto" ? autoResolvedLabel : opt.badge}
                         </span>
                       </div>
@@ -627,7 +633,7 @@ export default function SeasonSpinner({
                   type="button"
                   onClick={() => stepBy(-1)}
                   aria-label="Previous season"
-                  className="inline-flex h-7 w-6 items-center justify-center rounded-sm border border-border bg-surface font-mono text-[10px] text-foreground-muted transition-colors hover:bg-surface-hover hover:text-foreground"
+                  className="inline-flex h-7 w-6 items-center justify-center rounded-sm border border-border-control bg-background font-mono text-[10px] text-foreground transition-colors duration-150 ease-out hover:bg-surface-hover"
                 >
                   ▲
                 </button>
@@ -635,7 +641,7 @@ export default function SeasonSpinner({
                   type="button"
                   onClick={() => stepBy(1)}
                   aria-label="Next season"
-                  className="inline-flex h-7 w-6 items-center justify-center rounded-sm border border-border bg-surface font-mono text-[10px] text-foreground-muted transition-colors hover:bg-surface-hover hover:text-foreground"
+                  className="inline-flex h-7 w-6 items-center justify-center rounded-sm border border-border-control bg-background font-mono text-[10px] text-foreground transition-colors duration-150 ease-out hover:bg-surface-hover"
                 >
                   ▼
                 </button>
@@ -643,7 +649,7 @@ export default function SeasonSpinner({
             </div>
 
             {/* Active theme micro-footer */}
-            <p className="mt-2 truncate border-t border-border pt-1.5 font-mono text-[10px] text-foreground-muted">
+            <p className="mt-2 truncate border-t border-border-subtle pt-1.5 font-mono text-[10px] text-foreground-muted tabular-nums">
               {SEASON_META[resolvedSeason].label} ·{" "}
               {SEASON_META[resolvedSeason].badge}
             </p>

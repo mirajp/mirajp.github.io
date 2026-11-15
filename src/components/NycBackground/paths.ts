@@ -1,5 +1,5 @@
 // ============================================================================
-// Hand-crafted SVG <path d="..."> line-drawing catalog for NycHero / miraj.dev
+// AI-crafted SVG <path d="..."> line-drawing catalog for NycHero / miraj.dev
 //
 // Canonical orientation:
 //   Every newly authored sprite faces +X (right) in local space so horizontal

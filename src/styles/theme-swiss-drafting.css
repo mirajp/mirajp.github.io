@@ -1,0 +1,9 @@
+/* Lazy-loaded font bundle for the "Swiss Drafting" theme (`data-theme="swiss-drafting"`).
+   Injected on demand when the user opens the theme menu or activates Swiss Drafting. */
+@import "@fontsource/space-grotesk/600.css";
+@import "@fontsource/space-grotesk/700.css";
+@import "@fontsource/public-sans/400.css";
+@import "@fontsource/public-sans/500.css";
+@import "@fontsource/public-sans/600.css";
+@import "@fontsource/azeret-mono/400.css";
+@import "@fontsource/azeret-mono/500.css";

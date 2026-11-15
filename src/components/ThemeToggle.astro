@@ -1,49 +1,429 @@
 ---
-// Vanilla-JS toggle (not a React island) — flipping a CSS attribute doesn't
-// need a framework, and it keeps this above-the-fold control at zero
-// hydration cost.
+// Zero-hydration `[Theme ▾ | ☀/☾]` header switcher (DESIGN.md v2.0).
+// Controls orthogonal `data-theme` (`miraj_theme`) and `data-mode` (`miraj_mode`)
+// attributes on `<html>`, lazy-loads alternate theme font bundles on demand,
+// and dispatches `miraj:themechange` on every change.
+const THEMES = [
+  {
+    id: "crisp-forest",
+    name: "Crisp Forest",
+    subtitle: "Field Monograph (Default)",
+    primaryLight: "#0D6B58",
+    accentLight: "#B34125",
+  },
+  {
+    id: "swiss-drafting",
+    name: "Swiss Drafting",
+    subtitle: "Architectural Blueprint",
+    primaryLight: "#1849A9",
+    accentLight: "#C4321A",
+  },
+  {
+    id: "press-darkroom",
+    name: "Press & Darkroom",
+    subtitle: "Editorial Broadsheet",
+    primaryLight: "#8E1B2C",
+    accentLight: "#1D4E6B",
+  },
+] as const;
 ---
 
-<button
-  id="theme-toggle"
-  type="button"
-  aria-label="Toggle color theme"
-  class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-foreground-muted transition-colors duration-150 hover:bg-surface-hover hover:text-foreground"
+<div
+  id="theme-switcher"
+  class="relative inline-flex items-center rounded-md border border-border-control bg-surface"
 >
-  <svg data-icon="sun" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-    <circle cx="12" cy="12" r="4"></circle>
-    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
-  </svg>
-  <svg data-icon="moon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="hidden">
-    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>
-  </svg>
-</button>
+  <button
+    id="theme-menu-trigger"
+    type="button"
+    aria-haspopup="menu"
+    aria-expanded="false"
+    aria-controls="theme-menu"
+    class="inline-flex h-11 items-center gap-2 rounded-l-md px-3 text-sm font-semibold leading-5 text-foreground transition-colors duration-150 ease-out hover:bg-surface-hover"
+  >
+    <span
+      aria-hidden="true"
+      class="inline-block h-2.5 w-2.5 shrink-0 rounded-full bg-primary"
+    ></span>
+    <span data-theme-label class="hidden sm:inline">Crisp Forest</span>
+    <span class="sm:hidden">Theme</span>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2.2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+      class="text-foreground-muted"
+    >
+      <path d="m6 9 6 6 6-6"></path>
+    </svg>
+  </button>
 
-<script is:inline>
-  (function () {
-    var btn = document.getElementById("theme-toggle");
-    if (!btn) return;
+  <span aria-hidden="true" class="h-5 w-px bg-border-subtle"></span>
 
-    function sync() {
-      var isDark = document.documentElement.getAttribute("data-theme") === "dark";
-      var sun = btn.querySelector('[data-icon="sun"]');
-      var moon = btn.querySelector('[data-icon="moon"]');
+  <button
+    id="theme-toggle"
+    type="button"
+    aria-label="Toggle light or dark mode"
+    class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-r-md text-foreground-muted transition-colors duration-150 ease-out hover:bg-surface-hover hover:text-foreground"
+  >
+    <svg
+      data-icon="sun"
+      xmlns="http://www.w3.org/2000/svg"
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="4"></circle>
+      <path
+        d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"
+      ></path>
+    </svg>
+    <svg
+      data-icon="moon"
+      xmlns="http://www.w3.org/2000/svg"
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+      class="hidden"
+    >
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>
+    </svg>
+  </button>
+
+  <div
+    id="theme-menu"
+    role="menu"
+    aria-label="Design theme"
+    hidden
+    class="absolute right-0 top-[calc(100%+6px)] z-150 w-68 rounded-lg border border-border-subtle bg-surface p-1.5 shadow-md"
+  >
+    <p
+      class="px-2.5 pt-1 pb-1.5 font-mono text-[11px] font-medium tracking-[0.02em] text-foreground-muted uppercase"
+    >
+      Design System Theme
+    </p>
+    {
+      THEMES.map((t) => (
+        <button
+          type="button"
+          role="menuitemradio"
+          aria-checked={t.id === "crisp-forest" ? "true" : "false"}
+          data-theme-option={t.id}
+          data-theme-name={t.name}
+          class="flex w-full items-center justify-between gap-3 rounded-md px-2.5 py-2 text-left transition-colors duration-150 ease-out hover:bg-surface-hover"
+        >
+          <span class="min-w-0">
+            <span class="block text-sm font-semibold leading-5 text-foreground">
+              {t.name}
+            </span>
+            <span class="block text-xs leading-4 text-foreground-muted">
+              {t.subtitle}
+            </span>
+          </span>
+          <span class="inline-flex shrink-0 items-center gap-1.5">
+            <span
+              aria-hidden="true"
+              class="inline-block h-3 w-3 rounded-full border border-border-subtle"
+              style={`background-color: ${t.primaryLight}`}
+            />
+            <span
+              aria-hidden="true"
+              class="inline-block h-3 w-3 rounded-full border border-border-subtle"
+              style={`background-color: ${t.accentLight}`}
+            />
+            <span
+              data-check-indicator
+              aria-hidden="true"
+              class="ml-0.5 font-mono text-xs font-semibold text-primary opacity-0"
+            >
+              ✓
+            </span>
+          </span>
+        </button>
+      ))
+    }
+  </div>
+</div>
+
+<script>
+  type ThemeId = "crisp-forest" | "swiss-drafting" | "press-darkroom";
+  type ModeId = "light" | "dark";
+
+  const VALID_THEMES = new Set<ThemeId>([
+    "crisp-forest",
+    "swiss-drafting",
+    "press-darkroom",
+  ]);
+
+  const THEME_LABELS: Record<ThemeId, string> = {
+    "crisp-forest": "Crisp Forest",
+    "swiss-drafting": "Swiss Drafting",
+    "press-darkroom": "Press & Darkroom",
+  };
+
+  const loadedFontBundles = new Set<ThemeId>(["crisp-forest"]);
+
+  function ensureThemeFontBundle(theme: ThemeId): void {
+    if (loadedFontBundles.has(theme)) return;
+    loadedFontBundles.add(theme);
+    if (
+      document.head.querySelector(`link[data-theme-fonts="${theme}"]`)
+    ) {
+      return;
+    }
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = `/themes/${theme}.css`;
+    link.setAttribute("data-theme-fonts", theme);
+    document.head.appendChild(link);
+  }
+
+  function preloadAlternateThemeBundles(): void {
+    ensureThemeFontBundle("swiss-drafting");
+    ensureThemeFontBundle("press-darkroom");
+  }
+
+  function getActiveTheme(): ThemeId {
+    const attr = document.documentElement.getAttribute("data-theme") as ThemeId;
+    return VALID_THEMES.has(attr) ? attr : "crisp-forest";
+  }
+
+  function getActiveMode(): ModeId {
+    return document.documentElement.getAttribute("data-mode") === "dark"
+      ? "dark"
+      : "light";
+  }
+
+  function normalizeRootAttributes(): void {
+    const root = document.documentElement;
+    const rawTheme = root.getAttribute("data-theme");
+    const rawMode = root.getAttribute("data-mode");
+
+    let nextTheme: ThemeId = VALID_THEMES.has(rawTheme as ThemeId)
+      ? (rawTheme as ThemeId)
+      : "crisp-forest";
+
+    let nextMode: ModeId;
+    if (rawMode === "dark" || rawMode === "light") {
+      nextMode = rawMode;
+    } else {
+      let savedMode: string | null = null;
+      let savedTheme: string | null = null;
+      let legacyMode: string | null = null;
+      try {
+        savedMode = localStorage.getItem("miraj_mode");
+        savedTheme = localStorage.getItem("miraj_theme");
+        legacyMode = localStorage.getItem("theme");
+      } catch {
+        // Ignore storage errors
+      }
+      if (savedTheme && VALID_THEMES.has(savedTheme as ThemeId)) {
+        nextTheme = savedTheme as ThemeId;
+      }
+      if (savedMode === "dark" || savedMode === "light") {
+        nextMode = savedMode;
+      } else if (rawTheme === "dark" || rawTheme === "light") {
+        nextMode = rawTheme;
+      } else if (legacyMode === "dark" || legacyMode === "light") {
+        nextMode = legacyMode;
+      } else {
+        nextMode = window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light";
+      }
+    }
+
+    if (root.getAttribute("data-theme") !== nextTheme) {
+      root.setAttribute("data-theme", nextTheme);
+    }
+    if (root.getAttribute("data-mode") !== nextMode) {
+      root.setAttribute("data-mode", nextMode);
+    }
+    root.style.colorScheme = nextMode;
+  }
+
+  function initThemeSwitcher(): void {
+    normalizeRootAttributes();
+    const root = document.documentElement;
+    const switcher = document.getElementById("theme-switcher");
+    const menuBtn = document.getElementById(
+      "theme-menu-trigger",
+    ) as HTMLButtonElement | null;
+    const modeBtn = document.getElementById(
+      "theme-toggle",
+    ) as HTMLButtonElement | null;
+    const menu = document.getElementById("theme-menu");
+
+    if (!switcher || !menuBtn || !modeBtn || !menu) return;
+
+    const labelEl = menuBtn.querySelector<HTMLElement>("[data-theme-label]");
+    const optionBtns = Array.from(
+      menu.querySelectorAll<HTMLButtonElement>("[data-theme-option]"),
+    );
+
+    const syncUi = () => {
+      const theme = getActiveTheme();
+      const mode = getActiveMode();
+      const isDark = mode === "dark";
+
+      ensureThemeFontBundle(theme);
+
+      if (labelEl) {
+        labelEl.textContent = THEME_LABELS[theme];
+      }
+
+      const sun = modeBtn.querySelector('[data-icon="sun"]');
+      const moon = modeBtn.querySelector('[data-icon="moon"]');
       if (sun && moon) {
         sun.classList.toggle("hidden", isDark);
         moon.classList.toggle("hidden", !isDark);
       }
-      btn.setAttribute("aria-pressed", String(isDark));
-    }
+      modeBtn.setAttribute("aria-pressed", String(isDark));
+      modeBtn.setAttribute(
+        "aria-label",
+        isDark ? "Switch to light mode" : "Switch to dark mode",
+      );
 
-    btn.addEventListener("click", function () {
-      var next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
-      document.documentElement.setAttribute("data-theme", next);
-      try {
-        localStorage.setItem("theme", next);
-      } catch (e) {}
-      sync();
+      for (const opt of optionBtns) {
+        const active = opt.dataset.themeOption === theme;
+        opt.setAttribute("aria-checked", String(active));
+        opt.classList.toggle("bg-primary-soft/65", active);
+        const check = opt.querySelector<HTMLElement>("[data-check-indicator]");
+        if (check) {
+          check.classList.toggle("opacity-100", active);
+          check.classList.toggle("opacity-0", !active);
+        }
+      }
+    };
+
+    const emitChange = (theme: ThemeId, mode: ModeId) => {
+      window.dispatchEvent(
+        new CustomEvent("miraj:themechange", { detail: { theme, mode } }),
+      );
+    };
+
+    const closeMenu = (restoreFocus = false) => {
+      if (menu.hidden) return;
+      menu.hidden = true;
+      menuBtn.setAttribute("aria-expanded", "false");
+      if (restoreFocus) menuBtn.focus();
+    };
+
+    const openMenu = () => {
+      preloadAlternateThemeBundles();
+      menu.hidden = false;
+      menuBtn.setAttribute("aria-expanded", "true");
+      const current = optionBtns.find(
+        (b) => b.dataset.themeOption === getActiveTheme(),
+      );
+      (current ?? optionBtns[0])?.focus();
+    };
+
+    menuBtn.addEventListener("pointerenter", preloadAlternateThemeBundles, {
+      once: true,
     });
 
-    sync();
-  })();
+    menuBtn.addEventListener("click", () => {
+      if (menu.hidden) {
+        openMenu();
+      } else {
+        closeMenu(false);
+      }
+    });
+
+    for (const opt of optionBtns) {
+      opt.addEventListener("click", () => {
+        const nextTheme = opt.dataset.themeOption as ThemeId | undefined;
+        if (!nextTheme || !VALID_THEMES.has(nextTheme)) return;
+        ensureThemeFontBundle(nextTheme);
+        root.setAttribute("data-theme", nextTheme);
+        try {
+          localStorage.setItem("miraj_theme", nextTheme);
+        } catch {
+          // Ignore storage quota / private browsing errors
+        }
+        syncUi();
+        closeMenu(true);
+        emitChange(nextTheme, getActiveMode());
+      });
+    }
+
+    modeBtn.addEventListener("click", () => {
+      const nextMode: ModeId = getActiveMode() === "dark" ? "light" : "dark";
+      root.setAttribute("data-mode", nextMode);
+      root.style.colorScheme = nextMode;
+      try {
+        localStorage.setItem("miraj_mode", nextMode);
+        localStorage.removeItem("theme");
+      } catch {
+        // Ignore storage errors
+      }
+      syncUi();
+      emitChange(getActiveTheme(), nextMode);
+    });
+
+    document.addEventListener("pointerdown", (e) => {
+      if (!menu.hidden && !switcher.contains(e.target as Node)) {
+        closeMenu(false);
+      }
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (menu.hidden) return;
+      if (e.key === "Escape") {
+        e.preventDefault();
+        closeMenu(true);
+        return;
+      }
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        e.preventDefault();
+        const idx = optionBtns.indexOf(
+          document.activeElement as HTMLButtonElement,
+        );
+        const step = e.key === "ArrowDown" ? 1 : -1;
+        const nextIdx =
+          idx < 0
+            ? 0
+            : (idx + step + optionBtns.length) % optionBtns.length;
+        optionBtns[nextIdx]?.focus();
+      }
+    });
+
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    mediaQuery.addEventListener("change", (event) => {
+      let storedMode: string | null = null;
+      try {
+        storedMode = localStorage.getItem("miraj_mode");
+      } catch {
+        storedMode = null;
+      }
+      if (!storedMode || storedMode === "system") {
+        const nextMode: ModeId = event.matches ? "dark" : "light";
+        root.setAttribute("data-mode", nextMode);
+        syncUi();
+        emitChange(getActiveTheme(), nextMode);
+      }
+    });
+
+    syncUi();
+  }
+
+  initThemeSwitcher();
 </script>

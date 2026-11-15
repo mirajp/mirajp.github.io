@@ -1,150 +1,309 @@
 @import "tailwindcss";
 
-/* Theme toggling uses a [data-theme] attribute (see ThemeInit + ThemeToggle),
-   not the OS-preference media query, so re-point Tailwind's `dark:` variant
-   at that attribute instead of its default `prefers-color-scheme` strategy. */
-@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+/* Polarity uses `html[data-mode="dark"]` (orthogonal to `html[data-theme="..."]`,
+   per DESIGN.md v2.0). Re-point Tailwind's `dark:` variant at `[data-mode="dark"]`. */
+@custom-variant dark (&:where([data-mode="dark"], [data-mode="dark"] *));
 
-/* Body copy stays Inter; display/headings switched to Bricolage Grotesque
-   (v2 redesign) for a less-templated, less-generic feel. */
-@import "@fontsource/inter/400.css";
-@import "@fontsource/inter/500.css";
-@import "@fontsource/inter/600.css";
+/* Default theme ("Crisp Forest") font triad ONLY.
+   Alternate theme fonts (`swiss-drafting`, `press-darkroom`) are split into
+   `theme-swiss-drafting.css` and `theme-press-darkroom.css` and injected on demand. */
+@import "@fontsource/plus-jakarta-sans/400.css";
+@import "@fontsource/plus-jakarta-sans/500.css";
+@import "@fontsource/plus-jakarta-sans/600.css";
 @import "@fontsource/jetbrains-mono/400.css";
 @import "@fontsource/jetbrains-mono/500.css";
 @import "@fontsource/jetbrains-mono/700.css";
 @import "@fontsource/bricolage-grotesque/600.css";
 @import "@fontsource/bricolage-grotesque/700.css";
-@import "@fontsource/bricolage-grotesque/800.css";
 
 /* ---------------------------------------------------------------------------
- * Design tokens — v2, "Editorial teal"
- * Warm paper neutrals instead of stark white/black; deep pine primary +
- * coral secondary instead of the generic blue/violet SaaS pairing. Every
- * text/background and white-on-button combination below is checked against
- * WCAG AA (4.5:1) — see the contrast note beside each block.
+ * DESIGN.md v2.0 Tokens
+ * Orthogonal theme (`data-theme`) + polarity (`data-mode`) architecture:
+ *   - Default theme: `crisp-forest` (Field Monograph)
+ *   - Alternate themes: `swiss-drafting` (Architectural Blueprint),
+ *     `press-darkroom` (Editorial Broadsheet)
+ *   - Every `primary` / `accent` surface pairs with `on-primary` / `on-accent`
+ *     so all 6 theme × mode combinations pass WCAG 2.2 AA.
  * ------------------------------------------------------------------------ */
 
-:root {
-  /* primitive neutral palette (warm, not cool gray) */
-  --gray-50: #faf9f6;
-  --gray-100: #f0eee7;
-  --gray-200: #dcd5c8;
-  --gray-300: #c2b9a8;
-  --gray-400: #9a9184;
-  --gray-500: #7a7267;
-  --gray-600: #5e6a67;
-  --gray-700: #454f4c;
-  --gray-800: #2a332f;
-  --gray-900: #1c2624;
-  --gray-950: #121817;
+:root,
+[data-theme="crisp-forest"] {
+  /* Status roles (global across themes) */
+  --status-success: #15803d;
+  --on-status-success: #ffffff;
+  --status-warning: #b45309;
+  --on-status-warning: #ffffff;
+  --status-error: #b91c1c;
+  --on-status-error: #ffffff;
+  --success: var(--status-success);
+  --warning: var(--status-warning);
+  --error: var(--status-error);
 
-  /* primitive primary (deep teal / pine) */
-  --teal-50: #e6f3f0;
-  --teal-100: #c2e3da;
-  --teal-200: #8fcab8;
-  --teal-300: #57ab93;
-  --teal-400: #2b8b73;
-  --teal-500: #0f6e5c;
-  --teal-600: #0b5645;
-  --teal-700: #094537;
-  --teal-800: #073327;
-  --teal-900: #05221a;
+  /* Spacing scale (`int-*` internal component padding, `ext-*` section cadence) */
+  --space-int-xs: 4px;
+  --space-int-sm: 8px;
+  --space-int-md: 12px;
+  --space-int-lg: 16px;
+  --space-int-xl: 24px;
+  --space-ext-sm: 32px;
+  --space-ext-md: 48px;
+  --space-ext-lg: 64px;
+  --space-ext-xl: 96px;
+  --space-ext-2xl: 128px;
+  --control-default: 44px;
+  --control-compact: 32px;
+  --content-sm: 640px;
+  --content-md: 768px;
+  --content-lg: 1024px;
+  --content-xl: 1280px;
+  --content-2xl: 1440px;
 
-  /* accent (coral) */
-  --coral-400: #e0785c;
-  --coral-500: #c14e32;
-  --coral-600: #a83e27;
-  --coral-tint-bg: #f6dcd2; /* used behind coral sticker-tag text */
-  --coral-tint-text: #8a3620;
+  /* Motion tokens (`MOTION 1` functional) */
+  --duration-control: 150ms;
+  --duration-surface-enter: 240ms;
+  --duration-surface-exit: 160ms;
+  --ease-control: ease-out;
+  --ease-surface-enter: cubic-bezier(0.2, 0, 0, 1);
+  --ease-surface-exit: cubic-bezier(0.4, 0, 1, 1);
 
-  /* semantic — light theme (default) */
-  --background: #faf9f6;
-  --surface: #f0eee7;
-  --surface-hover: #e8e4d8;
-  --foreground: #1c2624;
-  --foreground-muted: #576360;
-  --border: #dcd5c8;
-  --primary: #0f6e5c;
-  --primary-hover: #0b5645;
-  --accent: #c14e32;
-  --accent-hover: #a83e27;
-  --success: #22c55e;
-  --warning: #f59e0b;
-  --error: #ef4444;
+  /* Crisp Forest font triad */
+  --theme-font-display:
+    "Bricolage Grotesque", "Plus Jakarta Sans", ui-sans-serif, system-ui,
+    sans-serif;
+  --theme-font-sans:
+    "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --theme-font-mono:
+    "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas,
+    monospace;
+
+  /* Crisp Forest corner geometry & editorial motifs */
+  --theme-radius-sm: 6px;
+  --theme-radius-md: 10px;
+  --theme-radius-lg: 14px;
+  --theme-radius-xl: 20px;
+  --theme-radius-pill: 9999px;
+  --photo-tilt: -1.5deg;
+  --section-rule: 1px solid var(--border-subtle);
+
+  /* Crisp Forest — Light mode (default) */
+  --background: #faf9f5;
+  --surface: #f0eee6;
+  --surface-hover: #e6e2d6;
+  --surface-sunken: #e8e5da;
+  --foreground: #182220;
+  --foreground-muted: #4e5b58;
+  --border-subtle: #dcd5c7;
+  --border-control: #737067;
+  --border: var(--border-subtle);
+  --primary: #0d6b58;
+  --primary-hover: #095243;
+  --on-primary: #ffffff;
+  --primary-soft: #e3f2ee;
+  --on-primary-soft: #083d32;
+  --accent: #b34125;
+  --accent-hover: #96341c;
+  --on-accent: #ffffff;
+  --accent-soft: #f7dfd6;
+  --on-accent-soft: #7a2814;
 }
 
-[data-theme="dark"] {
-  --background: #121817;
-  --surface: #1c2624;
-  --surface-hover: #232e2b;
-  --foreground: #f3f1ea;
-  --foreground-muted: #9aa6a2;
-  --border: #2a332f;
-  --primary: #3fbf9f;
-  --primary-hover: #5ad1b3;
-  --accent: #e0785c;
-  --accent-hover: #e8917a;
+:root[data-mode="dark"],
+[data-theme="crisp-forest"][data-mode="dark"] {
+  --background: #111716;
+  --surface: #192220;
+  --surface-hover: #222e2b;
+  --surface-sunken: #0c1110;
+  --foreground: #f2f0e8;
+  --foreground-muted: #9ba8a4;
+  --border-subtle: #283431;
+  --border-control: #6d7e7a;
+  --border: var(--border-subtle);
+  --primary: #47c4a5;
+  --primary-hover: #63d2b6;
+  --on-primary: #06231c;
+  --primary-soft: #13352d;
+  --on-primary-soft: #a8ebd9;
+  --accent: #eb8468;
+  --accent-hover: #f29b83;
+  --on-accent: #290c05;
+  --accent-soft: #381b14;
+  --on-accent-soft: #fad0c4;
 }
 
-@theme {
+/* ---------------------------------------------------------------------------
+ * Theme 2: Swiss Drafting ("Architectural Blueprint")
+ * ------------------------------------------------------------------------ */
+[data-theme="swiss-drafting"] {
+  --theme-font-display:
+    "Space Grotesk", "Public Sans", ui-sans-serif, system-ui, sans-serif;
+  --theme-font-sans: "Public Sans", ui-sans-serif, system-ui, sans-serif;
+  --theme-font-mono:
+    "Azeret Mono", "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo,
+    Consolas, monospace;
+
+  --theme-radius-sm: 2px;
+  --theme-radius-md: 4px;
+  --theme-radius-lg: 4px;
+  --theme-radius-xl: 6px;
+  --theme-radius-pill: 4px;
+  --photo-tilt: 0deg;
+  --section-rule: 1px solid var(--border-control);
+
+  --background: #f5f6f8;
+  --surface: #eceef2;
+  --surface-hover: #e0e4eb;
+  --surface-sunken: #e3e6ec;
+  --foreground: #11161f;
+  --foreground-muted: #4a5362;
+  --border-subtle: #cfd5df;
+  --border-control: #687282;
+  --border: var(--border-subtle);
+  --primary: #1849a9;
+  --primary-hover: #123885;
+  --on-primary: #ffffff;
+  --primary-soft: #e0eaff;
+  --on-primary-soft: #102a63;
+  --accent: #c4321a;
+  --accent-hover: #a32712;
+  --on-accent: #ffffff;
+  --accent-soft: #fce4df;
+  --on-accent-soft: #7d1d0d;
+}
+
+[data-theme="swiss-drafting"][data-mode="dark"] {
+  --background: #0e1218;
+  --surface: #151b24;
+  --surface-hover: #1e2633;
+  --surface-sunken: #090c10;
+  --foreground: #edf0f5;
+  --foreground-muted: #96a1b3;
+  --border-subtle: #252e3d;
+  --border-control: #6b788d;
+  --border: var(--border-subtle);
+  --primary: #7eb2ff;
+  --primary-hover: #9ec5ff;
+  --on-primary: #081730;
+  --primary-soft: #13294b;
+  --on-primary-soft: #cfe2ff;
+  --accent: #ff8b73;
+  --accent-hover: #ffa38f;
+  --on-accent: #2b0903;
+  --accent-soft: #3b1610;
+  --on-accent-soft: #ffd2c9;
+}
+
+/* ---------------------------------------------------------------------------
+ * Theme 3: Press & Darkroom ("Editorial Broadsheet")
+ * ------------------------------------------------------------------------ */
+[data-theme="press-darkroom"] {
+  --theme-font-display:
+    "Newsreader", Georgia, Cambria, "Times New Roman", Times, serif;
+  --theme-font-sans:
+    "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --theme-font-mono:
+    "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas,
+    monospace;
+
+  --theme-radius-sm: 2px;
+  --theme-radius-md: 6px;
+  --theme-radius-lg: 6px;
+  --theme-radius-xl: 8px;
+  --theme-radius-pill: 9999px;
+  --photo-tilt: 0deg;
+  --section-rule: 3px double var(--foreground);
+
+  --background: #fcfbf8;
+  --surface: #f3f0ea;
+  --surface-hover: #e8e3da;
+  --surface-sunken: #ece8e0;
+  --foreground: #161514;
+  --foreground-muted: #57524e;
+  --border-subtle: #d8d2c7;
+  --border-control: #756e66;
+  --border: var(--border-subtle);
+  --primary: #8e1b2c;
+  --primary-hover: #6e1321;
+  --on-primary: #ffffff;
+  --primary-soft: #fae5e8;
+  --on-primary-soft: #590e1a;
+  --accent: #1d4e6b;
+  --accent-hover: #153a50;
+  --on-accent: #ffffff;
+  --accent-soft: #e1eef5;
+  --on-accent-soft: #103145;
+}
+
+[data-theme="press-darkroom"][data-mode="dark"] {
+  --background: #131214;
+  --surface: #1c1a1e;
+  --surface-hover: #262329;
+  --surface-sunken: #0d0c0e;
+  --foreground: #f4f1ec;
+  --foreground-muted: #a8a19b;
+  --border-subtle: #2e2a32;
+  --border-control: #7d7582;
+  --border: var(--border-subtle);
+  --primary: #f2949f;
+  --primary-hover: #f7adb6;
+  --on-primary: #29070c;
+  --primary-soft: #3d141b;
+  --on-primary-soft: #fcd6db;
+  --accent: #7cc2e8;
+  --accent-hover: #9ad1f0;
+  --on-accent: #07202e;
+  --accent-soft: #122e3f;
+  --on-accent-soft: #cbe9fa;
+}
+
+@theme inline {
   --color-background: var(--background);
   --color-surface: var(--surface);
   --color-surface-hover: var(--surface-hover);
+  --color-surface-sunken: var(--surface-sunken);
   --color-foreground: var(--foreground);
   --color-foreground-muted: var(--foreground-muted);
-  --color-border: var(--border);
+  --color-border: var(--border-subtle);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-control: var(--border-control);
   --color-primary: var(--primary);
   --color-primary-hover: var(--primary-hover);
+  --color-on-primary: var(--on-primary);
+  --color-primary-soft: var(--primary-soft);
+  --color-on-primary-soft: var(--on-primary-soft);
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
-  --color-success: var(--success);
-  --color-warning: var(--warning);
-  --color-error: var(--error);
+  --color-on-accent: var(--on-accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-on-accent-soft: var(--on-accent-soft);
+  --color-status-success: var(--status-success);
+  --color-on-status-success: var(--on-status-success);
+  --color-status-warning: var(--status-warning);
+  --color-on-status-warning: var(--on-status-warning);
+  --color-status-error: var(--status-error);
+  --color-on-status-error: var(--on-status-error);
+  --color-success: var(--status-success);
+  --color-warning: var(--status-warning);
+  --color-error: var(--status-error);
 
-  --color-gray-50: var(--gray-50);
-  --color-gray-100: var(--gray-100);
-  --color-gray-200: var(--gray-200);
-  --color-gray-300: var(--gray-300);
-  --color-gray-400: var(--gray-400);
-  --color-gray-500: var(--gray-500);
-  --color-gray-600: var(--gray-600);
-  --color-gray-700: var(--gray-700);
-  --color-gray-800: var(--gray-800);
-  --color-gray-900: var(--gray-900);
-  --color-gray-950: var(--gray-950);
+  --font-sans: var(--theme-font-sans);
+  --font-display: var(--theme-font-display);
+  --font-mono: var(--theme-font-mono);
 
-  --color-teal-50: var(--teal-50);
-  --color-teal-100: var(--teal-100);
-  --color-teal-200: var(--teal-200);
-  --color-teal-300: var(--teal-300);
-  --color-teal-400: var(--teal-400);
-  --color-teal-500: var(--teal-500);
-  --color-teal-600: var(--teal-600);
-  --color-teal-700: var(--teal-700);
-  --color-teal-800: var(--teal-800);
-  --color-teal-900: var(--teal-900);
-
-  --color-coral-400: var(--coral-400);
-  --color-coral-500: var(--coral-500);
-  --color-coral-600: var(--coral-600);
-
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Bricolage Grotesque", "Inter", ui-sans-serif, sans-serif;
-  --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
-
-  /* overriding Tailwind's default radius/shadow scale with the doc's values */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
+  --radius-none: 0px;
+  --radius-sm: var(--theme-radius-sm);
+  --radius-md: var(--theme-radius-md);
+  --radius-lg: var(--theme-radius-lg);
+  --radius-xl: var(--theme-radius-xl);
+  --radius-pill: var(--theme-radius-pill);
+  --radius-full: 9999px;
 
   --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.05);
   --shadow-md: 0 4px 12px rgb(0 0 0 / 0.08);
   --shadow-lg: 0 10px 30px rgb(0 0 0 / 0.12);
 
   --duration-fast: 150ms;
-  --duration-base: 250ms;
+  --duration-base: 240ms;
+  --duration-exit: 160ms;
   --duration-slow: 400ms;
 
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
@@ -153,12 +312,12 @@
 }
 
 /* ---------------------------------------------------------------------------
- * Base element styles
+ * Base element styles (DESIGN.md v2.0 responsive typography & WCAG 2.2 AA focus)
  * ------------------------------------------------------------------------ */
 
 @layer base {
   * {
-    border-color: var(--color-border);
+    border-color: var(--border-subtle);
   }
 
   html {
@@ -166,88 +325,116 @@
   }
 
   body {
-    background-color: var(--color-background);
-    color: var(--color-foreground);
-    font-family: var(--font-sans);
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--theme-font-sans);
+    font-size: 16px;
+    line-height: 26px;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
     position: relative;
     transition:
-      background-color var(--duration-base) var(--ease-standard),
-      color var(--duration-base) var(--ease-standard);
+      background-color var(--duration-surface-enter) var(--ease-surface-enter),
+      color var(--duration-surface-enter) var(--ease-surface-enter);
   }
 
   h1,
   h2,
   h3,
   h4 {
-    font-family: var(--font-display);
-    letter-spacing: -0.01em;
+    font-family: var(--theme-font-display);
     text-wrap: balance;
   }
 
+  /* `display-mobile` (32/36, -0.02em) -> `display` (56/60, -0.025em) */
   h1 {
-    font-size: var(--text-6xl);
-    font-weight: 800;
-    line-height: 1.05;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 36px;
+    letter-spacing: -0.02em;
   }
 
+  @media (min-width: 640px) {
+    h1 {
+      font-size: 40px;
+      line-height: 46px;
+      letter-spacing: -0.02em;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    h1 {
+      font-size: 56px;
+      line-height: 60px;
+      letter-spacing: -0.025em;
+    }
+  }
+
+  /* `headline-lg-mobile` (28/34, -0.015em) -> `headline-lg` (40/46, -0.02em) */
   h2 {
-    font-size: var(--text-5xl);
+    font-size: 28px;
     font-weight: 700;
-    line-height: 1.1;
+    line-height: 34px;
+    letter-spacing: -0.015em;
   }
 
+  @media (min-width: 640px) {
+    h2 {
+      font-size: 40px;
+      line-height: 46px;
+      letter-spacing: -0.02em;
+    }
+  }
+
+  /* `headline-md` (28/34, 600, -0.015em) */
   h3 {
-    font-size: var(--text-4xl);
-    font-weight: 700;
-    line-height: 1.2;
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 34px;
+    letter-spacing: -0.015em;
   }
 
+  /* `headline-sm` (24/30, 600, -0.01em) */
   h4 {
-    font-size: var(--text-3xl);
+    font-size: 24px;
     font-weight: 600;
-    line-height: 1.3;
+    line-height: 30px;
+    letter-spacing: -0.01em;
   }
 
   p {
-    line-height: 1.7;
+    line-height: 26px;
   }
 
   code,
   pre,
   kbd,
   samp {
-    font-family: var(--font-mono);
+    font-family: var(--theme-font-mono);
   }
 
   a {
     color: inherit;
   }
 
-  /* Accessible, visible focus ring everywhere — never suppressed */
+  /* Accessible, visible focus ring everywhere — 2px primary with 2px offset */
   :focus-visible {
-    outline: 2px solid var(--color-primary);
+    outline: 2px solid var(--primary);
     outline-offset: 2px;
-    border-radius: var(--radius-sm);
+    border-radius: var(--theme-radius-sm);
   }
 
   ::selection {
-    background-color: var(--teal-100);
-    color: var(--teal-900);
-  }
-
-  [data-theme="dark"] ::selection {
-    background-color: var(--teal-700);
-    color: var(--gray-50);
+    background-color: var(--primary-soft);
+    color: var(--on-primary-soft);
   }
 
   .mobile-menu-item {
     opacity: 0;
     transform: translateY(-4px);
     transition:
-      opacity var(--duration-fast) var(--ease-decelerate),
-      transform var(--duration-fast) var(--ease-decelerate);
+      opacity var(--duration-control) var(--ease-control),
+      transform var(--duration-control) var(--ease-control);
     transition-delay: calc(var(--menu-index) * 20ms);
   }
 
@@ -271,58 +458,176 @@
   }
 }
 
+/* ---------------------------------------------------------------------------
+ * Component & editorial motif utilities
+ * ------------------------------------------------------------------------ */
+
 @layer utilities {
-  /* 72ch reading width for long-form content, per the design system */
+  /* 72ch reading width for long-form content */
   .measure {
     max-width: 72ch;
   }
 
+  .section-rule-b {
+    border-bottom: var(--section-rule);
+  }
+
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* `components.skip-link`: never hardcode white; always pair primary + on-primary */
   .skip-link {
     position: absolute;
     left: 1rem;
-    top: -3rem;
-    z-index: 100;
-    background: var(--color-primary);
-    color: white;
-    padding: 0.75rem 1.25rem;
-    border-radius: var(--radius-md);
-    transition: top var(--duration-fast) var(--ease-standard);
+    top: -3.5rem;
+    z-index: 200;
+    background: var(--primary);
+    color: var(--on-primary);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 20px;
+    padding: var(--space-int-md) var(--space-int-lg);
+    border-radius: var(--theme-radius-md);
+    transition: top var(--duration-control) var(--ease-control);
   }
 
   .skip-link:focus {
     top: 1rem;
   }
 
-  /* A hand-drawn-feel accent for one or two key words per page — not a
-     plain straight <u>. Apply to an inline <span>. Deliberately wobbly
-     path, not a repeating pattern, so it reads as drawn rather than
-     generated. */
+  /* Theme-adaptive hero emphasis (`motif.heroAccent`):
+     1. Crisp Forest (`squiggle`): hand-drawn wobbly underline masked with `var(--accent)`.
+     2. Swiss Drafting (`index-bracket`): architectural `[word]` drafting callout.
+     3. Press & Darkroom (`italic-stress`): optical-size Newsreader italic stress. */
   .squiggle {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 12' preserveAspectRatio='none'%3E%3Cpath d='M1 8.5C10 3 18 3 27 7.5C36 12 44 4 53 4.5C62 5 68 10 78 8C88 6 94 2 103 5C110 7.5 114 8 119 6' stroke='%23C14E32' stroke-width='2.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: 0 100%;
-    background-size: 100% 0.4em;
-    padding-bottom: 0.12em;
+    position: relative;
+    display: inline-block;
+    padding-bottom: 0.1em;
   }
 
-  /* Sticker/photo tilt helpers — alternate for a hand-placed, not-quite-grid
-     feel. Applied selectively, never to a whole grid at once. */
+  .squiggle::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -0.02em;
+    height: 0.38em;
+    pointer-events: none;
+    background-color: var(--accent);
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 12' preserveAspectRatio='none'%3E%3Cpath d='M1 8.5C10 3 18 3 27 7.5C36 12 44 4 53 4.5C62 5 68 10 78 8C88 6 94 2 103 5C110 7.5 114 8 119 6' stroke='black' stroke-width='2.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 12' preserveAspectRatio='none'%3E%3Cpath d='M1 8.5C10 3 18 3 27 7.5C36 12 44 4 53 4.5C62 5 68 10 78 8C88 6 94 2 103 5C110 7.5 114 8 119 6' stroke='black' stroke-width='2.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+  }
+
+  [data-theme="swiss-drafting"] .squiggle {
+    padding-bottom: 0;
+    color: var(--foreground);
+    border-bottom: 1px dashed var(--border-control);
+  }
+
+  [data-theme="swiss-drafting"] .squiggle::before {
+    content: "[";
+    margin-right: 0.06em;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  [data-theme="swiss-drafting"] .squiggle::after {
+    content: "]";
+    position: static;
+    display: inline;
+    height: auto;
+    margin-left: 0.06em;
+    background: none;
+    -webkit-mask-image: none;
+    mask-image: none;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  [data-theme="press-darkroom"] .squiggle {
+    padding-bottom: 0;
+    font-style: italic;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  [data-theme="press-darkroom"] .squiggle::after {
+    display: none;
+  }
+
+  /* Photo frame rotation bound to `var(--photo-tilt)` (`-1.5deg` in Crisp Forest,
+     `0deg` contact sheets in Swiss Drafting & archival mounts in Press & Darkroom). */
+  .photo-tilt,
   .tilt-left {
-    transform: rotate(-2deg);
+    transform: rotate(var(--photo-tilt));
+    transition: transform var(--duration-control) var(--ease-control);
   }
 
   .tilt-right {
-    transform: rotate(1.5deg);
+    transform: rotate(calc(var(--photo-tilt) * -1));
+    transition: transform var(--duration-control) var(--ease-control);
   }
 
+  .photo-tilt:hover,
   .tilt-left:hover,
   .tilt-right:hover {
     transform: rotate(0deg);
   }
 
-  /* Shared prose styling for rendered Markdown/MDX — used by blog articles
-     and the Markdown scratchpad tool, so both stay visually consistent and
-     only need to be tuned in one place. */
+  /* Semantic DESIGN.md v2.0 component recipes (`tag`, `tag-accent`, `callout-*`) */
+  .tag-chip {
+    display: inline-flex;
+    align-items: center;
+    background-color: var(--surface);
+    color: var(--foreground);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--theme-radius-pill);
+    padding: var(--space-int-xs) var(--space-int-sm);
+    font-family: var(--theme-font-sans);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 16px;
+    letter-spacing: 0.02em;
+  }
+
+  .tag-accent {
+    display: inline-flex;
+    align-items: center;
+    background-color: var(--accent-soft);
+    color: var(--on-accent-soft);
+    border-radius: var(--theme-radius-pill);
+    padding: var(--space-int-xs) var(--space-int-sm);
+    font-family: var(--theme-font-sans);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 16px;
+    letter-spacing: 0.02em;
+  }
+
+  .callout-primary {
+    background-color: var(--primary-soft);
+    color: var(--on-primary-soft);
+    border-radius: var(--theme-radius-md);
+    padding: var(--space-int-xl);
+    font-size: 16px;
+    line-height: 26px;
+  }
+
+  .callout-accent {
+    background-color: var(--accent-soft);
+    color: var(--on-accent-soft);
+    border-radius: var(--theme-radius-md);
+    padding: var(--space-int-xl);
+    font-size: 16px;
+    line-height: 26px;
+  }
+
+  /* Shared prose styling for rendered Markdown/MDX */
   .markdown-body h2 {
     margin-top: 2.5rem;
     margin-bottom: 1rem;
@@ -335,9 +640,9 @@
 
   .markdown-body p {
     margin-bottom: 1.25rem;
-    font-size: 17px;
-    line-height: 1.75;
-    color: var(--color-foreground);
+    font-size: 18px;
+    line-height: 30px;
+    color: var(--foreground);
   }
 
   .markdown-body ul {
@@ -354,12 +659,12 @@
 
   .markdown-body li {
     margin-bottom: 0.5rem;
-    font-size: 17px;
-    line-height: 1.75;
+    font-size: 18px;
+    line-height: 30px;
   }
 
   .markdown-body a {
-    color: var(--color-primary);
+    color: var(--primary);
     text-decoration: underline;
     text-underline-offset: 2px;
   }
@@ -369,24 +674,18 @@
   }
 
   .markdown-body code {
-    border-radius: 0.25rem;
-    background-color: var(--color-surface);
+    border-radius: var(--theme-radius-sm);
+    background-color: var(--surface);
     padding: 0.125rem 0.375rem;
-    font-size: 0.9em;
+    font-size: 14px;
+    line-height: 22px;
   }
 
   .markdown-body blockquote {
-    border-left: 2px solid var(--color-primary);
+    border-left: 2px solid var(--primary);
     padding-left: 1rem;
-    color: var(--color-foreground-muted);
+    color: var(--foreground-muted);
   }
-
-  /* -------------------------------------------------------------------------
-   * Markdown PDF export
-   *
-   * These rules are scoped to .pdf-export so PDF-specific behavior doesn't
-   * alter the normal Markdown preview or blog article styling.
-   * ---------------------------------------------------------------------- */
 
   .pdf-export p,
   .pdf-export blockquote,
@@ -418,27 +717,7 @@
 }
 
 /* ---------------------------------------------------------------------------
- * Paper grain — a very low-opacity noise texture over the whole page, the
- * one thing that most separates "warm paper" from "flat corporate white."
- * A fixed, pointer-events:none overlay so it never affects layout or
- * scrolls independently. overlay blend + mid-gray-centered noise keeps it
- * looking right in both themes without a separate dark-mode image.
- * ------------------------------------------------------------------------ */
-/* body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  pointer-events: none;
-  background-image: url("/grain.png");
-  background-repeat: repeat;
-  background-size: 128px 128px;
-  opacity: 0.05;
-  mix-blend-mode: overlay;
-} */
-
-/* ---------------------------------------------------------------------------
- * Shiki dual-theme code blocks (paired with defaultColor:false in astro.config)
+ * Shiki dual-theme code blocks (keyed to `data-mode="dark"`)
  * ------------------------------------------------------------------------ */
 
 .astro-code,
@@ -449,8 +728,8 @@
   font-weight: var(--shiki-light-font-weight);
 }
 
-[data-theme="dark"] .astro-code,
-[data-theme="dark"] .astro-code span {
+[data-mode="dark"] .astro-code,
+[data-mode="dark"] .astro-code span {
   color: var(--shiki-dark);
   background-color: var(--shiki-dark-bg) !important;
   font-style: var(--shiki-dark-font-style);
@@ -459,19 +738,16 @@
 
 .astro-code {
   padding: 1rem 1.25rem;
-  border-radius: var(--radius-md);
+  border-radius: var(--theme-radius-md);
   overflow-x: auto;
-  font-size: var(--text-sm);
-  line-height: 1.6;
-  border: 1px solid var(--color-border);
+  font-size: 14px;
+  line-height: 22px;
+  border: 1px solid var(--border-subtle);
 }
 
 /* ---------------------------------------------------------------------------
- * Print / PDF export
- *
- * Native browser printing is used instead of html2canvas/html2pdf so the
- * exported PDF contains real text and uses the browser's document layout
- * engine for pagination.
+ * Print & PDF reset (`#FFFFFF` paper, `#000000` ink, hidden chrome, unclipped code)
+ * Supports both `/resume/` (normal document flow) and `/tools/scratchpad/`.
  * ------------------------------------------------------------------------ */
 
 @page {
@@ -480,63 +756,47 @@
 }
 
 @media print {
-  /*
-   * IMPORTANT:
-   *
-   * The browser itself can add:
-   *   - date/time
-   *   - document title
-   *   - URL
-   *   - page numbers
-   *
-   * Those are controlled by the browser's "Headers and footers" print
-   * setting, NOT by CSS. Turn "Headers and footers" OFF in the print dialog.
-   */
-
-  /*
-   * Start with a completely blank white document.
-   *
-   * This is intentionally applied to html, body, and the application's
-   * layout containers so no dark/light theme background can leak through.
-   */
   html,
   body {
     background: #ffffff !important;
     background-color: #ffffff !important;
-    color: #1c2624 !important;
+    color: #000000 !important;
     margin: 0 !important;
     padding: 0 !important;
     min-height: 0 !important;
   }
 
-  /*
-   * Hide everything in the application first. The PDF export subtree below
-   * explicitly opts back into visibility.
-   *
-   * Using visibility rather than display:none is important because it lets
-   * the exported Markdown retain its normal document layout.
-   */
-  body * {
-    visibility: hidden !important;
-  }
-
-  /*
-   * Completely remove application chrome from the print layout.
-   */
   header,
   footer,
   nav,
   .skip-link,
   #cmdk-trigger,
+  #cmdk-dialog,
+  #theme-switcher,
   #theme-toggle,
+  [data-easter-egg],
+  .sandbox-toolbar,
   .scratchpad-toolbar,
   .scratchpad-editor {
     display: none !important;
   }
 
-  /*
-   * Make the scratchpad itself the only visible printed document.
-   */
+  pre,
+  .astro-code {
+    max-width: 100% !important;
+    overflow: visible !important;
+    white-space: pre-wrap !important;
+    overflow-wrap: break-word !important;
+    word-break: break-word !important;
+    background: #f5f5f5 !important;
+    color: #000000 !important;
+    border: 1px solid #d4d4d4 !important;
+  }
+
+  body:has(.scratchpad-shell) * {
+    visibility: hidden !important;
+  }
+
   .scratchpad-shell,
   .scratchpad-shell * {
     visibility: visible !important;
@@ -545,89 +805,37 @@
   .scratchpad-shell {
     position: absolute !important;
     inset: 0 !important;
-
     display: block !important;
-
     width: 100% !important;
     max-width: none !important;
     min-height: 0 !important;
-
     margin: 0 !important;
     padding: 0 !important;
-
     border: 0 !important;
     border-radius: 0 !important;
-
     background: #ffffff !important;
     background-color: #ffffff !important;
-
     box-shadow: none !important;
   }
 
-  /*
-   * The two-column editor/preview layout becomes a normal block document.
-   */
-  .scratchpad-content {
+  .scratchpad-content,
+  .scratchpad-preview,
+  .pdf-export {
     display: block !important;
-
-    width: 100% !important;
-    min-height: 0 !important;
-
-    margin: 0 !important;
-    padding: 0 !important;
-
-    border: 0 !important;
-
-    background: #ffffff !important;
-    background-color: #ffffff !important;
-  }
-
-  /*
-   * The preview pane must not retain its interactive scroll container.
-   * @page provides the actual physical page margins.
-   */
-  .scratchpad-preview {
-    display: block !important;
-
     width: 100% !important;
     max-width: none !important;
-
     min-height: 0 !important;
     height: auto !important;
     max-height: none !important;
-
     margin: 0 !important;
     padding: 0 !important;
-
     overflow: visible !important;
-
     border: 0 !important;
-
     background: #ffffff !important;
     background-color: #ffffff !important;
+    color: #000000 !important;
   }
 
-  /*
-   * The actual Markdown document.
-   */
-  .pdf-export {
-    display: block !important;
-
-    width: 100% !important;
-    max-width: none !important;
-
-    margin: 0 !important;
-    padding: 0 !important;
-
-    background: #ffffff !important;
-    background-color: #ffffff !important;
-
-    color: #1c2624 !important;
-  }
-
-  /*
-   * Force Markdown content onto the white paper background.
-   */
   .pdf-export h1,
   .pdf-export h2,
   .pdf-export h3,
@@ -640,92 +848,24 @@
   .pdf-export table {
     background: transparent !important;
     background-color: transparent !important;
-    color: #1c2624 !important;
+    color: #000000 !important;
   }
 
-  /*
-   * Links remain readable and identifiable on paper.
-   */
   .pdf-export a {
-    color: #0b5645 !important;
+    color: #000000 !important;
     text-decoration: underline !important;
   }
 
-  /*
-   * Inline code gets a subtle paper-gray background instead of inheriting
-   * the site's interactive surface color.
-   */
   .pdf-export code {
-    background: #f0eee7 !important;
-    color: #1c2624 !important;
+    background: #f5f5f5 !important;
+    color: #000000 !important;
   }
 
-  /*
-   * Code blocks should remain readable and fit within the printable area.
-   */
-  .pdf-export pre {
-    max-width: 100% !important;
-
-    overflow: visible !important;
-
-    white-space: pre-wrap !important;
-    overflow-wrap: break-word !important;
-    word-break: break-word !important;
-
-    background: #f0eee7 !important;
-    color: #1c2624 !important;
-  }
-
-  /*
-   * Keep content blocks together whenever the browser can honor it.
-   *
-   * This specifically prevents the "half a paragraph at the bottom of one
-   * page, other half at the top of the next page" problem.
-   */
-  .pdf-export p,
-  .pdf-export blockquote,
-  .pdf-export pre,
-  .pdf-export table,
-  .pdf-export img,
-  .pdf-export li {
-    break-inside: avoid !important;
-    page-break-inside: avoid !important;
-  }
-
-  /*
-   * Don't leave headings stranded at the bottom of a page.
-   */
-  .pdf-export h1,
-  .pdf-export h2,
-  .pdf-export h3,
-  .pdf-export h4,
-  .pdf-export h5,
-  .pdf-export h6 {
-    break-after: avoid !important;
-    page-break-after: avoid !important;
-  }
-
-  /*
-   * Keep images inside the printable page.
-   */
-  .pdf-export img {
-    display: block;
-    max-width: 100% !important;
-    height: auto !important;
-  }
-
-  /*
-   * Remove interactive focus styling from the PDF.
-   */
   .pdf-export :focus,
   .pdf-export :focus-visible {
     outline: none !important;
   }
 
-  /*
-   * Remove any selection highlighting that might accidentally be active
-   * when the user clicks Export PDF.
-   */
   ::selection {
     background: transparent !important;
     color: inherit !important;
@@ -748,7 +888,7 @@
 .nyc-ink-path {
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
-  animation: nyc-ink-draw 1.15s var(--ease-standard) forwards;
+  animation: nyc-ink-draw 1.15s var(--ease-surface-enter) forwards;
   animation-delay: var(--draw-delay, 0ms);
 }
 

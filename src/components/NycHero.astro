@@ -17,25 +17,45 @@ interface Props {
   season?: SeasonTheme;
 }
 
-const { eyebrow, subhead, primaryCta, secondaryCta, season = "auto" } = Astro.props;
+const {
+  eyebrow,
+  subhead,
+  primaryCta,
+  secondaryCta,
+  season = "auto",
+} = Astro.props;
 ---
 
-<section class="relative border-b border-border overflow-hidden bg-background">
+<section
+  class="section-rule-b relative flex min-h-[480px] items-center overflow-hidden bg-background sm:min-h-[540px] lg:min-h-[max(620px,42.5vw)]"
+>
   <!-- React Island: Seasonal Animated SVG Line Drawings -->
   <div id="nyc-hero-bg-layer" class="pointer-events-none absolute inset-0">
     <NycBackground client:only="react" season={season} />
   </div>
 
-  <!-- Content Layer (pointer-events-none on layout wrapper so skyline easter eggs remain clickable) -->
-  <div class="pointer-events-none relative z-10 mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
-    <p class="pointer-events-auto w-fit font-mono text-sm font-medium text-primary">{eyebrow}</p>
-    <h1 class="pointer-events-auto mt-4 w-fit max-w-3xl !text-5xl sm:!text-6xl lg:!text-7xl">
+  <!-- Editorial Mode Hero Content (`42.5vw` floor exceeds `skyline.png`'s `39.6vw` aspect so spires never clip) -->
+  <div
+    class="pointer-events-none relative z-10 mx-auto w-full max-w-6xl px-4 pt-14 pb-24 sm:px-6 sm:pt-20 sm:pb-28 lg:px-8 lg:pt-24 lg:pb-36"
+  >
+    <p
+      class="pointer-events-auto w-fit font-mono text-xs font-medium leading-[18px] text-primary sm:text-sm sm:leading-[22px]"
+    >
+      {eyebrow}
+    </p>
+    <h1
+      class="pointer-events-auto mt-4 w-fit max-w-3xl text-[32px] leading-[36px] font-bold tracking-[-0.02em] sm:text-[40px] sm:leading-[46px] lg:text-[56px] lg:leading-[60px] lg:tracking-[-0.025em]"
+    >
       <slot />
     </h1>
-    <p class="measure pointer-events-auto mt-6 w-fit text-lg leading-relaxed text-foreground-muted sm:text-xl">
+    <p
+      class="measure pointer-events-auto mt-6 w-fit text-base leading-[26px] text-foreground-muted sm:text-lg sm:leading-[30px]"
+    >
       {subhead}
     </p>
-    <div class="pointer-events-auto relative z-30 mt-10 flex w-fit flex-wrap gap-4">
+    <div
+      class="pointer-events-auto relative z-30 mt-8 flex w-fit flex-wrap gap-3 sm:mt-10 sm:gap-4"
+    >
       <Button
         href={(!primaryCta.disabled && primaryCta.href) || ""}
         size="lg"

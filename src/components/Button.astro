@@ -1,8 +1,8 @@
 ---
 interface Props {
   href?: string;
-  variant?: "primary" | "secondary" | "ghost" | "text";
-  size?: "md" | "lg";
+  variant?: "primary" | "secondary" | "accent" | "compact" | "ghost" | "text";
+  size?: "sm" | "md" | "lg";
   type?: "button" | "submit";
   class?: string;
   disabled?: boolean;
@@ -11,39 +11,49 @@ interface Props {
 const {
   href,
   variant = "primary",
-  size = "md",
+  size = variant === "compact" ? "sm" : "md",
   type = "button",
   class: className = "",
   disabled,
 } = Astro.props;
 
 const base =
-  "inline-flex items-center justify-center gap-2 rounded-md font-medium transition-colors duration-150 ease-[var(--ease-standard)] focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:pointer-events-none";
+  "inline-flex items-center justify-center gap-2 transition-colors duration-150 ease-out focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:pointer-events-none";
 
+// Editorial mode uses 44px (`min-h-11`, `label-md` 14/20 600);
+// Studio workspace mode (`/tools/*`) uses 32px (`h-8`, `label-sm` 12/16 600 0.02em).
 const sizes: Record<string, string> = {
-  md: "min-h-11 px-5 text-sm",
-  lg: "min-h-12 px-6 text-base",
+  sm: "h-8 rounded-sm px-2 text-xs font-semibold leading-4 tracking-[0.02em]",
+  md: "min-h-11 rounded-md px-4 text-sm font-semibold leading-5",
+  lg: "min-h-11 rounded-md px-5 text-sm font-semibold leading-5",
 };
 
+// Semantic `on-primary` / `on-accent` pairings guarantee >= 5.68:1 WCAG 2.2 AA
+// contrast across all 6 theme × mode combinations (never hardcode `text-white`).
 const variants: Record<string, string> = {
-  primary: "bg-primary text-white hover:bg-primary-hover",
+  primary: "bg-primary text-on-primary hover:bg-primary-hover",
   secondary:
-    "bg-surface text-foreground border border-border hover:bg-surface-hover",
-  ghost: "text-foreground hover:bg-surface-hover",
-  text: "text-primary hover:text-primary-hover underline-offset-4 hover:underline",
+    "bg-surface text-foreground border border-border-control hover:bg-surface-hover",
+  accent: "bg-accent text-on-accent hover:bg-accent-hover",
+  compact:
+    "bg-surface text-foreground border border-border-control hover:bg-surface-hover",
+  ghost: "rounded-md text-foreground hover:bg-surface-hover",
+  text: "text-sm font-semibold leading-5 text-primary hover:text-primary-hover underline-offset-4 hover:underline",
 };
 
-// "text" is an inline, low-emphasis link style — it deliberately skips the
-// fixed min-height/padding sizing so it never has to fight `sizes` for the
-// same CSS properties (two same-specificity utilities targeting the same
-// property means source order in Tailwind's generated sheet decides the
-// winner, not class-attribute order, so it's safer to just not combine them).
 const sizeClasses = variant === "text" ? "" : sizes[size];
 
-const classes = [base, sizeClasses, variants[variant], className].join(" ");
+const classes = [base, sizeClasses, variants[variant], className]
+  .filter(Boolean)
+  .join(" ");
 const Tag = href ? "a" : "button";
 ---
 
-<Tag href={href} type={href ? undefined : type} class={classes} disabled={disabled ? disabled : undefined}>
+<Tag
+  href={href}
+  type={href ? undefined : type}
+  class={classes}
+  disabled={disabled ? disabled : undefined}
+>
   <slot />
 </Tag>

@@ -1,7 +1,13 @@
 ---
+import bricolage700Woff2 from "@fontsource/bricolage-grotesque/files/bricolage-grotesque-latin-700-normal.woff2?url";
+import jetbrainsMono400Woff2 from "@fontsource/jetbrains-mono/files/jetbrains-mono-latin-400-normal.woff2?url";
+import plusJakartaSans400Woff2 from "@fontsource/plus-jakarta-sans/files/plus-jakarta-sans-latin-400-normal.woff2?url";
+
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
+import ThemeInit from "../components/ThemeInit.astro";
 import { site } from "../data/site";
+
 import "../styles/global.css";
 
 interface Props {
@@ -52,16 +58,7 @@ const articleSchema =
 <!doctype html>
 <html lang="en">
   <head>
-    <script is:inline>
-      (function () {
-        try {
-          var stored = localStorage.getItem("theme");
-          var theme =
-            stored || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-          document.documentElement.setAttribute("data-theme", theme);
-        } catch (e) {}
-      })();
-    </script>
+    <ThemeInit />
 
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -76,6 +73,29 @@ const articleSchema =
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalURL} />
     {noIndex && <meta name="robots" content="noindex,nofollow" />}
+
+    <!-- Preload ONLY Crisp Forest default theme fonts in <head> (DESIGN.md v2.0) -->
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href={bricolage700Woff2}
+      crossorigin
+    />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href={plusJakartaSans400Woff2}
+      crossorigin
+    />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href={jetbrainsMono400Woff2}
+      crossorigin
+    />
 
     <meta property="og:type" content={ogType} />
     <meta property="og:title" content={pageTitle} />

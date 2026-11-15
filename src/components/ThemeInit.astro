@@ -1,0 +1,58 @@
+---
+// Blocking `<head>` theme and mode initializer (zero FOUC, zero hydration).
+// Sets orthogonal `data-theme` (`miraj_theme`) and `data-mode` (`miraj_mode`)
+// before CSS or islands render, and migrates legacy v1.0 `localStorage["theme"]`.
+---
+
+<script is:inline>
+  (function () {
+    var root = document.documentElement;
+    try {
+      var validThemes = {
+        "crisp-forest": true,
+        "swiss-drafting": true,
+        "press-darkroom": true,
+      };
+      var savedTheme = localStorage.getItem("miraj_theme");
+      var theme =
+        savedTheme && validThemes[savedTheme] ? savedTheme : "crisp-forest";
+
+      var savedMode = localStorage.getItem("miraj_mode");
+      var legacyMode = localStorage.getItem("theme");
+      var mode;
+      if (savedMode === "dark" || savedMode === "light") {
+        mode = savedMode;
+      } else if (
+        savedMode !== "system" &&
+        (legacyMode === "dark" || legacyMode === "light")
+      ) {
+        mode = legacyMode;
+        localStorage.setItem("miraj_mode", mode);
+        localStorage.removeItem("theme");
+      } else {
+        mode = window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light";
+      }
+
+      root.setAttribute("data-theme", theme);
+      root.setAttribute("data-mode", mode);
+      root.style.colorScheme = mode;
+
+      if (theme === "swiss-drafting" || theme === "press-darkroom") {
+        var selector = 'link[data-theme-fonts="' + theme + '"]';
+        if (!document.head.querySelector(selector)) {
+          var fontLink = document.createElement("link");
+          fontLink.rel = "stylesheet";
+          fontLink.href = "/themes/" + theme + ".css";
+          fontLink.setAttribute("data-theme-fonts", theme);
+          document.head.appendChild(fontLink);
+        }
+      }
+    } catch (e) {
+      root.setAttribute("data-theme", "crisp-forest");
+      root.setAttribute("data-mode", "light");
+      root.style.colorScheme = "light";
+    }
+  })();
+</script>

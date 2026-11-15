@@ -1,874 +1,523 @@
 ---
-version: 1.0
-name: Crisp Forest
-description: A warm editorial design system for a fast, accessible, technical portfolio and blog.
+version: "2.0"
+name: "Crisp Forest"
+themeId: "crisp-forest"
+defaultTheme: "crisp-forest"
+defaultMode: "system"
+description: "Warm editorial design system for miraj.dev with Crisp Forest as the default theme and Swiss Drafting and Press & Darkroom as user-selectable themes."
 colors:
-  background: "#faf9f6"
-  surface: "#f0eee7"
-  surface-hover: "#e8e4d8"
-  foreground: "#1c2624"
-  foreground-muted: "#576360"
-  border: "#dcd5c8"
-  primary: "#0f6e5c"
-  primary-hover: "#0b5645"
-  primary-soft: "#e6f3f0"
-  primary-dark: "#000000"
-  accent: "#c14e32"
-  accent-hover: "#a83e27"
-  accent-soft: "#f6dcd2"
-  accent-soft-text: "#8a3620"
-  success: "#22c55e"
-  warning: "#f59e0b"
-  error: "#ef4444"
-  white: "#ffffff"
+  status-success: "#15803D"
+  on-status-success: "#FFFFFF"
+  status-warning: "#B45309"
+  on-status-warning: "#FFFFFF"
+  status-error: "#B91C1C"
+  on-status-error: "#FFFFFF"
+  light:
+    background: "#FAF9F5"
+    surface: "#F0EEE6"
+    surface-hover: "#E6E2D6"
+    surface-sunken: "#E8E5DA"
+    foreground: "#182220"
+    foreground-muted: "#4E5B58"
+    border-subtle: "#DCD5C7"
+    border-control: "#737067"
+    primary: "#0D6B58"
+    primary-hover: "#095243"
+    on-primary: "#FFFFFF"
+    primary-soft: "#E3F2EE"
+    on-primary-soft: "#083D32"
+    accent: "#B34125"
+    accent-hover: "#96341C"
+    on-accent: "#FFFFFF"
+    accent-soft: "#F7DFD6"
+    on-accent-soft: "#7A2814"
+  dark:
+    background: "#111716"
+    surface: "#192220"
+    surface-hover: "#222E2B"
+    surface-sunken: "#0C1110"
+    foreground: "#F2F0E8"
+    foreground-muted: "#9BA8A4"
+    border-subtle: "#283431"
+    border-control: "#6D7E7A"
+    primary: "#47C4A5"
+    primary-hover: "#63D2B6"
+    on-primary: "#06231C"
+    primary-soft: "#13352D"
+    on-primary-soft: "#A8EBD9"
+    accent: "#EB8468"
+    accent-hover: "#F29B83"
+    on-accent: "#290C05"
+    accent-soft: "#381B14"
+    on-accent-soft: "#FAD0C4"
 typography:
   display:
-    fontFamily: '"Bricolage Grotesque", "Inter", ui-sans-serif, sans-serif'
-    fontSize: 60px
-    fontWeight: 800
-    lineHeight: 1.05
-    letterSpacing: -0.01em
+    fontFamily: "Bricolage Grotesque"
+    fontSize: 56px
+    fontWeight: 700
+    lineHeight: 60px
+    letterSpacing: -0.025em
+  display-mobile:
+    fontFamily: "Bricolage Grotesque"
+    fontSize: 32px
+    fontWeight: 700
+    lineHeight: 36px
+    letterSpacing: -0.02em
   headline-lg:
-    fontFamily: '"Bricolage Grotesque", "Inter", ui-sans-serif, sans-serif'
-    fontSize: 48px
+    fontFamily: "Bricolage Grotesque"
+    fontSize: 40px
     fontWeight: 700
-    lineHeight: 1.1
-    letterSpacing: -0.01em
+    lineHeight: 46px
+    letterSpacing: -0.02em
+  headline-lg-mobile:
+    fontFamily: "Bricolage Grotesque"
+    fontSize: 28px
+    fontWeight: 700
+    lineHeight: 34px
+    letterSpacing: -0.015em
   headline-md:
-    fontFamily: '"Bricolage Grotesque", "Inter", ui-sans-serif, sans-serif'
-    fontSize: 36px
-    fontWeight: 700
-    lineHeight: 1.2
-    letterSpacing: -0.01em
-  headline-sm:
-    fontFamily: '"Bricolage Grotesque", "Inter", ui-sans-serif, sans-serif'
-    fontSize: 30px
+    fontFamily: "Bricolage Grotesque"
+    fontSize: 28px
     fontWeight: 600
-    lineHeight: 1.3
+    lineHeight: 34px
+    letterSpacing: -0.015em
+  headline-sm:
+    fontFamily: "Bricolage Grotesque"
+    fontSize: 24px
+    fontWeight: 600
+    lineHeight: 30px
     letterSpacing: -0.01em
+  title-md:
+    fontFamily: "Plus Jakarta Sans"
+    fontSize: 18px
+    fontWeight: 600
+    lineHeight: 24px
   body-lg:
-    fontFamily: '"Inter", ui-sans-serif, system-ui, sans-serif'
+    fontFamily: "Plus Jakarta Sans"
     fontSize: 18px
     fontWeight: 400
-    lineHeight: 1.7
+    lineHeight: 30px
   body-md:
-    fontFamily: '"Inter", ui-sans-serif, system-ui, sans-serif'
+    fontFamily: "Plus Jakarta Sans"
     fontSize: 16px
     fontWeight: 400
-    lineHeight: 1.7
+    lineHeight: 26px
   body-sm:
-    fontFamily: '"Inter", ui-sans-serif, system-ui, sans-serif'
+    fontFamily: "Plus Jakarta Sans"
     fontSize: 14px
     fontWeight: 400
-    lineHeight: 1.5
+    lineHeight: 22px
   label-md:
-    fontFamily: '"Inter", ui-sans-serif, system-ui, sans-serif'
+    fontFamily: "Plus Jakarta Sans"
     fontSize: 14px
     fontWeight: 600
-    lineHeight: 1.4
+    lineHeight: 20px
   label-sm:
-    fontFamily: '"Inter", ui-sans-serif, system-ui, sans-serif'
+    fontFamily: "Plus Jakarta Sans"
     fontSize: 12px
     fontWeight: 600
-    lineHeight: 1.4
+    lineHeight: 16px
+    letterSpacing: 0.02em
   code:
-    fontFamily: '"JetBrains Mono", "SFMono-Regular", Consolas, monospace'
+    fontFamily: "JetBrains Mono"
     fontSize: 14px
     fontWeight: 400
-    lineHeight: 1.6
+    lineHeight: 22px
   code-sm:
-    fontFamily: '"JetBrains Mono", "SFMono-Regular", Consolas, monospace'
+    fontFamily: "JetBrains Mono"
     fontSize: 12px
     fontWeight: 500
-    lineHeight: 1.5
+    lineHeight: 18px
 rounded:
   none: 0px
   sm: 6px
   md: 10px
-  lg: 16px
-  xl: 24px
+  lg: 14px
+  xl: 20px
   full: 9999px
 spacing:
-  xs: 4px
-  sm: 8px
-  md-sm: 12px
-  md: 16px
-  lg-sm: 20px
-  lg: 24px
-  xl-sm: 32px
-  xl: 40px
-  2xl: 48px
-  3xl: 64px
-  4xl: 80px
-  5xl: 96px
-  6xl: 128px
+  int-xs: 4px
+  int-sm: 8px
+  int-md: 12px
+  int-lg: 16px
+  int-xl: 24px
+  ext-sm: 32px
+  ext-md: 48px
+  ext-lg: 64px
+  ext-xl: 96px
+  ext-2xl: 128px
+  control-default: 44px
+  control-compact: 32px
   content-sm: 640px
   content-md: 768px
   content-lg: 1024px
   content-xl: 1280px
   content-2xl: 1440px
+motion:
+  control-hover:
+    duration: 150ms
+    delay: 0ms
+    timingFunction: ease-out
+  surface-enter:
+    duration: 240ms
+    delay: 0ms
+    timingFunction: cubic-bezier(0.2, 0, 0, 1)
+  surface-exit:
+    duration: 160ms
+    delay: 0ms
+    timingFunction: cubic-bezier(0.4, 0, 1, 1)
 components:
   button-primary:
-    backgroundColor: "{colors.primary}"
-    textColor: "{colors.white}"
+    backgroundColor: "{colors.light.primary}"
+    textColor: "{colors.light.on-primary}"
     typography: "{typography.label-md}"
     rounded: "{rounded.md}"
-    padding: "{spacing.md-sm}"
-    height: 44px
+    padding: "{spacing.int-md}"
+    height: "{spacing.control-default}"
   button-primary-hover:
-    backgroundColor: "{colors.primary-hover}"
-    textColor: "{colors.white}"
+    backgroundColor: "{colors.light.primary-hover}"
+    textColor: "{colors.light.on-primary}"
     typography: "{typography.label-md}"
     rounded: "{rounded.md}"
-  button-primary-disabled:
-    backgroundColor: "{colors.surface-hover}"
-    textColor: "{colors.foreground-muted}"
-    typography: "{typography.label-md}"
-    rounded: "{rounded.md}"
-    height: 44px
   button-secondary:
-    backgroundColor: "{colors.surface}"
-    textColor: "{colors.foreground}"
+    backgroundColor: "{colors.light.surface}"
+    textColor: "{colors.light.foreground}"
+    borderColor: "{colors.light.border-control}"
     typography: "{typography.label-md}"
     rounded: "{rounded.md}"
-    padding: "{spacing.md-sm}"
-    height: 44px
-  button-secondary-hover:
-    backgroundColor: "{colors.surface-hover}"
-    textColor: "{colors.foreground}"
-    typography: "{typography.label-md}"
-    rounded: "{rounded.md}"
+    padding: "{spacing.int-md}"
+    height: "{spacing.control-default}"
   button-accent:
-    backgroundColor: "{colors.accent}"
-    textColor: "{colors.white}"
+    backgroundColor: "{colors.light.accent}"
+    textColor: "{colors.light.on-accent}"
     typography: "{typography.label-md}"
     rounded: "{rounded.md}"
-    padding: "{spacing.md-sm}"
-    height: 44px
-  button-accent-hover:
-    backgroundColor: "{colors.accent-hover}"
-    textColor: "{colors.white}"
-    typography: "{typography.label-md}"
-    rounded: "{rounded.md}"
-  link:
-    textColor: "{colors.primary}"
-    typography: "{typography.body-md}"
-  link-hover:
-    textColor: "{colors.primary-dark}"
-    typography: "{typography.body-md}"
-  card:
-    backgroundColor: "{colors.surface}"
-    textColor: "{colors.foreground}"
-    typography: "{typography.body-md}"
-    rounded: "{rounded.lg}"
-    padding: "{spacing.lg}"
-  card-hover:
-    backgroundColor: "{colors.surface-hover}"
-    textColor: "{colors.foreground}"
-    typography: "{typography.body-md}"
-    rounded: "{rounded.lg}"
-  input:
-    backgroundColor: "{colors.background}"
-    textColor: "{colors.foreground}"
-    typography: "{typography.body-md}"
-    rounded: "{rounded.md}"
-    padding: "{spacing.md-sm}"
-    height: 44px
-  input-placeholder:
-    backgroundColor: "{colors.background}"
-    textColor: "{colors.foreground-muted}"
-    typography: "{typography.body-md}"
-    rounded: "{rounded.md}"
-  divider:
-    backgroundColor: "{colors.border}"
-    height: 1px
-  code-inline:
-    backgroundColor: "{colors.surface}"
-    textColor: "{colors.foreground}"
-    typography: "{typography.code-sm}"
+    padding: "{spacing.int-md}"
+    height: "{spacing.control-default}"
+  button-studio-compact:
+    backgroundColor: "{colors.light.surface}"
+    textColor: "{colors.light.foreground}"
+    borderColor: "{colors.light.border-control}"
+    typography: "{typography.label-sm}"
     rounded: "{rounded.sm}"
-    padding: "{spacing.xs}"
-  code-block:
-    backgroundColor: "{colors.surface}"
-    textColor: "{colors.foreground}"
-    typography: "{typography.code}"
+    padding: "{spacing.int-sm}"
+    height: "{spacing.control-compact}"
+  card:
+    backgroundColor: "{colors.light.surface}"
+    textColor: "{colors.light.foreground}"
+    borderColor: "{colors.light.border-subtle}"
+    typography: "{typography.body-md}"
+    rounded: "{rounded.lg}"
+    padding: "{spacing.int-xl}"
+  input:
+    backgroundColor: "{colors.light.background}"
+    textColor: "{colors.light.foreground}"
+    borderColor: "{colors.light.border-control}"
+    typography: "{typography.body-md}"
     rounded: "{rounded.md}"
-    padding: "{spacing.md}"
-  blockquote:
-    textColor: "{colors.foreground-muted}"
-    typography: "{typography.body-lg}"
-    padding: "{spacing.md}"
+    padding: "{spacing.int-md}"
+    height: "{spacing.control-default}"
   callout-primary:
-    backgroundColor: "{colors.primary-soft}"
-    textColor: "{colors.primary-dark}"
+    backgroundColor: "{colors.light.primary-soft}"
+    textColor: "{colors.light.on-primary-soft}"
     typography: "{typography.body-md}"
     rounded: "{rounded.md}"
-    padding: "{spacing.lg}"
+    padding: "{spacing.int-xl}"
   callout-accent:
-    backgroundColor: "{colors.accent-soft}"
-    textColor: "{colors.accent-soft-text}"
+    backgroundColor: "{colors.light.accent-soft}"
+    textColor: "{colors.light.on-accent-soft}"
     typography: "{typography.body-md}"
     rounded: "{rounded.md}"
-    padding: "{spacing.lg}"
-  status-success:
-    backgroundColor: "{colors.success}"
-    textColor: "{colors.primary-dark}"
-    typography: "{typography.label-md}"
-    rounded: "{rounded.md}"
-    padding: "{spacing.sm}"
-  status-warning:
-    backgroundColor: "{colors.warning}"
-    textColor: "{colors.primary-dark}"
-    typography: "{typography.label-md}"
-    rounded: "{rounded.md}"
-    padding: "{spacing.sm}"
-  status-error:
-    backgroundColor: "{colors.error}"
-    textColor: "{colors.primary-dark}"
-    typography: "{typography.label-md}"
-    rounded: "{rounded.md}"
-    padding: "{spacing.sm}"
+    padding: "{spacing.int-xl}"
   tag:
-    backgroundColor: "{colors.surface}"
-    textColor: "{colors.foreground}"
+    backgroundColor: "{colors.light.surface}"
+    textColor: "{colors.light.foreground}"
+    borderColor: "{colors.light.border-subtle}"
     typography: "{typography.label-sm}"
     rounded: "{rounded.full}"
-    padding: "{spacing.xs}"
+    padding: "{spacing.int-xs}"
   tag-accent:
-    backgroundColor: "{colors.accent-soft}"
-    textColor: "{colors.accent-soft-text}"
+    backgroundColor: "{colors.light.accent-soft}"
+    textColor: "{colors.light.on-accent-soft}"
     typography: "{typography.label-sm}"
     rounded: "{rounded.full}"
-    padding: "{spacing.xs}"
+    padding: "{spacing.int-xs}"
   skip-link:
-    backgroundColor: "{colors.primary}"
-    textColor: "{colors.white}"
+    backgroundColor: "{colors.light.primary}"
+    textColor: "{colors.light.on-primary}"
     typography: "{typography.label-md}"
     rounded: "{rounded.md}"
-    padding: "{spacing.md-sm}"
+    padding: "{spacing.int-md}"
+themes:
+  crisp-forest:
+    name: "Crisp Forest"
+    subtitle: "Field Monograph (Default)"
+    dials: { energy: 2, rhythm: 2, motion: 1 }
+    fonts:
+      display: "Bricolage Grotesque"
+      sans: "Plus Jakarta Sans"
+      mono: "JetBrains Mono"
+    radii: { sm: 6px, md: 10px, lg: 14px, pill: 9999px }
+    motif: { heroAccent: "squiggle", photoTilt: "-1.5deg", sectionRule: "1px solid var(--border-subtle)" }
+    colors:
+      light:
+        background: "#FAF9F5"
+        surface: "#F0EEE6"
+        surface-hover: "#E6E2D6"
+        surface-sunken: "#E8E5DA"
+        foreground: "#182220"
+        foreground-muted: "#4E5B58"
+        border-subtle: "#DCD5C7"
+        border-control: "#737067"
+        primary: "#0D6B58"
+        primary-hover: "#095243"
+        on-primary: "#FFFFFF"
+        primary-soft: "#E3F2EE"
+        on-primary-soft: "#083D32"
+        accent: "#B34125"
+        accent-hover: "#96341C"
+        on-accent: "#FFFFFF"
+        accent-soft: "#F7DFD6"
+        on-accent-soft: "#7A2814"
+      dark:
+        background: "#111716"
+        surface: "#192220"
+        surface-hover: "#222E2B"
+        surface-sunken: "#0C1110"
+        foreground: "#F2F0E8"
+        foreground-muted: "#9BA8A4"
+        border-subtle: "#283431"
+        border-control: "#6D7E7A"
+        primary: "#47C4A5"
+        primary-hover: "#63D2B6"
+        on-primary: "#06231C"
+        primary-soft: "#13352D"
+        on-primary-soft: "#A8EBD9"
+        accent: "#EB8468"
+        accent-hover: "#F29B83"
+        on-accent: "#290C05"
+        accent-soft: "#381B14"
+        on-accent-soft: "#FAD0C4"
+  swiss-drafting:
+    name: "Swiss Drafting"
+    subtitle: "Architectural Blueprint"
+    dials: { energy: 2, rhythm: 3, motion: 1 }
+    fonts:
+      display: "Space Grotesk"
+      sans: "Public Sans"
+      mono: "Azeret Mono"
+    radii: { sm: 2px, md: 4px, lg: 4px, pill: 4px }
+    motif: { heroAccent: "index-bracket", photoTilt: "0deg", sectionRule: "1px solid var(--border-control)" }
+    colors:
+      light:
+        background: "#F5F6F8"
+        surface: "#ECEEF2"
+        surface-hover: "#E0E4EB"
+        surface-sunken: "#E3E6EC"
+        foreground: "#11161F"
+        foreground-muted: "#4A5362"
+        border-subtle: "#CFD5DF"
+        border-control: "#687282"
+        primary: "#1849A9"
+        primary-hover: "#123885"
+        on-primary: "#FFFFFF"
+        primary-soft: "#E0EAFF"
+        on-primary-soft: "#102A63"
+        accent: "#C4321A"
+        accent-hover: "#A32712"
+        on-accent: "#FFFFFF"
+        accent-soft: "#FCE4DF"
+        on-accent-soft: "#7D1D0D"
+      dark:
+        background: "#0E1218"
+        surface: "#151B24"
+        surface-hover: "#1E2633"
+        surface-sunken: "#090C10"
+        foreground: "#EDF0F5"
+        foreground-muted: "#96A1B3"
+        border-subtle: "#252E3D"
+        border-control: "#6B788D"
+        primary: "#7EB2FF"
+        primary-hover: "#9EC5FF"
+        on-primary: "#081730"
+        primary-soft: "#13294B"
+        on-primary-soft: "#CFE2FF"
+        accent: "#FF8B73"
+        accent-hover: "#FFA38F"
+        on-accent: "#2B0903"
+        accent-soft: "#3B1610"
+        on-accent-soft: "#FFD2C9"
+  press-darkroom:
+    name: "Press & Darkroom"
+    subtitle: "Editorial Broadsheet"
+    dials: { energy: 2, rhythm: 2, motion: 1 }
+    fonts:
+      display: "Newsreader"
+      sans: "Plus Jakarta Sans"
+      mono: "JetBrains Mono"
+    radii: { sm: 2px, md: 6px, lg: 6px, pill: 9999px }
+    motif: { heroAccent: "italic-stress", photoTilt: "0deg", sectionRule: "3px double var(--foreground)" }
+    colors:
+      light:
+        background: "#FCFBF8"
+        surface: "#F3F0EA"
+        surface-hover: "#E8E3DA"
+        surface-sunken: "#ECE8E0"
+        foreground: "#161514"
+        foreground-muted: "#57524E"
+        border-subtle: "#D8D2C7"
+        border-control: "#756E66"
+        primary: "#8E1B2C"
+        primary-hover: "#6E1321"
+        on-primary: "#FFFFFF"
+        primary-soft: "#FAE5E8"
+        on-primary-soft: "#590E1A"
+        accent: "#1D4E6B"
+        accent-hover: "#153A50"
+        on-accent: "#FFFFFF"
+        accent-soft: "#E1EEF5"
+        on-accent-soft: "#103145"
+      dark:
+        background: "#131214"
+        surface: "#1C1A1E"
+        surface-hover: "#262329"
+        surface-sunken: "#0D0C0E"
+        foreground: "#F4F1EC"
+        foreground-muted: "#A8A19B"
+        border-subtle: "#2E2A32"
+        border-control: "#7D7582"
+        primary: "#F2949F"
+        primary-hover: "#F7ADB6"
+        on-primary: "#29070C"
+        primary-soft: "#3D141B"
+        on-primary-soft: "#FCD6DB"
+        accent: "#7CC2E8"
+        accent-hover: "#9AD1F0"
+        on-accent: "#07202E"
+        accent-soft: "#122E3F"
+        on-accent-soft: "#CBE9FA"
 ---
 
-# Overview
+## Overview
 
-Crisp Forest is a framework-agnostic design system for a personal software-engineering portfolio and technical blog. It is designed to communicate technical credibility without feeling sterile or corporate.
+Crisp Forest is the default design system for `miraj.dev`, a software engineering portfolio, technical publication, and six-app browser tool suite.
 
-The visual direction is **Editorial Teal**: warm paper neutrals, deep pine and teal, restrained coral accents, strong typographic hierarchy, and small human imperfections used selectively. The system should feel authored rather than generated.
+- **Design Read:** Personal engineering publication and interactive tool workbench for technical peers and hiring leaders, in a warm botanical monograph voice.
+- **Calibration Dials:** `ENERGY 2` (Focused) / `RHYTHM 2` (Generous) / `MOTION 1` (Functional).
+- **Default Theme:** `crisp-forest` (warm alabaster paper, pine teal, vermilion accents, Bricolage Grotesque + Plus Jakarta Sans + JetBrains Mono).
+- **Alternate User-Selectable Themes:** `swiss-drafting` (architectural vellum, cobalt, Space Grotesk + Public Sans + Azeret Mono) and `press-darkroom` (cotton newsprint, claret ink, Newsreader + Plus Jakarta Sans).
 
-Crisp Forest is optimized for:
+## Colors
 
-- **Content first:** Content → Interaction → Visual Design → Animation.
-- **Technical credibility:** Clear, deliberate, engineered, trustworthy.
-- **Fast by default:** Prefer static HTML, minimal JavaScript, optimized images, and platform-native browser behavior.
-- **Long-form readability:** Comfortable measure, generous line height, clear hierarchy, and restrained decoration.
-- **Accessibility:** Target WCAG 2.2 AA, with keyboard access, visible focus, sufficient contrast, semantic HTML, and reduced-motion support.
-- **Maintainability:** Primitive values map to semantic roles, and components consume semantic tokens rather than raw values.
-- **Restraint:** Personality comes from typography, color, photography, and small editorial details—not from visual noise.
+Semantic color roles form the public API of the design system. Components bind semantic roles rather than raw hex literals.
 
-## Design language
+| Semantic Token | Default Light (`crisp-forest`) | Default Dark (`crisp-forest`) | Role |
+| :--- | :--- | :--- | :--- |
+| `background` | `#FAF9F5` | `#111716` | Page canvas |
+| `surface` | `#F0EEE6` | `#192220` | Cards, code blocks, secondary containers |
+| `surface-hover` | `#E6E2D6` | `#222E2B` | Interactive surface hover state |
+| `surface-sunken` | `#E8E5DA` | `#0C1110` | Studio canvas wells and recessed tool trays |
+| `foreground` | `#182220` | `#F2F0E8` | Primary text (`15.47:1` light / `15.89:1` dark) |
+| `foreground-muted` | `#4E5B58` | `#9BA8A4` | Secondary metadata (`5.62:1`+ on sunken wells) |
+| `border-subtle` | `#DCD5C7` | `#283431` | Hairline section and card dividers |
+| `border-control` | `#737067` | `#6D7E7A` | Form inputs, sliders, toolbars (`>= 3.81:1` SC 1.4.11) |
+| `primary` | `#0D6B58` | `#47C4A5` | Primary actions, active indicators, focus rings |
+| `on-primary` | `#FFFFFF` | `#06231C` | Text on primary buttons (`6.44:1` light / `7.67:1` dark) |
+| `primary-soft` | `#E3F2EE` | `#13352D` | Soft primary callout and badge fill |
+| `on-primary-soft` | `#083D32` | `#A8EBD9` | Text on soft primary surfaces (`>= 9.87:1`) |
+| `accent` | `#B34125` | `#EB8468` | Editorial highlights and featured metric badges |
+| `on-accent` | `#FFFFFF` | `#290C05` | Text on filled accent controls (`>= 5.68:1`) |
+| `accent-soft` | `#F7DFD6` | `#381B14` | Soft accent callout and badge fill |
+| `on-accent-soft` | `#7A2814` | `#FAD0C4` | Text on soft accent surfaces (`>= 7.70:1`) |
 
-The design should feel like a thoughtfully made technical publication rather than a SaaS dashboard.
+Never bind hardcoded `{colors.white}` onto `button-primary`, `button-accent`, or `.skip-link`. Always pair `primary` with `on-primary` and `accent` with `on-accent` so dark mode passes WCAG 2.2 AA.
 
-Use:
+## Typography
 
-- Warm, slightly off-white paper backgrounds.
-- Deep teal/pine for primary actions and links.
-- Coral as a secondary accent and editorial highlight.
-- Bricolage Grotesque for display typography.
-- Inter for body copy and interface text.
-- JetBrains Mono for code and technical metadata.
-- Cards and surfaces with quiet separation rather than heavy shadows.
-- Occasional tilted photos/stickers and hand-drawn accents.
-- Dense information only when the content benefits from it.
+Each theme defines a 3-font triad mapped to `--font-display`, `--font-sans`, and `--font-mono`:
 
-Avoid:
+1. **Crisp Forest (Default):** `Bricolage Grotesque` (display), `Plus Jakarta Sans` (body and UI), and `JetBrains Mono` (code and tabular metrics).
+2. **Swiss Drafting:** `Space Grotesk` (display), `Public Sans` (body and UI), and `Azeret Mono` (coordinates and code).
+3. **Press & Darkroom:** `Newsreader` (optical-size `6..72` editorial display), `Plus Jakarta Sans` (body and UI), and `JetBrains Mono` (code).
 
-- Generic blue/violet SaaS gradients.
-- Excessive glassmorphism.
-- Giant decorative blobs.
-- Overuse of rounded cards.
-- Animation that competes with content.
-- Decorative illustrations that add no information.
-- Every section looking like a separate marketing landing page.
+Rules:
 
-# Colors
+- Every heading token above `32px` (`display`, `headline-lg`) pairs with a `<level>-mobile` token (`<= 32px`).
+- Apply `font-variant-numeric: tabular-nums` to all dates, reading times, counters, sliders, and coordinate readouts.
+- Keep `/tools/*` control bars in `--font-sans` and `--font-mono` across all three themes.
 
-## Semantic color roles
+## Layout & Spacing
 
-Semantic colors are the public API of the design system. Components should consume these roles instead of directly selecting primitive palette values.
+Spacing separates internal component padding (`int-*`: `4, 8, 12, 16, 24px`) from external section cadence (`ext-*`: `32, 48, 64, 96, 128px`).
 
-| Token                       | Value     | Role                             |
-| --------------------------- | --------- | -------------------------------- |
-| `{colors.background}`       | `#faf9f6` | Page background / warm paper     |
-| `{colors.surface}`          | `#f0eee7` | Cards, code, secondary surfaces  |
-| `{colors.surface-hover}`    | `#e8e4d8` | Hover and selected surface state |
-| `{colors.foreground}`       | `#1c2624` | Primary text                     |
-| `{colors.foreground-muted}` | `#576360` | Secondary text, metadata         |
-| `{colors.border}`           | `#dcd5c8` | Dividers and boundaries          |
-| `{colors.primary}`          | `#0f6e5c` | Primary actions, links, focus    |
-| `{colors.primary-hover}`    | `#0b5645` | Primary interactive hover state  |
-| `{colors.primary-soft}`     | `#e6f3f0` | Soft teal background             |
-| `{colors.primary-dark}`     | `#000000` | High-contrast text on soft teal  |
-| `{colors.accent}`           | `#c14e32` | Coral editorial accent           |
-| `{colors.accent-hover}`     | `#a83e27` | Coral interactive hover state    |
-| `{colors.accent-soft}`      | `#f6dcd2` | Soft coral background            |
-| `{colors.accent-soft-text}` | `#8a3620` | Text on soft coral               |
-| `{colors.success}`          | `#22c55e` | Success state                    |
-| `{colors.warning}`          | `#f59e0b` | Warning state                    |
-| `{colors.error}`            | `#ef4444` | Error state                      |
-| `{colors.white}`            | `#ffffff` | Text on dark/filled controls     |
+`miraj.dev` uses two layout density modes:
 
-The neutral and brand primitives used by the implementation may remain in CSS/Tailwind as implementation tokens. The formal DESIGN.md contract intentionally exposes the semantic palette above rather than requiring every primitive shade to be used by a component.
+1. **Editorial Mode (`/`, `/about/`, `/blog/*`, `/projects/`, `/resume/`, `/colophon/`, `/photos/`):** Uses `44px` (`control-default`) touch targets, `65ch–72ch` prose measure, and `ext-lg` (`64px`) section rhythm.
+2. **Studio Workspace Mode (`/tools/*`):** Uses `32px` (`control-compact`) toolbar buttons, `int-sm` (`8px`) bar padding, `surface-sunken` canvas wells, and `border-control` outlines.
 
-## Dark mode
+## Elevation & Depth
 
-Dark mode is a theme mapping of the same semantic roles rather than a separate design system. The implementation uses `[data-theme="dark"]` to remap the semantic CSS variables.
+Differentiate surfaces through background luminance steps (`background` -> `surface` -> `surface-sunken`) and `1px` borders before adding drop shadows. Reserve shadows for floating menus and `<dialog id="cmdk-dialog">`.
 
-Dark theme values currently map to:
+## Shapes
 
-- background: `#121817`
-- surface: `#1c2624`
-- surface-hover: `#232e2b`
-- foreground: `#f3f1ea`
-- foreground-muted: `#9aa6a2`
-- border: `#2a332f`
-- primary: `#3fbf9f`
-- primary-hover: `#5ad1b3`
-- accent: `#e0785c`
-- accent-hover: `#e8917a`
+Corner geometry adapts per theme through CSS custom properties (`--radius-sm`, `--radius-md`, `--radius-lg`, `--radius-pill`):
 
-The semantic component contract remains unchanged across themes. Components must not contain separate light/dark markup merely to accommodate color changes.
+- **Crisp Forest (Default):** `6px` compact controls, `10px` standard controls, `14px` cards, `9999px` tags.
+- **Swiss Drafting:** `2px` compact controls, `4px` cards and tags, exposed `1px` shared grid borders.
+- **Press & Darkroom:** `2px` tags, `6px` controls, zero-box editorial sections separated by `3px + 1px` masthead rules.
 
-## Color accessibility
+## Components
 
-Normal text and controls should meet WCAG 2.2 AA contrast requirements. Do not use muted text for essential information when its contrast becomes insufficient.
+- **Navigation & Theme Switcher:** Expose primary routes, `#cmdk-trigger` (`⌘K`), and the `[Theme ▾ | ☀/☾]` switcher in `<header>`.
+- **Buttons:** Bind primary CTAs to `bg-primary text-on-primary` (`height: 44px` in editorial views, `32px` in `/tools/*` toolbars).
+- **Project Rows:** Lead with project title, verified outcome metric, architecture summary, and a destination link. Use neutral `tag` chips for technology stacks and at most one `tag-accent` badge per project for the headline metric.
+- **Photos:** Bind frame rotation to `var(--photo-tilt)` (`-1.5deg` in Crisp Forest, `0deg` contact sheets in Swiss Drafting, `0deg` archival mounts in Press & Darkroom).
 
-Focus indicators use the primary color and must remain visibly distinct from adjacent surfaces.
+## Do's and Don'ts
 
-Selection styling uses a light teal tint in the light theme and a deeper teal tint in dark mode.
+### Do
 
-# Typography
+- Do keep `crisp-forest` as the default theme and lazy-load alternate theme fonts only when selected.
+- Do pair every `primary` and `accent` fill with `on-primary` and `on-accent`.
+- Do use `border-control` (`>= 3.0:1`) on inputs, sliders, color wells, and segmented buttons.
+- Do keep all six browser tools listed on `/tools/` in a balanced 3x2 grid.
 
-Crisp Forest uses three typefaces with distinct responsibilities.
+### Don't
 
-### Bricolage Grotesque
+- Don't hardcode `text-white`, `bg-teal-50`, `bg-gray-900`, or `text-red-600` in Astro templates or React islands.
+- Don't style every technology tag on `/projects/` with `tag-accent`.
+- Don't render multiple `<h1>` elements on `/tools/scratchpad/`.
+- Don't display literal `$X00M+` or `$XM+` redaction strings in production cards.
 
-Use Bricolage Grotesque for display headings (`h1`–`h4`) and other moments where typography carries editorial personality.
+## Interaction & Motion
 
-- `display`: 60px / 800 / 1.05
-- `headline-lg`: 48px / 700 / 1.10
-- `headline-md`: 36px / 700 / 1.20
-- `headline-sm`: 30px / 600 / 1.30
+Keep motion functional (`150ms–240ms`, `cubic-bezier(0.2, 0, 0, 1)`). Honor `prefers-reduced-motion: reduce` across all CSS transitions and `<NycHero>` SVG line-drawing animations.
 
-Headings use approximately `-0.01em` letter spacing and `text-wrap: balance` where supported.
+## Accessibility
 
-### Inter
+Target WCAG 2.2 AA across all 6 theme-and-mode combinations (`>= 4.5:1` normal text, `>= 3.0:1` large text and UI controls, `:focus-visible` `2px` primary outline with `2px` offset, and programmatic form labels).
 
-Use Inter for paragraphs, navigation, labels, controls, metadata, and general UI.
+## Performance
 
-- `body-lg`: 18px / 400 / 1.70
-- `body-md`: 16px / 400 / 1.70
-- `body-sm`: 14px / 400 / 1.50
-- `label-md`: 14px / 600 / 1.40
-- `label-sm`: 12px / 600 / 1.40
+Preload only Crisp Forest `.woff2` fonts in `<head>`. Inject `<link rel="stylesheet">` tags for `swiss-drafting` or `press-darkroom` fonts on demand when the user opens the theme menu or selects an alternate theme.
 
-Blog prose may increase body text to 17px with a 1.75 line height for sustained reading.
+## SEO & Content
 
-### JetBrains Mono
+Provide unique titles, canonical URLs, Open Graph tags, and valid `Person`, `WebSite`, and `BlogPosting` JSON-LD on indexable routes. Omit `email` from `Person` JSON-LD when the site defines no public address, and set `"url": "https://www.miraj.dev"`.
 
-Use JetBrains Mono for code, keyboard shortcuts, technical metadata, and small developer-oriented labels.
+## Theme Implementation
 
-- `code`: 14px / 400 / 1.60
-- `code-sm`: 12px / 500 / 1.50
+Control theme identity and light/dark polarity through two orthogonal attributes on `<html>`:
 
-Do not use monospace for ordinary prose merely to signal that a page is technical.
+```html
+<html lang="en" data-theme="crisp-forest" data-mode="light">
+```
 
-# Layout & Spacing
+1. **`data-theme`:** `"crisp-forest"` (default) | `"swiss-drafting"` | `"press-darkroom"`. Stored in `localStorage.getItem("miraj_theme")`.
+2. **`data-mode`:** `"light"` | `"dark"`. Stored in `localStorage.getItem("miraj_mode")` with `"system"` fallback via `prefers-color-scheme`.
+3. **Custom Event:** Dispatch `window.dispatchEvent(new CustomEvent("miraj:themechange", { detail: { theme, mode } }))` on every toggle so `/tools/contrast`, `/tools/paint`, and Shiki syntax blocks update immediately.
 
-## Content widths
+## Print & PDF
 
-| Token                   |  Width | Use                                           |
-| ----------------------- | -----: | --------------------------------------------- |
-| `{spacing.content-sm}`  |  640px | Narrow content / compact layouts              |
-| `{spacing.content-md}`  |  768px | Standard reading and article-adjacent content |
-| `{spacing.content-lg}`  | 1024px | Wide content and two-column layouts           |
-| `{spacing.content-xl}`  | 1280px | Primary desktop shell                         |
-| `{spacing.content-2xl}` | 1440px | Large editorial compositions                  |
-
-Long-form text should generally use a maximum measure of **72ch**. Do not stretch prose simply because the viewport has available space.
-
-## Grid
-
-Use a responsive grid appropriate to the content:
-
-- Mobile: 4 columns.
-- Tablet: 8 columns.
-- Desktop: 12 columns.
-
-Grid gaps should generally come from the spacing scale rather than arbitrary values.
-
-## Spacing scale
-
-The base spacing scale is:
-
-`4, 8, 12, 16, 20, 24, 32, 40, 48, 64, 80, 96, 128px`
-
-Use smaller values for related elements and larger values to establish section hierarchy. Avoid introducing one-off spacing values unless the layout has a documented reason.
-
-## Responsive behavior
-
-Design mobile-first. Prefer fluid layout and natural wrapping over breakpoint-specific hacks.
-
-At smaller widths:
-
-- Reduce heading sizes before reducing readability.
-- Preserve comfortable horizontal padding.
-- Stack multi-column content when the content order is meaningful.
-- Keep controls comfortably tappable.
-- Avoid horizontal scrolling except for genuinely wide content such as code.
-
-# Elevation & Depth
-
-Crisp Forest uses depth sparingly. Surfaces should primarily be differentiated through background color and borders.
-
-Available shadows:
-
-- Small: `0 1px 2px rgb(0 0 0 / 0.05)`
-- Medium: `0 4px 12px rgb(0 0 0 / 0.08)`
-- Large: `0 10px 30px rgb(0 0 0 / 0.12)`
-
-Use:
-
-- Small shadows for subtle controls or floating elements.
-- Medium shadows for elevated cards or menus when necessary.
-- Large shadows only for prominent overlays or modal-like surfaces.
-
-Do not use shadows as decoration on every card. The editorial aesthetic benefits from quiet surfaces.
-
-# Shapes
-
-Corner radii:
-
-- `none`: 0px
-- `sm`: 6px
-- `md`: 10px
-- `lg`: 16px
-- `xl`: 24px
-- `full`: 9999px
-
-Use `md` for controls and inputs, `lg` for cards, and `full` for tags/pills.
-
-Rounded corners should reinforce hierarchy. Avoid making every element maximally rounded.
-
-# Components
-
-## Navigation
-
-The primary navigation should expose the site's major destinations without competing with the page content.
-
-Typical destinations:
-
-- Home / logo
-- Projects
-- Blog
-- Resume
-- About
-- Theme toggle
-- GitHub
-- LinkedIn
-
-Behavior:
-
-- Use semantic `<nav>` markup.
-- Provide a visible current-page state.
-- Support keyboard navigation.
-- Collapse into a compact mobile navigation when needed.
-- Keep the theme toggle available without requiring a settings page.
-- Preserve a clear skip link before the main content.
-
-## Buttons
-
-Primary buttons use `{colors.primary}` with `{colors.white}` text. Hover uses `{colors.primary-hover}`.
-
-Secondary buttons use `{colors.surface}` and `{colors.foreground}`.
-
-Coral buttons are reserved for secondary emphasis, invitations, or editorial calls to action; they should not compete with the primary action on every page.
-
-Controls should have at least a 44px target height where practical.
-
-Never communicate disabled state through color alone.
-
-## Links
-
-Links use `{colors.primary}` and should remain visually identifiable in prose through underlining.
-
-Hover/focus may use `{colors.primary-dark}` where contrast remains appropriate.
-
-Do not remove underlines from long-form body links merely for visual cleanliness.
-
-## Cards
-
-Cards use `{colors.surface}` over `{colors.background}` and `{rounded.lg}`.
-
-A card should have a clear semantic purpose: project, article, experience item, photo, callout, or grouped controls.
-
-Avoid nesting cards inside cards unless the hierarchy is genuinely necessary.
-
-## Project cards
-
-A project card should prioritize:
-
-1. Project name.
-2. Short description.
-3. Evidence of impact.
-4. Technology or role metadata.
-5. A clear destination or action.
-
-Metrics should be concrete when available. Prefer outcomes over technology lists.
-
-## Blog cards
-
-A blog card may include:
-
-- Cover image or editorial thumbnail.
-- Title.
-- Short description.
-- Tags.
-- Publication date.
-- Reading time.
-
-The title should remain the strongest visual element.
-
-## Inputs
-
-Inputs use `{colors.background}` with `{colors.foreground}` and `{rounded.md}`.
-
-Placeholder text uses `{colors.foreground-muted}` but should never contain essential information.
-
-Inputs require:
-
-- Visible labels.
-- Programmatic label association.
-- Clear focus state.
-- Useful error messaging.
-- Keyboard and screen-reader support.
-
-## Tags
-
-Tags use `{rounded.full}` and compact label typography.
-
-Use neutral tags for taxonomy such as `frontend`, `architecture`, or `career`.
-
-Use the coral tag treatment sparingly for featured or especially relevant metadata.
-
-## Callouts
-
-Use teal callouts for explanatory or positive emphasis and coral callouts for editorial emphasis or caution.
-
-Callouts should not become substitutes for ordinary paragraph hierarchy.
-
-## Status
-
-Success, warning, and error treatments are semantic states rather than decorative colors.
-
-Always pair status color with text or an icon/label so meaning is not dependent on color alone.
-
-## Code
-
-Inline code uses the surface color and JetBrains Mono.
-
-Code blocks:
-
-- Use JetBrains Mono.
-- Allow horizontal scrolling for genuinely wide code.
-- Preserve syntax highlighting.
-- Maintain readable line height.
-- Use a visible border when the surrounding surface does not sufficiently distinguish the block.
-- Do not make syntax colors the only way to distinguish code semantics.
-
-The implementation uses Shiki with dual light/dark themes.
-
-## Blockquotes
-
-Blockquotes use muted text and a primary-colored leading rule.
-
-Keep blockquotes visually quieter than headings but more distinct than ordinary body text.
-
-## Images and photography
-
-Photography and project imagery should feel editorial rather than overly polished.
-
-Images should:
-
-- Use meaningful `alt` text when informative.
-- Use empty `alt` text when purely decorative.
-- Be optimized and sized appropriately.
-- Avoid layout shift by reserving dimensions.
-- Use subtle tilts selectively.
-
-Crisp Forest supports two tilt helpers:
-
-- `tilt-left`: approximately `-2deg`
-- `tilt-right`: approximately `1.5deg`
-
-On hover, tilted elements may return to `0deg`.
-
-Never tilt an entire grid of cards. The effect works because it is used sparingly.
-
-## Editorial accents
-
-A hand-drawn coral squiggle may emphasize one or two words per page.
-
-The squiggle is an accent, not a general-purpose underline replacement. Avoid applying it to navigation, every heading, or every link.
-
-# Do's and Don'ts
-
-## Do
-
-- Do lead with content and evidence.
-- Do use Bricolage Grotesque to establish personality.
-- Do keep body text in Inter.
-- Do use teal as the primary interaction color.
-- Do use coral as a deliberate secondary accent.
-- Do preserve a 72ch-ish reading measure for long-form writing.
-- Do use borders and surfaces before reaching for shadows.
-- Do respect reduced-motion preferences.
-- Do make keyboard focus obvious.
-- Do optimize images and avoid unnecessary client-side JavaScript.
-- Do use semantic HTML and meaningful landmarks.
-- Do let typography, spacing, and content hierarchy carry most of the visual design.
-- Do treat dark mode as a semantic theme mapping.
-
-## Don't
-
-- Don't turn every section into a card.
-- Don't use gradients as a default background treatment.
-- Don't use excessive blur or glass effects.
-- Don't use giant decorative graphics behind important content.
-- Don't rely on color alone for status, interaction, or meaning.
-- Don't use tiny low-contrast metadata for important information.
-- Don't animate page content simply because CSS allows it.
-- Don't ship avoidable layout shift from images or fonts.
-- Don't add a new token when an existing semantic role already describes the intent.
-- Don't reference raw primitive colors from components when a semantic token exists.
-
-# Interaction & Motion
-
-Motion is functional and restrained.
-
-Preferred easing:
-
-- Standard: `cubic-bezier(0.2, 0, 0, 1)`
-- Decelerate: `cubic-bezier(0, 0, 0.2, 1)`
-- Accelerate: `cubic-bezier(0.4, 0, 1, 1)`
-
-Typical durations:
-
-- Fast: ~150ms
-- Base: ~250ms
-- Slow: ~400ms
-
-Use motion for:
-
-- Hover state transitions.
-- Theme changes.
-- Opening/closing navigation.
-- Focus or selection feedback.
-- Small editorial interactions.
-
-Avoid:
-
-- Decorative perpetual animation.
-- Large transforms on essential content.
-- Motion that delays access to information.
-
-Honor `prefers-reduced-motion: reduce` globally. Reduced motion should remove nonessential animation rather than merely slowing it down.
-
-# Accessibility
-
-Crisp Forest targets WCAG 2.2 AA.
-
-Requirements:
-
-- Use semantic HTML before ARIA.
-- Maintain a logical heading hierarchy.
-- Provide a skip link.
-- Make all interactive controls keyboard accessible.
-- Use `:focus-visible` with a 2px primary outline and 2px offset.
-- Maintain sufficient contrast for text and meaningful UI.
-- Do not rely on color alone.
-- Provide accessible names for icon-only controls.
-- Ensure touch targets are comfortably sized.
-- Respect reduced motion.
-- Preserve readable text zoom/reflow.
-- Keep form errors associated with their controls.
-- Provide meaningful alternative text for informative images.
-
-# Performance
-
-Crisp Forest is optimized for a static-first architecture.
-
-Prefer:
-
-- Astro/SSG output where content permits.
-- Minimal client-side JavaScript.
-- Native browser APIs over large dependencies.
-- Responsive images and modern image formats.
-- Explicit image dimensions to reduce layout shift.
-- Systematic lazy loading below the fold.
-- Preloading only truly critical resources.
-- Font loading that avoids prolonged invisible text.
-- Browser-native print/PDF behavior where possible.
-
-Avoid:
-
-- Hydrating components that do not need interactivity.
-- Large animation libraries for small effects.
-- Client-side rendering of content that can be generated at build time.
-- Unoptimized full-resolution images.
-- Third-party scripts without a clear benefit.
-
-# SEO & Content
-
-Every indexable page should have:
-
-- A unique title.
-- A useful meta description.
-- A canonical URL.
-- Appropriate Open Graph metadata.
-- Appropriate social sharing metadata.
-- Semantic headings.
-- Descriptive links.
-- Structured data where appropriate.
-
-Recommended structured data includes:
-
-- `Person` for the portfolio owner.
-- `WebSite` for the site.
-- `BlogPosting` for articles.
-- `BreadcrumbList` where hierarchical navigation exists.
-
-Content should be written for humans first. SEO metadata should clarify the content rather than stuff keywords.
-
-# Theme Implementation
-
-The production implementation uses CSS custom properties and Tailwind CSS v4.
-
-Theme switching is controlled by:
-
-`[data-theme="dark"]`
-
-Tailwind's `dark:` variant is mapped to that attribute rather than `prefers-color-scheme`.
-
-The semantic CSS variables are exposed to Tailwind through `@theme`, including:
-
-- `background`
-- `surface`
-- `surface-hover`
-- `foreground`
-- `foreground-muted`
-- `border`
-- `primary`
-- `primary-hover`
-- `accent`
-- `accent-hover`
-- `success`
-- `warning`
-- `error`
-
-The formal DESIGN.md token contract intentionally remains framework-agnostic even though the current implementation uses Tailwind.
-
-# Print & PDF
-
-The Markdown scratchpad supports browser-native PDF export.
-
-Print output should:
-
-- Use white paper.
-- Use dark readable text.
-- Hide site chrome and interactive controls.
-- Remove theme backgrounds.
-- Preserve real selectable text.
-- Keep headings with following content where possible.
-- Avoid splitting common content blocks across pages.
-- Keep images within the printable area.
-- Preserve readable code blocks.
-- Remove interactive focus styling.
-
-Browser print headers/footers such as title, URL, date, and page numbers are controlled by the browser's print dialog rather than CSS. Users should disable them when a clean document is required.
-
-# Content Patterns
-
-## Hero
-
-A hero should quickly communicate:
-
-1. Who this is.
-2. What they build or specialize in.
-3. Why the visitor should care.
-4. What to do next.
-
-Keep the headline short. Let supporting copy carry nuance.
-
-## Metrics
-
-Metrics should be evidence, not decoration.
-
-Good examples:
-
-- Revenue impact.
-- Users reached.
-- Conversion or acquisition lift.
-- Performance improvements.
-- Scope of systems owned.
-- Team or project scale.
-
-Use a short label with a strong number or phrase. Avoid presenting arbitrary counts simply because they look impressive.
-
-## Experience timeline
-
-Experience entries should emphasize:
-
-- Role.
-- Organization.
-- Dates.
-- Scope.
-- Outcomes.
-- Selected technologies where useful.
-
-Lead with what changed because of the work, not an exhaustive task list.
-
-## Article layout
-
-A technical article should generally contain:
-
-- Title.
-- Description or deck.
-- Publication date.
-- Reading time when available.
-- Optional tags.
-- Optional table of contents.
-- Article body.
-- Related articles or next steps.
-
-Article prose should use the `.measure` reading width or an equivalent 72ch maximum.
-
-# Engineering Contract
-
-Crisp Forest is a design system specification, not a component implementation. The implementation may use Astro, Tailwind CSS, TypeScript, React islands, or other technologies without changing the visual contract.
-
-When implementing a component:
-
-1. Start from a semantic token.
-2. Use the component token when one exists.
-3. Preserve accessibility behavior.
-4. Preserve responsive behavior.
-5. Preserve dark-theme semantic mapping.
-6. Avoid introducing arbitrary values.
-7. Add a new semantic token only when the intent is genuinely new.
-8. Keep JavaScript optional unless the interaction requires it.
-
-The source of truth is:
-
-**Primitive values → semantic tokens → component tokens → implementation.**
-
-A component implementation should never become the source of truth for the design language.
+Reset print output (`@media print`) to white paper (`#FFFFFF`), dark text (`#000000`), hidden navigation/toolbars, and unclipped code blocks on `/resume/` and `/tools/scratchpad/`.

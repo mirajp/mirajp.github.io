@@ -69,13 +69,13 @@ export default function SandboxToolbar() {
 
   return (
     <>
-      <div className="flex flex-wrap items-center gap-2">
-        {/* Redraw stroke animation */}
+      <div className="sandbox-toolbar flex flex-wrap items-center gap-2">
+        {/* Redraw stroke animation (`button-studio-compact`: 32px height, `border-control`) */}
         <button
           type="button"
           onClick={replayDraw}
           title="Replay SVG stroke line-drawing animation"
-          className="inline-flex h-7 items-center gap-1.5 rounded-md border border-border bg-surface px-2.5 font-mono text-[11px] font-medium text-foreground-muted transition-colors duration-150 hover:bg-surface-hover hover:text-foreground"
+          className="inline-flex h-8 items-center gap-1.5 rounded-sm border border-border-control bg-surface px-2.5 font-mono text-xs font-medium text-foreground transition-colors duration-150 ease-out hover:bg-surface-hover"
         >
           Redraw
         </button>
@@ -86,10 +86,10 @@ export default function SandboxToolbar() {
           onClick={toggleInspectInk}
           aria-pressed={inspectInk}
           title="Toggle between 40% hero background opacity and 95% line-art inspection contrast"
-          className={`inline-flex h-7 items-center rounded-md border px-2.5 font-mono text-[11px] font-medium transition-colors duration-150 ${
+          className={`inline-flex h-8 items-center rounded-sm border px-2.5 font-mono text-xs font-medium tabular-nums transition-colors duration-150 ease-out ${
             inspectInk
-              ? "border-primary bg-primary/12 text-primary"
-              : "border-border bg-surface text-foreground-muted hover:bg-surface-hover hover:text-foreground"
+              ? "border-primary bg-primary-soft text-on-primary-soft"
+              : "border-border-control bg-surface text-foreground hover:bg-surface-hover"
           }`}
         >
           {inspectInk ? "Ink: 95%" : "Ink: 40%"}
@@ -103,7 +103,7 @@ export default function SandboxToolbar() {
             setSpecimenReplay((n) => n + 1);
           }}
           aria-expanded={showSpecimens}
-          className="inline-flex h-7 items-center rounded-md border border-border bg-surface px-2.5 font-mono text-[11px] font-medium text-foreground-muted transition-colors duration-150 hover:bg-surface-hover hover:text-foreground"
+          className="inline-flex h-8 items-center rounded-sm border border-border-control bg-surface px-2.5 font-mono text-xs font-medium text-foreground transition-colors duration-150 ease-out hover:bg-surface-hover"
         >
           SVG Sheet
         </button>
@@ -122,10 +122,10 @@ export default function SandboxToolbar() {
               if (e.target === e.currentTarget) setShowSpecimens(false);
             }}
           >
-            <div className="max-h-[86vh] w-full max-w-6xl overflow-y-auto rounded-lg border border-border bg-background p-6 shadow-lg">
-              <div className="flex flex-wrap items-baseline justify-between gap-4 border-b border-border pb-4">
+            <div className="max-h-[86vh] w-full max-w-6xl overflow-y-auto rounded-lg border border-border-subtle bg-background p-6 shadow-lg">
+              <div className="flex flex-wrap items-baseline justify-between gap-4 border-b border-border-subtle pb-4">
                 <div>
-                  <p className="font-mono text-xs font-medium text-primary">
+                  <p className="font-mono text-xs font-medium text-primary tabular-nums">
                     {SEASON_META[activeSeason].badge} ·{" "}
                     {SEASON_META[activeSeason].label}
                     {seasonPref === "auto" ? " (Auto [-4, +3] Window)" : ""}
@@ -141,14 +141,14 @@ export default function SandboxToolbar() {
                   <button
                     type="button"
                     onClick={() => setSpecimenReplay((n) => n + 1)}
-                    className="rounded-md border border-border bg-surface px-3 py-1.5 font-mono text-xs font-medium hover:bg-surface-hover"
+                    className="inline-flex h-8 items-center rounded-sm border border-border-control bg-surface px-3 font-mono text-xs font-medium text-foreground transition-colors duration-150 ease-out hover:bg-surface-hover"
                   >
                     Replay Ink Draw
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowSpecimens(false)}
-                    className="rounded-md bg-primary px-3 py-1.5 font-mono text-xs font-medium text-white hover:bg-primary-hover"
+                    className="inline-flex h-8 items-center rounded-sm bg-primary px-3 font-mono text-xs font-medium text-on-primary transition-colors duration-150 ease-out hover:bg-primary-hover"
                   >
                     Close
                   </button>
@@ -1211,8 +1211,8 @@ function SpecimenCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col justify-between rounded-md border border-border bg-surface/60 p-3.5">
-      <div className="flex h-36 items-center justify-center rounded-sm bg-background p-2">
+    <div className="flex flex-col justify-between rounded-lg border border-border-subtle bg-surface p-3.5">
+      <div className="flex h-36 items-center justify-center rounded-sm bg-surface-sunken p-2">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox={viewBox}
@@ -1220,14 +1220,14 @@ function SpecimenCard({
           stroke="currentColor"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="h-full w-full text-foreground/80"
+          className="h-full w-full text-foreground/85"
         >
           {children}
         </svg>
       </div>
       <div className="mt-2.5 flex items-baseline justify-between gap-2">
         <span className="text-xs font-semibold text-foreground">{title}</span>
-        <span className="rounded-full bg-background px-2 py-0.5 font-mono text-[10px] text-foreground-muted">
+        <span className="rounded-pill border border-border-subtle bg-background px-2 py-0.5 font-mono text-[11px] font-medium text-foreground tabular-nums">
           {tag}
         </span>
       </div>

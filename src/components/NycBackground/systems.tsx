@@ -184,6 +184,7 @@ export function renderSceneSvgElements(
     accent: string;
     primary: string;
     gold: string;
+    paperMask?: string;
   },
   inkMultiplier = 0.42,
 ) {
@@ -193,9 +194,8 @@ export function renderSceneSvgElements(
   const darkFillSoft = isDark
     ? `rgba(42, 54, 50, ${(0.82 * inkMultiplier).toFixed(2)})`
     : `rgba(64, 76, 72, ${(0.72 * inkMultiplier).toFixed(2)})`;
-  const paperMaskFill = isDark
-    ? "rgba(18, 24, 23, 0.92)"
-    : "rgba(250, 249, 246, 0.92)";
+  const paperMaskFill =
+    colors.paperMask ?? "color-mix(in srgb, var(--background) 92%, transparent)";
 
   return (
     <>

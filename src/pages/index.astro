@@ -3,14 +3,13 @@ import { getCollection } from "astro:content";
 
 import BlogCard from "../components/BlogCard.astro";
 import Button from "../components/Button.astro";
-import HeroSkyline from "../components/HeroSkyline.astro";
 import Metrics from "../components/Metrics.astro";
 import NowCard from "../components/NowCard.astro";
 import NycHero from "../components/NycHero.astro";
 import ProjectCard from "../components/ProjectCard.astro";
-import { site } from "../data/site";
-import { projects } from "../data/projects";
 import { experience, headlineMetrics } from "../data/experience";
+import { projects } from "../data/projects";
+import { site } from "../data/site";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getReadingTime } from "../utils/readingTime";
 
@@ -22,9 +21,10 @@ const recentPosts = (await getCollection("blog", ({ data }) => !data.draft))
 
 const currentRole = experience[0];
 
-// Split the tagline so exactly one phrase can get the hand-drawn squiggle
-// accent — falls back to the plain string if the phrase isn't found, so
-// this never silently breaks if the tagline copy changes later.
+// Split the tagline so one word gets the active theme's hero emphasis
+// (.squiggle: wobbly underline in Crisp Forest, [people] brackets in Swiss
+// Drafting, italic stress in Press & Darkroom). Falls back to the plain string
+// if the tagline copy changes later.
 const squiggleWord = "people";
 const [taglineBefore, taglineAfter] = site.tagline.includes(squiggleWord)
   ? site.tagline.split(squiggleWord)
@@ -36,9 +36,11 @@ const [taglineBefore, taglineAfter] = site.tagline.includes(squiggleWord)
     eyebrow={`${currentRole.title} · ${currentRole.company}`}
     subhead={site.summary}
     primaryCta={{ label: "View Projects", href: "/projects/" }}
-    secondaryCta={{ label: "Blog (🛠️ 🚧)", href: "/blog/" }}
+    secondaryCta={{ label: "Read the Blog", href: "/blog/" }}
   >
-    {taglineBefore}{taglineAfter !== null && <span class="squiggle">{squiggleWord}</span>}{taglineAfter}
+    {taglineBefore}{
+      taglineAfter !== null && <span class="squiggle">{squiggleWord}</span>
+    }{taglineAfter}
   </NycHero>
 
   <NowCard />
@@ -47,11 +49,16 @@ const [taglineBefore, taglineAfter] = site.tagline.includes(squiggleWord)
     <Metrics metrics={headlineMetrics} />
   </section>
 
-  <section class="border-t border-border bg-surface/50">
+  <section
+    class="bg-surface/50"
+    style="border-top: var(--section-rule); border-bottom: var(--section-rule);"
+  >
     <div class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
-      <div class="flex items-baseline justify-between">
-        <h2 class="!text-3xl !font-bold">Featured work</h2>
-        <Button href="/projects/" variant="text">View all projects &rarr;</Button>
+      <div class="flex flex-wrap items-baseline justify-between gap-4">
+        <h2>Featured work</h2>
+        <Button href="/projects/" variant="text">
+          View all projects &rarr;
+        </Button>
       </div>
       <div class="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {featuredProjects.map((project) => <ProjectCard project={project} />)}
@@ -60,11 +67,11 @@ const [taglineBefore, taglineAfter] = site.tagline.includes(squiggleWord)
   </section>
 
   <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
-    <div class="flex items-baseline justify-between">
-      <h2 class="!text-3xl !font-bold">Recent writing</h2>
+    <div class="flex flex-wrap items-baseline justify-between gap-4">
+      <h2>Recent writing</h2>
       <Button href="/blog/" variant="text">View all posts &rarr;</Button>
     </div>
-    <div class="mt-4 divide-y divide-border">
+    <div class="mt-4 divide-y divide-border-subtle">
       {
         recentPosts.map((post) => (
           <BlogCard
