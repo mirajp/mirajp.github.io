@@ -272,6 +272,14 @@ function createSpireLighting(season: ResolvedSeasonTheme): SpireLighting {
   };
 }
 
+export const SHIP_KEEL_Y: Record<Ship["type"], number> = {
+  ferry: 10,
+  catamaran: 0,
+  tugboat: 5,
+  cargo: 6,
+  sailboat: 4,
+};
+
 const stratifiedX = (
   index: number,
   count: number,
@@ -282,13 +290,6 @@ const stratifiedX = (
   const slot = width / count;
   const center = (index + 0.5) * slot;
   return center + (Math.random() - 0.5) * slot * jitter;
-};
-
-const getHarborY = (width: number, height: number) => {
-  const isDesktop = width >= 1024;
-  const baseOffset = isDesktop ? 26 : 15;
-  const spread = isDesktop ? 16 : 9;
-  return height - baseOffset + Math.random() * spread;
 };
 
 export function createSceneState(
@@ -304,6 +305,63 @@ export function createSceneState(
   const birdCount = overrides.birdCount ?? preset.birds;
   const heliCount = overrides.helicopterCount ?? preset.helicopters;
   const shipCount = overrides.shipCount ?? preset.ships;
+  const charonCount =
+    season === "halloween"
+      ? (overrides.charonFerryCount ?? DEFAULT_CONFIG.charonFerryCount)
+      : 0;
+
+  // Stratified harbor waterline lanes (hull-bottom Y in viewport px) from the upper bay
+  // below the Manhattan seawall down to the foreground water edge so every watercraft has a
+  // distinct depth lane and lower-down boats cleanly occlude higher-up boats.
+  const baseScale = Math.max(0.42, Math.min(0.76, width / 1920));
+  const seawallY = height - width * (789 / 1994) * (1 - 0.903);
+  const waterBand = Math.max(14, height - seawallY);
+  const minWaterlineY = seawallY + waterBand * 0.28;
+  const maxWaterlineY = height - (width >= 1024 ? 5.5 : 3.5);
+  const totalHarborCraft =
+    shipCount +
+    preset.statenIslandFerrys +
+    charonCount +
+    preset.harvestBoats +
+    preset.holidayTreeBoats +
+    preset.winterHarborBoats +
+    preset.emeraldBoats +
+    preset.springBoats +
+    preset.summerDogs +
+    preset.summerBoats +
+    preset.fireboats +
+    preset.diwaliBoats;
+
+  const harborWaterlines = Array.from(
+    { length: Math.max(1, totalHarborCraft) },
+    (_, idx) => {
+      if (totalHarborCraft <= 1) {
+        return (minWaterlineY + maxWaterlineY) * 0.5;
+      }
+      const span = Math.max(2, maxWaterlineY - minWaterlineY);
+      const slotGap = span / (totalHarborCraft - 1);
+      const jitter = (Math.random() - 0.5) * slotGap * 0.2;
+      return Math.max(
+        minWaterlineY,
+        Math.min(maxWaterlineY, minWaterlineY + idx * slotGap + jitter),
+      );
+    },
+  );
+  for (let i = harborWaterlines.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [harborWaterlines[i], harborWaterlines[j]] = [
+      harborWaterlines[j],
+      harborWaterlines[i],
+    ];
+  }
+  let nextHarborLane = 0;
+  const claimBoatAnchorY = (localKeelY: number, scaleFactor: number) => {
+    const waterlineY =
+      harborWaterlines[nextHarborLane % harborWaterlines.length] ??
+      (minWaterlineY + maxWaterlineY) * 0.5;
+    nextHarborLane += 1;
+    return waterlineY - localKeelY * baseScale * scaleFactor;
+  };
 
   state.clouds = Array.from({ length: cloudCount }, (_, i) => ({
     x: stratifiedX(i, cloudCount, width, 0.85),
@@ -346,7 +404,7 @@ export function createSceneState(
             : 0.12 + Math.random() * 0.06;
     return {
       x: stratifiedX(i, shipCount, width, 0.85),
-      y: getHarborY(width, height),
+      y: claimBoatAnchorY(SHIP_KEEL_Y[type], 0.85),
       speed,
       direction: i % 2 === 0 ? 1 : -1,
       type,
@@ -354,12 +412,11 @@ export function createSceneState(
   });
 
   // Iconic Orange Staten Island Ferry cruising the Upper Bay across all seasons
-  const ferryChannelY = height - (width >= 1024 ? 19 : 11);
   state.statenIslandFerrys = Array.from(
     { length: preset.statenIslandFerrys },
     (_, i) => ({
       x: width * (0.34 + i * 0.42),
-      y: ferryChannelY,
+      y: claimBoatAnchorY(9, 0.98),
       speed: 0.21,
       direction: 1,
       bobAngle: 0.7,
@@ -408,13 +465,9 @@ export function createSceneState(
     hatSpeed: 0.024,
   }));
 
-  const charonCount =
-    season === "halloween"
-      ? (overrides.charonFerryCount ?? DEFAULT_CONFIG.charonFerryCount)
-      : 0;
   state.charonFerrys = Array.from({ length: charonCount }, (_, i) => ({
     x: stratifiedX(i, charonCount, width, 0.6),
-    y: getHarborY(width, height),
+    y: claimBoatAnchorY(9.5, 0.85),
     speed: 0.14 + Math.random() * 0.07,
     direction: i % 2 === 0 ? 1 : -1,
     bobAngle: Math.random() * Math.PI * 2,
@@ -493,7 +546,7 @@ export function createSceneState(
 
   state.harvestBoats = Array.from({ length: preset.harvestBoats }, (_, i) => ({
     x: width * (0.3 + i * 0.46),
-    y: getHarborY(width, height),
+    y: claimBoatAnchorY(10, 0.96),
     speed: 0.16 + i * 0.04,
     direction: i % 2 === 0 ? 1 : -1,
     bobAngle: i * 1.9,
@@ -536,7 +589,7 @@ export function createSceneState(
     { length: preset.holidayTreeBoats },
     (_, i) => ({
       x: width * (0.28 + i * 0.48),
-      y: getHarborY(width, height),
+      y: claimBoatAnchorY(9, 0.96),
       speed: 0.15 + i * 0.04,
       direction: i % 2 === 0 ? 1 : -1,
       bobAngle: i * 2.2,
@@ -609,28 +662,38 @@ export function createSceneState(
 
   state.winterHarborBoats = Array.from(
     { length: preset.winterHarborBoats },
-    (_, i) => ({
-      kind: i === 0 ? "rinkBarge" : "cocoaTug",
-      x: width * (0.32 + i * 0.42),
-      y: getHarborY(width, height),
-      speed: i === 0 ? 0.13 : 0.18,
-      direction: i === 0 ? 1 : -1,
-      bobAngle: i * 1.8,
-      bobSpeed: 0.028,
-      actionPhase: 0,
-      actionSpeed: 0.032,
-    }),
+    (_, i) => {
+      const kind = i === 0 ? "rinkBarge" : "cocoaTug";
+      return {
+        kind,
+        x: width * (0.32 + i * 0.42),
+        y: claimBoatAnchorY(kind === "rinkBarge" ? 10 : 9, 0.98),
+        speed: i === 0 ? 0.13 : 0.18,
+        direction: i === 0 ? 1 : -1,
+        bobAngle: i * 1.8,
+        bobSpeed: 0.028,
+        actionPhase: 0,
+        actionSpeed: 0.032,
+      };
+    },
   );
 
-  state.iceFloes = Array.from({ length: preset.iceFloes }, (_, i) => ({
-    x: stratifiedX(i, preset.iceFloes, width, 0.8),
-    y: getHarborY(width, height) + 4,
-    speed: 0.06 + (i % 3) * 0.025,
-    direction: 1,
-    scale: 0.75 + (i % 3) * 0.2,
-    bobPhase: i * 1.3,
-    variant: (i % 3) as 0 | 1 | 2,
-  }));
+  state.iceFloes = Array.from({ length: preset.iceFloes }, (_, i) => {
+    const floeScale = 0.75 + (i % 3) * 0.2;
+    const floeT =
+      preset.iceFloes <= 1 ? 0.5 : (i + 0.5) / preset.iceFloes;
+    const floeWaterlineY =
+      minWaterlineY + floeT * Math.max(2, maxWaterlineY - minWaterlineY);
+    return {
+      x: stratifiedX(i, preset.iceFloes, width, 0.8),
+      y: floeWaterlineY - 2.5 * baseScale * floeScale * 0.9,
+      speed: 0.06 + (i % 3) * 0.025,
+      direction: 1,
+      scale: floeScale,
+      bobPhase: i * 1.3,
+      variant: (i % 3) as 0 | 1 | 2,
+    };
+  });
 
   // ------------------------------------------------------------------
   // St. Patrick's Day
@@ -671,7 +734,7 @@ export function createSceneState(
 
   state.emeraldBoats = Array.from({ length: preset.emeraldBoats }, (_, i) => ({
     x: width * (0.28 + i * 0.46),
-    y: getHarborY(width, height),
+    y: claimBoatAnchorY(10, 0.95),
     speed: 0.18 + i * 0.04,
     direction: i % 2 === 0 ? 1 : -1,
     bobAngle: i * 1.7,
@@ -731,7 +794,7 @@ export function createSceneState(
 
   state.springBoats = Array.from({ length: preset.springBoats }, (_, i) => ({
     x: width * (0.3 + i * 0.44),
-    y: getHarborY(width, height),
+    y: claimBoatAnchorY(10, 0.95),
     speed: 0.15 + i * 0.04,
     direction: i % 2 === 0 ? 1 : -1,
     bobAngle: i * 2.0,
@@ -760,11 +823,9 @@ export function createSceneState(
   }));
 
   const surfScale = 0.175;
-  const surfS = Math.max(0.42, Math.min(0.76, width / 1920)) * surfScale;
-  const surfWaterY = height - (width >= 1024 ? 14 : 9);
   state.summerDogs = Array.from({ length: preset.summerDogs }, () => ({
     x: width * 0.48,
-    baseY: surfWaterY - 180 * surfS,
+    baseY: claimBoatAnchorY(180, surfScale),
     speed: 0.36,
     direction: 1,
     scale: surfScale,
@@ -774,7 +835,7 @@ export function createSceneState(
 
   state.summerBoats = Array.from({ length: preset.summerBoats }, (_, i) => ({
     x: width * (0.18 + i * 0.32),
-    y: height - (width >= 1024 ? 22 - (i % 2) * 7 : 13 - (i % 2) * 4),
+    y: claimBoatAnchorY(10, 0.98),
     speed: 0.13 + i * 0.03,
     direction: i % 2 === 0 ? 1 : -1,
     bobAngle: i * 1.9,
@@ -842,7 +903,7 @@ export function createSceneState(
 
   state.fireboats = Array.from({ length: preset.fireboats }, (_, i) => ({
     x: width * (0.3 + i * 0.45),
-    y: getHarborY(width, height),
+    y: claimBoatAnchorY(10, 0.96),
     speed: 0.14 + i * 0.03,
     direction: i % 2 === 0 ? 1 : -1,
     bobAngle: i * 1.7,
@@ -895,7 +956,7 @@ export function createSceneState(
 
   state.diwaliBoats = Array.from({ length: preset.diwaliBoats }, (_, i) => ({
     x: width * (0.28 + i * 0.46),
-    y: getHarborY(width, height),
+    y: claimBoatAnchorY(12, 0.98),
     speed: 0.13 + i * 0.04,
     direction: i % 2 === 0 ? 1 : -1,
     bobAngle: i * 2.1,

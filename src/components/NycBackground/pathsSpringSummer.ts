@@ -90,8 +90,8 @@ export const SPRING_SUMMER_PATHS = {
 
     emeraldBoat: {
       hull:
-        "M -40 0 L 42 0 L 35 10 L -34 10 Z M -32 0 L -27 -13 L 24 -13 L 29 0 " +
-        "M -18 -13 L -14 -22 L 12 -22 L 16 -13 " +
+        "M -40 0 L 42 0 L 35 10 L -34 10 Z M -32 0 L -27 -13 L 24 -13 L 29 0 Z " +
+        "M -18 -13 L -14 -22 L 12 -22 L 16 -13 Z " +
         "M -18 -6 L -12 -6 M -5 -6 L 1 -6 M 8 -6 L 14 -6",
       buntingAndShamrock:
         "M -27 -13 Q -14 -7 0 -13 Q 14 -7 29 -13 " +
@@ -175,7 +175,7 @@ export const SPRING_SUMMER_PATHS = {
 
     springBoat: {
       hull:
-        "M -40 2 L 42 2 L 36 10 L -34 10 Z M -32 2 L -30 -8 L 10 -8 L 12 2 " +
+        "M -40 2 L 42 2 L 36 10 L -34 10 Z M -32 2 L -30 -8 L 10 -8 L 12 2 Z " +
         "M -22 -3 L -16 -3 M -8 -3 L -2 -3",
       tulips:
         // Three oversized spring tulips swaying on foredeck
@@ -238,7 +238,7 @@ export const SPRING_SUMMER_PATHS = {
 
     summerBoat: {
       hull:
-        "M -50 2 L 52 2 L 44 10 L -43 10 Z M 8 2 L 11 -8 L 38 -8 L 41 2 " +
+        "M -50 2 L 52 2 L 44 10 L -43 10 Z M 8 2 L 11 -8 L 38 -8 L 41 2 Z " +
         "M 15 -3 L 21 -3 M 27 -3 L 33 -3",
       // Waffle-cone ice cream on cabin + tilted striped beach umbrella on bow
       iceCreamCone:
@@ -304,8 +304,8 @@ export const SPRING_SUMMER_PATHS = {
       hull:
         // Iconic FDNY Harbor Fireboat facing +X
         "M -42 0 L 44 0 L 50 -6 L 44 10 L -36 10 Z " +
-        "M -22 0 L -20 -13 L 18 -13 L 21 0 " +
-        "M -8 -13 L -6 -23 L 10 -23 L 12 -13 " +
+        "M -22 0 L -20 -13 L 18 -13 L 21 0 Z " +
+        "M -8 -13 L -6 -23 L 10 -23 L 12 -13 Z " +
         // Water-monitor towers & radar mast
         "M -30 0 L -30 -10 M -33 -10 L -27 -10 " +
         "M 30 0 L 30 -9 M 27 -9 L 33 -9 " +

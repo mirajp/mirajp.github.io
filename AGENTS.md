@@ -28,11 +28,11 @@ npm run generate:og # Regenerate public/og-image.png
   GitHub Pages with no server or database.
 - Ship zero framework JavaScript on content routes (`/about/`,
   `/blog/*`, `/colophon/`, `/photos/`, `/projects/`, `/resume/`).
-- Keep the command palette (`<dialog id="cmdk-dialog">`, `⌘K`) and the
-  header switcher (`src/components/ThemeToggle.astro`) in plain
-  JavaScript.
+- Keep the command palette (`<dialog id="cmdk-dialog">`, `⌘K`), `<head>`
+  initializer (`src/components/ThemeInit.astro`), and header switcher
+  (`src/components/ThemeToggle.astro`) in plain JavaScript.
 - Restrict React 19 islands to `<NycHero>`
-  (`src/components/NycBackground/`) and the `/tools/*` apps
+  (`src/components/NycBackground/`) and the six `/tools/*` apps
   (`src/components/tools/*.tsx`).
 - Edit structured data in `src/data/` (`site.ts`, `experience.ts`,
   `projects.ts`, `photos.ts`) and posts in `src/content/blog/`. Do not
@@ -122,6 +122,10 @@ radii, or shared UI components. Keep `public/DESIGN.md` and
   - Portaled `SeasonSpinner` dialog: `z-150`.
 - Re-tint skyline ink, SVG strokes, and paper-mask fills from
   `THEME_INK_PALETTES` across all six theme-and-mode combinations.
+- Maintain strict three-layer SVG depth ordering in `systems.tsx`:
+  `city-and-waterfront` (back), `sky-and-aerial` (mid), and
+  `harbor-forefront` (front, sorted ascending by hull-bottom
+  `waterlineY` with opaque `var(--background)` silhouette backing).
 - Honor `prefers-reduced-motion: reduce` across CSS transitions,
   `.nyc-ink-path` animations, and the `requestAnimationFrame` loop.
 

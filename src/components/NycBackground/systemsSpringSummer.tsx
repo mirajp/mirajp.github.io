@@ -1,8 +1,14 @@
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactElement } from "react";
 import { SVG_PATHS } from "./paths";
 import { SHAPED_FIREWORK_SHELLS } from "./pathsCityDetails";
 import type { SceneState } from "./state";
 import { strokePx } from "./utils";
+
+export interface HarborRenderItem {
+  waterlineY: number;
+  orderTieBreaker: number;
+  element: ReactElement;
+}
 
 export interface SpringSummerDomRefs {
   // St. Patrick's
@@ -177,11 +183,11 @@ function renderKaiHandsFace(swMain: number, mask: string) {
   );
 }
 
-export function renderSpringSummerSvgElements(
+export function renderSpringSummerAerialSvgElements(
   scene: SceneState,
   refs: SpringSummerDomRefs,
   baseScale: number,
-  isDark: boolean,
+  _isDark: boolean,
   colors: {
     sketch: string;
     accent: string;
@@ -190,8 +196,7 @@ export function renderSpringSummerSvgElements(
     paperMask?: string;
   },
 ) {
-  const paperMaskFill =
-    colors.paperMask ?? "color-mix(in srgb, var(--background) 92%, transparent)";
+  const paperMaskFill = colors.paperMask ?? "var(--background)";
 
   return (
     <>
@@ -370,64 +375,6 @@ export function renderSpringSummerSvgElements(
                 strokeWidth={swFine}
               />
             </g>
-          </g>
-        );
-      })}
-
-      {scene.emeraldBoats.map((_, i) => {
-        const slot = (refs.emeraldBoats[i] ??= { group: null, wake: null });
-        const s = baseScale * 0.95;
-        const sw = strokePx(1.1, s);
-        return (
-          <g
-            key={`emerald-boat-${i}`}
-            ref={(el) => {
-              slot.group = el;
-            }}
-            data-entity="emerald-ferry"
-          >
-            <path
-              ref={(el) => {
-                slot.wake = el;
-              }}
-              d={SVG_PATHS.stPatricks.emeraldBoat.emeraldWake}
-              pathLength={1}
-              strokeDasharray="0.48 0.52"
-              stroke={colors.primary}
-              strokeWidth={strokePx(0.95, s)}
-            />
-            <path
-              d={SVG_PATHS.stPatricks.emeraldBoat.hull}
-              fill={paperMaskFill}
-              pathLength={1}
-              className="nyc-ink-path"
-              style={drawDelay(i * 2, 55)}
-              strokeWidth={sw}
-            />
-            <path
-              d={SVG_PATHS.stPatricks.emeraldBoat.buntingAndShamrock}
-              stroke={colors.primary}
-              strokeWidth={strokePx(0.85, s)}
-            />
-            {isDark && (
-              <g data-entity="boat-night-lights">
-                <path
-                  d="M -18 -6 L -12 -6 M -5 -6 L 1 -6 M 8 -6 L 14 -6 M -10 -17.5 L 8 -17.5"
-                  stroke="#fde68a"
-                  strokeWidth={strokePx(1.85, s)}
-                  opacity={0.92}
-                />
-                <path
-                  d="M -30 12.5 L 32 12.5"
-                  stroke="#fbbf24"
-                  strokeWidth={strokePx(0.95, s)}
-                  opacity={0.42}
-                />
-                <circle cx={38} cy={-1} r={1.25} fill="#4ade80" stroke="none" />
-                <circle cx={-36} cy={-1} r={1.2} fill="#f87171" stroke="none" />
-                <circle cx={0} cy={-40} r={1.45} fill="#4ade80" stroke="none" />
-              </g>
-            )}
           </g>
         );
       })}
@@ -642,62 +589,6 @@ export function renderSpringSummerSvgElements(
         );
       })}
 
-      {scene.springBoats.map((_, i) => {
-        const slot = (refs.springBoats[i] ??= { group: null, tulips: null });
-        const s = baseScale * 0.95;
-        return (
-          <g
-            key={`spring-boat-${i}`}
-            ref={(el) => {
-              slot.group = el;
-            }}
-            data-entity="spring-tulip-boat"
-          >
-            <path
-              d={SVG_PATHS.easter.springBoat.hull}
-              fill={paperMaskFill}
-              pathLength={1}
-              className="nyc-ink-path"
-              style={drawDelay(i * 2, 55)}
-              strokeWidth={strokePx(1.1, s)}
-            />
-            <g
-              ref={(el) => {
-                slot.tulips = el;
-              }}
-            >
-              <path
-                d={SVG_PATHS.easter.springBoat.tulips}
-                stroke={colors.accent}
-                pathLength={1}
-                className="nyc-ink-path"
-                style={drawDelay(i * 2 + 1, 55)}
-                strokeWidth={strokePx(0.95, s)}
-              />
-            </g>
-            {isDark && (
-              <g data-entity="boat-night-lights">
-                <path
-                  d="M -22 -3 L -16 -3 M -8 -3 L -2 -3"
-                  stroke="#fde68a"
-                  strokeWidth={strokePx(1.85, s)}
-                  opacity={0.92}
-                />
-                <path
-                  d="M -28 12.5 L 32 12.5"
-                  stroke="#fbbf24"
-                  strokeWidth={strokePx(0.95, s)}
-                  opacity={0.4}
-                />
-                <circle cx={39} cy={1} r={1.25} fill="#4ade80" stroke="none" />
-                <circle cx={-36} cy={1} r={1.2} fill="#f87171" stroke="none" />
-                <circle cx={2} cy={-10} r={1.3} fill="#fef08a" stroke="none" />
-              </g>
-            )}
-          </g>
-        );
-      })}
-
       {scene.blossomPetals.map((petal, i) => {
         const s = baseScale * petal.scale * 0.95;
         return (
@@ -826,250 +717,6 @@ export function renderSpringSummerSvgElements(
               y2={14}
               strokeWidth={sw}
             />
-          </g>
-        );
-      })}
-
-      {scene.summerDogs.map((dog, i) => {
-        const slot = (refs.summerDogs[i] ??= {
-          group: null,
-          bandana: null,
-          wake: null,
-        });
-        const s = baseScale * dog.scale;
-        const swMain = strokePx(1.2, s);
-        const swFine = strokePx(0.85, s);
-        const gear = SVG_PATHS.summer.summerDogGear;
-        return (
-          <g key={`summer-dog-wrap-${i}`} data-entity="kai-summer">
-            <path
-              ref={(el) => {
-                slot.wake = el;
-              }}
-              d="M 0 0 L -80 0"
-              pathLength={1}
-              strokeDasharray="0.5 0.5"
-              stroke={colors.primary}
-              strokeWidth={1.05}
-            />
-            <g
-              ref={(el) => {
-                slot.group = el;
-              }}
-            >
-              <path
-                d={gear.surfboard}
-                fill={paperMaskFill}
-                stroke={colors.primary}
-                pathLength={1}
-                className="nyc-ink-path"
-                style={drawDelay(1, 55)}
-                strokeWidth={swMain}
-              />
-              <path
-                d={gear.waterWave}
-                stroke={colors.primary}
-                strokeWidth={swFine}
-              />
-              {renderKaiBody(swMain, paperMaskFill)}
-              <g
-                ref={(el) => {
-                  slot.bandana = el;
-                }}
-              >
-                <path
-                  d={gear.bandana}
-                  fill={colors.accent}
-                  fillOpacity={0.2}
-                  stroke={colors.accent}
-                  strokeWidth={swMain}
-                />
-              </g>
-              {renderKaiHandsFace(swMain, paperMaskFill)}
-              {/* Aviator sunglasses + backwards summer sun-cap */}
-              <path
-                d={gear.aviators}
-                fill={paperMaskFill}
-                strokeWidth={swFine}
-              />
-              <path
-                d={gear.sunCap}
-                fill={colors.gold}
-                fillOpacity={0.22}
-                stroke={colors.gold}
-                pathLength={1}
-                className="nyc-ink-path"
-                style={drawDelay(3, 55)}
-                strokeWidth={swMain}
-              />
-            </g>
-          </g>
-        );
-      })}
-
-      {scene.summerBoats.map((boat, i) => {
-        const slot = (refs.summerBoats[i] ??= {
-          group: null,
-          umbrella: null,
-          kite1Group: null,
-          kite1String: null,
-          kite1Tail: null,
-          kite2Group: null,
-          kite2String: null,
-          kite2Tail: null,
-        });
-        const s = baseScale * 0.98;
-        const sw = strokePx(1.1, s);
-        const swFine = strokePx(0.85, s);
-        const kiteColor1 =
-          i % 3 === 0 ? colors.accent : i % 3 === 1 ? colors.gold : colors.primary;
-        const kiteColor2 = colors.primary;
-        return (
-          <g
-            key={`summer-boat-${i}`}
-            ref={(el) => {
-              slot.group = el;
-            }}
-            data-entity="summer-kite-barge"
-          >
-            {/* Kite strings (behind kites, anchored to deck flyers' raised hands) */}
-            <path
-              ref={(el) => {
-                slot.kite1String = el;
-              }}
-              d="M -19 -21 Q -42 -62 -76 -110"
-              strokeWidth={strokePx(0.75, s)}
-              opacity={0.85}
-            />
-            {boat.twinKites && (
-              <path
-                ref={(el) => {
-                  slot.kite2String = el;
-                }}
-                d="M -39 -19 Q -68 -50 -106 -86"
-                strokeWidth={strokePx(0.72, s)}
-                opacity={0.82}
-              />
-            )}
-
-            {/* Primary diamond kite + fluttering ribbon tail */}
-            <g
-              ref={(el) => {
-                slot.kite1Group = el;
-              }}
-              transform="translate(-76, -112) rotate(-22)"
-            >
-              <path
-                ref={(el) => {
-                  slot.kite1Tail = el;
-                }}
-                d={SVG_PATHS.summer.summerBoat.kiteTailStatic}
-                stroke={kiteColor1}
-                strokeWidth={swFine}
-              />
-              <path
-                d={SVG_PATHS.summer.summerBoat.diamondKite}
-                fill={paperMaskFill}
-                stroke={kiteColor1}
-                pathLength={1}
-                className="nyc-ink-path"
-                style={drawDelay(i * 2 + 1, 55)}
-                strokeWidth={sw}
-              />
-            </g>
-
-            {/* Optional second kite flown by stern companion */}
-            {boat.twinKites && (
-              <g
-                ref={(el) => {
-                  slot.kite2Group = el;
-                }}
-                transform="translate(-106, -88) scale(0.86) rotate(-26)"
-              >
-                <path
-                  ref={(el) => {
-                    slot.kite2Tail = el;
-                  }}
-                  d={SVG_PATHS.summer.summerBoat.kiteTailStatic}
-                  stroke={kiteColor2}
-                  strokeWidth={swFine}
-                />
-                <path
-                  d={SVG_PATHS.summer.summerBoat.diamondKite}
-                  fill={paperMaskFill}
-                  stroke={kiteColor2}
-                  pathLength={1}
-                  className="nyc-ink-path"
-                  style={drawDelay(i * 2 + 2, 55)}
-                  strokeWidth={sw}
-                />
-              </g>
-            )}
-
-            {/* People on barge deck holding kite strings */}
-            <path
-              d={SVG_PATHS.summer.summerBoat.kiteFlyerPrimary}
-              pathLength={1}
-              className="nyc-ink-path"
-              style={drawDelay(i * 2, 45)}
-              strokeWidth={sw}
-            />
-            <path
-              d={SVG_PATHS.summer.summerBoat.kiteFlyerSecondary}
-              pathLength={1}
-              className="nyc-ink-path"
-              style={drawDelay(i * 2 + 1, 45)}
-              strokeWidth={sw}
-            />
-
-            {/* Barge hull, ice-cream cabin & beach umbrella */}
-            <path
-              d={SVG_PATHS.summer.summerBoat.hull}
-              fill={paperMaskFill}
-              pathLength={1}
-              className="nyc-ink-path"
-              style={drawDelay(i * 2, 55)}
-              strokeWidth={sw}
-            />
-            <path
-              d={SVG_PATHS.summer.summerBoat.iceCreamCone}
-              fill={paperMaskFill}
-              stroke={colors.gold}
-              strokeWidth={swFine}
-            />
-            <path d={SVG_PATHS.summer.summerBoat.umbrellaPole} strokeWidth={swFine} />
-            <g
-              ref={(el) => {
-                slot.umbrella = el;
-              }}
-            >
-              <path
-                d={SVG_PATHS.summer.summerBoat.umbrellaCanopy}
-                fill={colors.accent}
-                fillOpacity={0.2}
-                stroke={colors.accent}
-                strokeWidth={swFine}
-              />
-            </g>
-            {isDark && (
-              <g data-entity="boat-night-lights">
-                <path
-                  d="M 15 -3 L 21 -3 M 27 -3 L 33 -3"
-                  stroke="#fde68a"
-                  strokeWidth={strokePx(1.9, s)}
-                  opacity={0.92}
-                />
-                <path
-                  d="M -38 12.5 L 40 12.5"
-                  stroke="#fbbf24"
-                  strokeWidth={strokePx(0.95, s)}
-                  opacity={0.42}
-                />
-                <circle cx={48} cy={1} r={1.25} fill="#4ade80" stroke="none" />
-                <circle cx={-45} cy={1} r={1.2} fill="#f87171" stroke="none" />
-                <circle cx={24} cy={-10} r={1.3} fill="#fef08a" stroke="none" />
-              </g>
-            )}
           </g>
         );
       })}
@@ -1223,86 +870,6 @@ export function renderSpringSummerSvgElements(
         );
       })}
 
-      {scene.fireboats.map((_, i) => {
-        const slot = (refs.fireboats[i] ??= {
-          group: null,
-          arch1: null,
-          arch2: null,
-          arch3: null,
-        });
-        const s = baseScale * 0.96;
-        const sw = strokePx(1.1, s);
-        const swSpray = strokePx(0.95, s);
-        return (
-          <g
-            key={`fireboat-${i}`}
-            ref={(el) => {
-              slot.group = el;
-            }}
-            data-entity="fdny-fireboat"
-          >
-            <path
-              ref={(el) => {
-                slot.arch1 = el;
-              }}
-              d={SVG_PATHS.july4th.fireboat.archBack}
-              pathLength={1}
-              strokeDasharray="0.24 0.16"
-              stroke={colors.primary}
-              strokeWidth={swSpray}
-            />
-            <path
-              ref={(el) => {
-                slot.arch2 = el;
-              }}
-              d={SVG_PATHS.july4th.fireboat.archMid}
-              pathLength={1}
-              strokeDasharray="0.24 0.16"
-              stroke={colors.accent}
-              strokeWidth={swSpray}
-            />
-            <path
-              ref={(el) => {
-                slot.arch3 = el;
-              }}
-              d={SVG_PATHS.july4th.fireboat.archFront}
-              pathLength={1}
-              strokeDasharray="0.24 0.16"
-              stroke={colors.primary}
-              strokeWidth={swSpray}
-            />
-            <path
-              d={SVG_PATHS.july4th.fireboat.hull}
-              fill={paperMaskFill}
-              pathLength={1}
-              className="nyc-ink-path"
-              style={drawDelay(i * 2, 55)}
-              strokeWidth={sw}
-            />
-            {isDark && (
-              <g data-entity="boat-night-lights">
-                <path
-                  d="M -14 -6 L -8 -6 M -1 -6 L 5 -6 M 11 -6 L 16 -6 M -4 -18 L 8 -18"
-                  stroke="#fde68a"
-                  strokeWidth={strokePx(1.85, s)}
-                  opacity={0.92}
-                />
-                <path
-                  d="M -34 12.5 L 40 12.5"
-                  stroke="#fbbf24"
-                  strokeWidth={strokePx(0.95, s)}
-                  opacity={0.42}
-                />
-                <circle cx={46} cy={-4} r={1.25} fill="#4ade80" stroke="none" />
-                <circle cx={-38} cy={-1} r={1.2} fill="#f87171" stroke="none" />
-                <circle cx={2} cy={-31.5} r={2.8} fill="#ef4444" fillOpacity={0.34} stroke="none" />
-                <circle cx={2} cy={-31.5} r={1.3} fill="#fca5a5" stroke="none" />
-              </g>
-            )}
-          </g>
-        );
-      })}
-
       {/* ================================================================== */}
       {/* DIWALI — Festival of Lights                                        */}
       {/* ================================================================== */}
@@ -1450,60 +1017,550 @@ export function renderSpringSummerSvgElements(
           </g>
         );
       })}
+    </>
+  );
+}
 
-      {scene.diwaliBoats.map((_, i) => {
-        const slot = (refs.diwaliBoats[i] ??= { group: null, flames: null });
-        const s = baseScale * 0.98;
-        const sw = strokePx(1.1, s);
-        const swFine = strokePx(0.85, s);
-        return (
+export function collectSpringSummerHarborItems(
+  scene: SceneState,
+  refs: SpringSummerDomRefs,
+  baseScale: number,
+  isDark: boolean,
+  colors: {
+    sketch: string;
+    accent: string;
+    primary: string;
+    gold: string;
+    paperMask?: string;
+  },
+  startOrder = 1000,
+): HarborRenderItem[] {
+  const paperMaskFill = colors.paperMask ?? "var(--background)";
+  const items: HarborRenderItem[] = [];
+  let seq = startOrder;
+
+  scene.emeraldBoats.forEach((boat, i) => {
+    const slot = (refs.emeraldBoats[i] ??= { group: null, wake: null });
+    const s = baseScale * 0.95;
+    const sw = strokePx(1.1, s);
+    items.push({
+      waterlineY: boat.y + 10 * s,
+      orderTieBreaker: seq++,
+      element: (
+        <g
+          key={`emerald-boat-${i}`}
+          ref={(el) => {
+            slot.group = el;
+          }}
+          data-entity="emerald-ferry"
+        >
+          <path
+            ref={(el) => {
+              slot.wake = el;
+            }}
+            d={SVG_PATHS.stPatricks.emeraldBoat.emeraldWake}
+            pathLength={1}
+            strokeDasharray="0.48 0.52"
+            stroke={colors.primary}
+            strokeWidth={strokePx(0.95, s)}
+          />
+          <path
+            d={SVG_PATHS.stPatricks.emeraldBoat.hull}
+            fill={paperMaskFill}
+            pathLength={1}
+            className="nyc-ink-path"
+            style={drawDelay(i * 2, 55)}
+            strokeWidth={sw}
+          />
+          <path
+            d={SVG_PATHS.stPatricks.emeraldBoat.buntingAndShamrock}
+            stroke={colors.primary}
+            strokeWidth={strokePx(0.85, s)}
+          />
+          {isDark && (
+            <g data-entity="boat-night-lights">
+              <path
+                d="M -18 -6 L -12 -6 M -5 -6 L 1 -6 M 8 -6 L 14 -6 M -10 -17.5 L 8 -17.5"
+                stroke="#fde68a"
+                strokeWidth={strokePx(1.85, s)}
+                opacity={0.92}
+              />
+              <path
+                d="M -30 12.5 L 32 12.5"
+                stroke="#fbbf24"
+                strokeWidth={strokePx(0.95, s)}
+                opacity={0.42}
+              />
+              <circle cx={38} cy={-1} r={1.25} fill="#4ade80" stroke="none" />
+              <circle cx={-36} cy={-1} r={1.2} fill="#f87171" stroke="none" />
+              <circle cx={0} cy={-40} r={1.45} fill="#4ade80" stroke="none" />
+            </g>
+          )}
+        </g>
+      ),
+    });
+  });
+
+  scene.springBoats.forEach((boat, i) => {
+    const slot = (refs.springBoats[i] ??= { group: null, tulips: null });
+    const s = baseScale * 0.95;
+    items.push({
+      waterlineY: boat.y + 10 * s,
+      orderTieBreaker: seq++,
+      element: (
+        <g
+          key={`spring-boat-${i}`}
+          ref={(el) => {
+            slot.group = el;
+          }}
+          data-entity="spring-tulip-boat"
+        >
+          <path
+            d={SVG_PATHS.easter.springBoat.hull}
+            fill={paperMaskFill}
+            pathLength={1}
+            className="nyc-ink-path"
+            style={drawDelay(i * 2, 55)}
+            strokeWidth={strokePx(1.1, s)}
+          />
           <g
-            key={`diwali-boat-${i}`}
+            ref={(el) => {
+              slot.tulips = el;
+            }}
+          >
+            <path
+              d={SVG_PATHS.easter.springBoat.tulips}
+              fill={paperMaskFill}
+              stroke={colors.accent}
+              pathLength={1}
+              className="nyc-ink-path"
+              style={drawDelay(i * 2 + 1, 55)}
+              strokeWidth={strokePx(0.95, s)}
+            />
+          </g>
+          {isDark && (
+            <g data-entity="boat-night-lights">
+              <path
+                d="M -22 -3 L -16 -3 M -8 -3 L -2 -3"
+                stroke="#fde68a"
+                strokeWidth={strokePx(1.85, s)}
+                opacity={0.92}
+              />
+              <path
+                d="M -28 12.5 L 32 12.5"
+                stroke="#fbbf24"
+                strokeWidth={strokePx(0.95, s)}
+                opacity={0.4}
+              />
+              <circle cx={39} cy={1} r={1.25} fill="#4ade80" stroke="none" />
+              <circle cx={-36} cy={1} r={1.2} fill="#f87171" stroke="none" />
+              <circle cx={2} cy={-10} r={1.3} fill="#fef08a" stroke="none" />
+            </g>
+          )}
+        </g>
+      ),
+    });
+  });
+
+  scene.summerDogs.forEach((dog, i) => {
+    const slot = (refs.summerDogs[i] ??= {
+      group: null,
+      bandana: null,
+      wake: null,
+    });
+    const s = baseScale * dog.scale;
+    const swMain = strokePx(1.2, s);
+    const swFine = strokePx(0.85, s);
+    const gear = SVG_PATHS.summer.summerDogGear;
+    items.push({
+      waterlineY: dog.baseY + 180 * s,
+      orderTieBreaker: seq++,
+      element: (
+        <g key={`summer-dog-wrap-${i}`} data-entity="kai-summer">
+          <path
+            ref={(el) => {
+              slot.wake = el;
+            }}
+            d="M 0 0 L -80 0"
+            pathLength={1}
+            strokeDasharray="0.5 0.5"
+            stroke={colors.primary}
+            strokeWidth={1.05}
+          />
+          <g
             ref={(el) => {
               slot.group = el;
             }}
-            data-entity="diwali-diya-boat"
           >
             <path
-              d={SVG_PATHS.diwali.diwaliBoat.hull}
+              d={gear.surfboard}
               fill={paperMaskFill}
+              stroke={colors.primary}
               pathLength={1}
               className="nyc-ink-path"
-              style={drawDelay(i * 2, 55)}
-              strokeWidth={sw}
+              style={drawDelay(1, 55)}
+              strokeWidth={swMain}
             />
             <path
-              d={SVG_PATHS.diwali.diwaliBoat.diyaBowls}
+              d={gear.waterWave}
+              stroke={colors.primary}
+              strokeWidth={swFine}
+            />
+            {renderKaiBody(swMain, paperMaskFill)}
+            <g
+              ref={(el) => {
+                slot.bandana = el;
+              }}
+            >
+              <path d={gear.bandana} fill={paperMaskFill} stroke="none" />
+              <path
+                d={gear.bandana}
+                fill={colors.accent}
+                fillOpacity={0.2}
+                stroke={colors.accent}
+                strokeWidth={swMain}
+              />
+            </g>
+            {renderKaiHandsFace(swMain, paperMaskFill)}
+            <path
+              d={gear.aviators}
               fill={paperMaskFill}
+              strokeWidth={swFine}
+            />
+            <path d={gear.sunCap} fill={paperMaskFill} stroke="none" />
+            <path
+              d={gear.sunCap}
+              fill={colors.gold}
+              fillOpacity={0.22}
+              stroke={colors.gold}
+              pathLength={1}
+              className="nyc-ink-path"
+              style={drawDelay(3, 55)}
+              strokeWidth={swMain}
+            />
+          </g>
+        </g>
+      ),
+    });
+  });
+
+  scene.summerBoats.forEach((boat, i) => {
+    const slot = (refs.summerBoats[i] ??= {
+      group: null,
+      umbrella: null,
+      kite1Group: null,
+      kite1String: null,
+      kite1Tail: null,
+      kite2Group: null,
+      kite2String: null,
+      kite2Tail: null,
+    });
+    const s = baseScale * 0.98;
+    const sw = strokePx(1.1, s);
+    const swFine = strokePx(0.85, s);
+    const kiteColor1 =
+      i % 3 === 0 ? colors.accent : i % 3 === 1 ? colors.gold : colors.primary;
+    const kiteColor2 = colors.primary;
+    items.push({
+      waterlineY: boat.y + 10 * s,
+      orderTieBreaker: seq++,
+      element: (
+        <g
+          key={`summer-boat-${i}`}
+          ref={(el) => {
+            slot.group = el;
+          }}
+          data-entity="summer-kite-barge"
+        >
+          <path
+            ref={(el) => {
+              slot.kite1String = el;
+            }}
+            d="M -19 -21 Q -42 -62 -76 -110"
+            strokeWidth={strokePx(0.75, s)}
+            opacity={0.85}
+          />
+          {boat.twinKites && (
+            <path
+              ref={(el) => {
+                slot.kite2String = el;
+              }}
+              d="M -39 -19 Q -68 -50 -106 -86"
+              strokeWidth={strokePx(0.72, s)}
+              opacity={0.82}
+            />
+          )}
+
+          <g
+            ref={(el) => {
+              slot.kite1Group = el;
+            }}
+            transform="translate(-76, -112) rotate(-22)"
+          >
+            <path
+              ref={(el) => {
+                slot.kite1Tail = el;
+              }}
+              d={SVG_PATHS.summer.summerBoat.kiteTailStatic}
+              stroke={kiteColor1}
+              strokeWidth={swFine}
+            />
+            <path
+              d={SVG_PATHS.summer.summerBoat.diamondKite}
+              fill={paperMaskFill}
+              stroke={kiteColor1}
+              pathLength={1}
+              className="nyc-ink-path"
+              style={drawDelay(i * 2 + 1, 55)}
+              strokeWidth={sw}
+            />
+          </g>
+
+          {boat.twinKites && (
+            <g
+              ref={(el) => {
+                slot.kite2Group = el;
+              }}
+              transform="translate(-106, -88) scale(0.86) rotate(-26)"
+            >
+              <path
+                ref={(el) => {
+                  slot.kite2Tail = el;
+                }}
+                d={SVG_PATHS.summer.summerBoat.kiteTailStatic}
+                stroke={kiteColor2}
+                strokeWidth={swFine}
+              />
+              <path
+                d={SVG_PATHS.summer.summerBoat.diamondKite}
+                fill={paperMaskFill}
+                stroke={kiteColor2}
+                pathLength={1}
+                className="nyc-ink-path"
+                style={drawDelay(i * 2 + 2, 55)}
+                strokeWidth={sw}
+              />
+            </g>
+          )}
+
+          <path
+            d={SVG_PATHS.summer.summerBoat.kiteFlyerPrimary}
+            pathLength={1}
+            className="nyc-ink-path"
+            style={drawDelay(i * 2, 45)}
+            strokeWidth={sw}
+          />
+          <path
+            d={SVG_PATHS.summer.summerBoat.kiteFlyerSecondary}
+            pathLength={1}
+            className="nyc-ink-path"
+            style={drawDelay(i * 2 + 1, 45)}
+            strokeWidth={sw}
+          />
+
+          <path
+            d={SVG_PATHS.summer.summerBoat.hull}
+            fill={paperMaskFill}
+            pathLength={1}
+            className="nyc-ink-path"
+            style={drawDelay(i * 2, 55)}
+            strokeWidth={sw}
+          />
+          <path
+            d={SVG_PATHS.summer.summerBoat.iceCreamCone}
+            fill={paperMaskFill}
+            stroke={colors.gold}
+            strokeWidth={swFine}
+          />
+          <path d={SVG_PATHS.summer.summerBoat.umbrellaPole} strokeWidth={swFine} />
+          <g
+            ref={(el) => {
+              slot.umbrella = el;
+            }}
+          >
+            <path
+              d={SVG_PATHS.summer.summerBoat.umbrellaCanopy}
+              fill={paperMaskFill}
+              stroke="none"
+            />
+            <path
+              d={SVG_PATHS.summer.summerBoat.umbrellaCanopy}
+              fill={colors.accent}
+              fillOpacity={0.2}
               stroke={colors.accent}
               strokeWidth={swFine}
             />
-            <g
-              ref={(el) => {
-                slot.flames = el;
-              }}
-            >
-              <path
-                d={SVG_PATHS.diwali.diwaliBoat.diyaFlames}
-                fill={colors.gold}
-                fillOpacity={0.35}
-                stroke={colors.gold}
-                strokeWidth={swFine}
-              />
-            </g>
-            {isDark && (
-              <path
-                d="M -34 14.5 L 36 14.5 M -18 17 L 20 17"
-                stroke="#fbbf24"
-                strokeWidth={strokePx(1.0, s)}
-                opacity={0.46}
-              />
-            )}
           </g>
-        );
-      })}
-    </>
-  );
+          {isDark && (
+            <g data-entity="boat-night-lights">
+              <path
+                d="M 15 -3 L 21 -3 M 27 -3 L 33 -3"
+                stroke="#fde68a"
+                strokeWidth={strokePx(1.9, s)}
+                opacity={0.92}
+              />
+              <path
+                d="M -38 12.5 L 40 12.5"
+                stroke="#fbbf24"
+                strokeWidth={strokePx(0.95, s)}
+                opacity={0.42}
+              />
+              <circle cx={48} cy={1} r={1.25} fill="#4ade80" stroke="none" />
+              <circle cx={-45} cy={1} r={1.2} fill="#f87171" stroke="none" />
+              <circle cx={24} cy={-10} r={1.3} fill="#fef08a" stroke="none" />
+            </g>
+          )}
+        </g>
+      ),
+    });
+  });
+
+  scene.fireboats.forEach((boat, i) => {
+    const slot = (refs.fireboats[i] ??= {
+      group: null,
+      arch1: null,
+      arch2: null,
+      arch3: null,
+    });
+    const s = baseScale * 0.96;
+    const sw = strokePx(1.1, s);
+    const swSpray = strokePx(0.95, s);
+    items.push({
+      waterlineY: boat.y + 10 * s,
+      orderTieBreaker: seq++,
+      element: (
+        <g
+          key={`fireboat-${i}`}
+          ref={(el) => {
+            slot.group = el;
+          }}
+          data-entity="fdny-fireboat"
+        >
+          <path
+            ref={(el) => {
+              slot.arch1 = el;
+            }}
+            d={SVG_PATHS.july4th.fireboat.archBack}
+            pathLength={1}
+            strokeDasharray="0.24 0.16"
+            stroke={colors.primary}
+            strokeWidth={swSpray}
+          />
+          <path
+            ref={(el) => {
+              slot.arch2 = el;
+            }}
+            d={SVG_PATHS.july4th.fireboat.archMid}
+            pathLength={1}
+            strokeDasharray="0.24 0.16"
+            stroke={colors.accent}
+            strokeWidth={swSpray}
+          />
+          <path
+            ref={(el) => {
+              slot.arch3 = el;
+            }}
+            d={SVG_PATHS.july4th.fireboat.archFront}
+            pathLength={1}
+            strokeDasharray="0.24 0.16"
+            stroke={colors.primary}
+            strokeWidth={swSpray}
+          />
+          <path
+            d={SVG_PATHS.july4th.fireboat.hull}
+            fill={paperMaskFill}
+            pathLength={1}
+            className="nyc-ink-path"
+            style={drawDelay(i * 2, 55)}
+            strokeWidth={sw}
+          />
+          {isDark && (
+            <g data-entity="boat-night-lights">
+              <path
+                d="M -14 -6 L -8 -6 M -1 -6 L 5 -6 M 11 -6 L 16 -6 M -4 -18 L 8 -18"
+                stroke="#fde68a"
+                strokeWidth={strokePx(1.85, s)}
+                opacity={0.92}
+              />
+              <path
+                d="M -34 12.5 L 40 12.5"
+                stroke="#fbbf24"
+                strokeWidth={strokePx(0.95, s)}
+                opacity={0.42}
+              />
+              <circle cx={46} cy={-4} r={1.25} fill="#4ade80" stroke="none" />
+              <circle cx={-38} cy={-1} r={1.2} fill="#f87171" stroke="none" />
+              <circle cx={2} cy={-31.5} r={2.8} fill="#ef4444" fillOpacity={0.34} stroke="none" />
+              <circle cx={2} cy={-31.5} r={1.3} fill="#fca5a5" stroke="none" />
+            </g>
+          )}
+        </g>
+      ),
+    });
+  });
+
+  scene.diwaliBoats.forEach((boat, i) => {
+    const slot = (refs.diwaliBoats[i] ??= { group: null, flames: null });
+    const s = baseScale * 0.98;
+    const sw = strokePx(1.1, s);
+    const swFine = strokePx(0.85, s);
+    items.push({
+      waterlineY: boat.y + 12 * s,
+      orderTieBreaker: seq++,
+      element: (
+        <g
+          key={`diwali-boat-${i}`}
+          ref={(el) => {
+            slot.group = el;
+          }}
+          data-entity="diwali-diya-boat"
+        >
+          <path
+            d={SVG_PATHS.diwali.diwaliBoat.hull}
+            fill={paperMaskFill}
+            pathLength={1}
+            className="nyc-ink-path"
+            style={drawDelay(i * 2, 55)}
+            strokeWidth={sw}
+          />
+          <path
+            d={SVG_PATHS.diwali.diwaliBoat.diyaBowls}
+            fill={paperMaskFill}
+            stroke={colors.accent}
+            strokeWidth={swFine}
+          />
+          <g
+            ref={(el) => {
+              slot.flames = el;
+            }}
+          >
+            <path
+              d={SVG_PATHS.diwali.diwaliBoat.diyaFlames}
+              fill={paperMaskFill}
+              stroke="none"
+            />
+            <path
+              d={SVG_PATHS.diwali.diwaliBoat.diyaFlames}
+              fill={colors.gold}
+              fillOpacity={0.35}
+              stroke={colors.gold}
+              strokeWidth={swFine}
+            />
+          </g>
+          {isDark && (
+            <path
+              d="M -34 14.5 L 36 14.5 M -18 17 L 20 17"
+              stroke="#fbbf24"
+              strokeWidth={strokePx(1.0, s)}
+              opacity={0.46}
+            />
+          )}
+        </g>
+      ),
+    });
+  });
+
+  return items;
 }
 
 // ============================================================================

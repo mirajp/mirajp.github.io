@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import { DEFAULT_CONFIG } from "./config";
 import { SVG_PATHS } from "./paths";
-import type { SceneState } from "./state";
+import { SHIP_KEEL_Y, type SceneState } from "./state";
 import {
   type CityDetailsDomRefs,
   createEmptyCityDetailsRefs,
@@ -9,9 +9,11 @@ import {
   updateCityDetailsDom,
 } from "./systemsCityDetails";
 import {
+  type HarborRenderItem,
   type SpringSummerDomRefs,
+  collectSpringSummerHarborItems,
   createEmptySpringSummerRefs,
-  renderSpringSummerSvgElements,
+  renderSpringSummerAerialSvgElements,
   updateSpringSummerDom,
 } from "./systemsSpringSummer";
 import { approachAngle, smoothstep, strokePx } from "./utils";
@@ -194,11 +196,673 @@ export function renderSceneSvgElements(
   const darkFillSoft = isDark
     ? `rgba(42, 54, 50, ${(0.82 * inkMultiplier).toFixed(2)})`
     : `rgba(64, 76, 72, ${(0.72 * inkMultiplier).toFixed(2)})`;
-  const paperMaskFill =
-    colors.paperMask ?? "color-mix(in srgb, var(--background) 92%, transparent)";
+  const paperMaskFill = colors.paperMask ?? "var(--background)";
+
+  // Collect all harbor watercraft into a single Y-sorted forefront layer so:
+  //   1. Every boat sits in front of skyline facade details and waterfront props
+  //      (snowmen, black cats, jack-o'-lantern pumpkins).
+  //   2. Boats positioned higher up (smaller hull-bottom waterlineY, farther back)
+  //      render behind boats positioned lower down (larger waterlineY, closer to viewer).
+  const harborItems: HarborRenderItem[] = [];
+  let harborSeq = 0;
+
+  scene.iceFloes.forEach((floe, i) => {
+    const s = baseScale * floe.scale * 0.95;
+    const moveScale = baseScale * floe.scale * 0.9;
+    const iceStroke = isDark
+      ? "rgba(125, 211, 252, 0.86)"
+      : "rgba(14, 116, 144, 0.78)";
+    harborItems.push({
+      waterlineY: floe.y + 2.5 * moveScale,
+      orderTieBreaker: harborSeq++,
+      element: (
+        <g
+          key={`floe-${i}`}
+          ref={(el) => {
+            refs.iceFloes[i] = el;
+          }}
+          data-entity="river-iceberg"
+        >
+          <path
+            d={SVG_PATHS.iceFloes[floe.variant]}
+            fill={paperMaskFill}
+            stroke={iceStroke}
+            pathLength={1}
+            className="nyc-ink-path"
+            style={drawDelayStyle(i, 45)}
+            strokeWidth={strokePx(1.0, s)}
+          />
+        </g>
+      ),
+    });
+  });
+
+  scene.ships.forEach((ship, i) => {
+    const s = baseScale * 0.85;
+    const nl = SVG_PATHS.shipNightLights[ship.type];
+    harborItems.push({
+      waterlineY: ship.y + SHIP_KEEL_Y[ship.type] * s,
+      orderTieBreaker: harborSeq++,
+      element: (
+        <g
+          key={`ship-${i}`}
+          ref={(el) => {
+            refs.ships[i] = el;
+          }}
+          data-entity={`ship-${ship.type}`}
+        >
+          <path
+            d={SVG_PATHS.ships[ship.type]}
+            fill={paperMaskFill}
+            pathLength={1}
+            className="nyc-ink-path"
+            style={drawDelayStyle(i, 55)}
+            strokeWidth={strokePx(1.05, s)}
+          />
+          {isDark && (
+            <g data-entity="ship-night-lights">
+              <path
+                d={nl.reflection}
+                stroke="#fbbf24"
+                strokeWidth={strokePx(0.9, s)}
+                opacity={0.42}
+              />
+              <path
+                d={nl.windows}
+                stroke="#fde68a"
+                strokeWidth={strokePx(1.85, s)}
+                opacity={0.92}
+              />
+              <circle
+                cx={nl.bowLight[0]}
+                cy={nl.bowLight[1]}
+                r={1.25}
+                fill="#4ade80"
+                stroke="none"
+              />
+              <circle
+                cx={nl.sternLight[0]}
+                cy={nl.sternLight[1]}
+                r={1.2}
+                fill="#f87171"
+                stroke="none"
+              />
+              <circle
+                cx={nl.mastLight[0]}
+                cy={nl.mastLight[1]}
+                r={2.5}
+                fill="#fef08a"
+                fillOpacity={0.28}
+                stroke="none"
+              />
+              <circle
+                cx={nl.mastLight[0]}
+                cy={nl.mastLight[1]}
+                r={1.2}
+                fill="#fef08a"
+                stroke="none"
+              />
+            </g>
+          )}
+        </g>
+      ),
+    });
+  });
+
+  scene.statenIslandFerrys.forEach((ferry, i) => {
+    const slot = (refs.statenIslandFerrys[i] ??= {
+      group: null,
+      wake: null,
+    });
+    const s = baseScale * 0.98;
+    const swMain = strokePx(1.18, s);
+    const swFine = strokePx(0.88, s);
+    const orangeAlpha = Math.min(1, 0.58 + inkMultiplier * 0.45).toFixed(2);
+    const ferryOrangeStroke = isDark
+      ? `rgba(251, 122, 36, ${orangeAlpha})`
+      : `rgba(217, 83, 15, ${orangeAlpha})`;
+    const ferryOrangeWash = isDark
+      ? "rgba(234, 88, 12, 0.34)"
+      : "rgba(249, 115, 22, 0.24)";
+    const windowDayStroke = isDark
+      ? "#fde68a"
+      : `rgba(154, 52, 18, ${orangeAlpha})`;
+    const sif = SVG_PATHS.statenIslandFerry;
+
+    harborItems.push({
+      waterlineY: ferry.y + 9 * s,
+      orderTieBreaker: harborSeq++,
+      element: (
+        <g
+          key={`staten-island-ferry-${i}`}
+          ref={(el) => {
+            slot.group = el;
+          }}
+          data-entity="staten-island-ferry"
+        >
+          <path
+            ref={(el) => {
+              slot.wake = el;
+            }}
+            d={sif.wakeRipples}
+            pathLength={1}
+            strokeDasharray="0.46 0.54"
+            stroke={isDark ? "rgba(251, 146, 60, 0.52)" : colors.sketch}
+            strokeWidth={strokePx(0.9, s)}
+            opacity={0.78}
+          />
+
+          {/* Opaque background mask behind full ferry silhouette (hull, decks, wheelhouses & stack) */}
+          <path d={sif.hull} fill={paperMaskFill} stroke="none" />
+          <path d={sif.lowerDeck} fill={paperMaskFill} stroke="none" />
+          <path d={sif.upperDeck} fill={paperMaskFill} stroke="none" />
+          <path d={sif.pilotHousesAndStack} fill={paperMaskFill} stroke="none" />
+
+          <path
+            d={sif.hull}
+            fill={ferryOrangeWash}
+            stroke={ferryOrangeStroke}
+            pathLength={1}
+            className="nyc-ink-path"
+            style={drawDelayStyle(2, 55)}
+            strokeWidth={swMain}
+          />
+          <path
+            d={sif.rubRailAndPortals}
+            stroke={ferryOrangeStroke}
+            strokeWidth={swFine}
+          />
+          <path
+            d={sif.lowerDeck}
+            fill={ferryOrangeWash}
+            stroke={ferryOrangeStroke}
+            pathLength={1}
+            className="nyc-ink-path"
+            style={drawDelayStyle(3, 55)}
+            strokeWidth={swMain}
+          />
+          <path
+            d={sif.upperDeck}
+            fill={ferryOrangeWash}
+            stroke={ferryOrangeStroke}
+            pathLength={1}
+            className="nyc-ink-path"
+            style={drawDelayStyle(4, 55)}
+            strokeWidth={swMain}
+          />
+          <path
+            d={sif.pilotHousesAndStack}
+            fill={ferryOrangeWash}
+            stroke={ferryOrangeStroke}
+            pathLength={1}
+            className="nyc-ink-path"
+            style={drawDelayStyle(5, 55)}
+            strokeWidth={swFine}
+          />
+
+          <path
+            d={sif.lowerWindows}
+            stroke={windowDayStroke}
+            strokeWidth={strokePx(isDark ? 2.1 : 1.35, s)}
+            opacity={isDark ? 0.96 : 0.85}
+          />
+          <path
+            d={sif.upperWindows}
+            stroke={windowDayStroke}
+            strokeWidth={strokePx(isDark ? 1.95 : 1.25, s)}
+            opacity={isDark ? 0.94 : 0.85}
+          />
+          <path
+            d={sif.bridgeWindows}
+            stroke={isDark ? "#fef08a" : windowDayStroke}
+            strokeWidth={strokePx(isDark ? 1.75 : 1.15, s)}
+            opacity={isDark ? 0.96 : 0.85}
+          />
+
+          {isDark && (
+            <g data-entity="staten-island-ferry-night-lights">
+              <path
+                d="M -42 12.5 L 42 12.5 M -28 15.2 L 28 15.2"
+                stroke="#fb923c"
+                strokeWidth={strokePx(1.05, s)}
+                opacity={0.5}
+              />
+              <circle
+                cx={48}
+                cy={-1}
+                r={1.35}
+                fill="#4ade80"
+                stroke="none"
+              />
+              <circle
+                cx={-48}
+                cy={-1}
+                r={1.3}
+                fill="#f87171"
+                stroke="none"
+              />
+              <circle
+                cx={0}
+                cy={-34.5}
+                r={3.2}
+                fill="#fef08a"
+                fillOpacity={0.32}
+                stroke="none"
+              />
+              <circle
+                cx={0}
+                cy={-34.5}
+                r={1.35}
+                fill="#fef08a"
+                stroke="none"
+              />
+            </g>
+          )}
+        </g>
+      ),
+    });
+  });
+
+  scene.charonFerrys.forEach((ship, i) => {
+    const slot = (refs.charonFerrys[i] ??= {
+      group: null,
+      oar: null,
+      arms: null,
+    });
+    const s = baseScale * 0.85;
+    const sw = strokePx(1.05, s);
+    harborItems.push({
+      waterlineY: ship.y + 9.5 * s,
+      orderTieBreaker: harborSeq++,
+      element: (
+        <g
+          key={`charon-${i}`}
+          ref={(el) => {
+            slot.group = el;
+          }}
+          data-entity="charon-ferry"
+        >
+          <path
+            d={SVG_PATHS.charonFerry.hull}
+            fill={paperMaskFill}
+            pathLength={1}
+            className="nyc-ink-path"
+            strokeWidth={sw}
+          />
+          <path
+            d={SVG_PATHS.charonFerry.skeleton}
+            pathLength={1}
+            className="nyc-ink-path"
+            strokeWidth={sw}
+          />
+          <g
+            ref={(el) => {
+              slot.oar = el;
+            }}
+          >
+            <path d={SVG_PATHS.charonFerry.oar} strokeWidth={sw} />
+          </g>
+          <path
+            ref={(el) => {
+              slot.arms = el;
+            }}
+            d="M 4 -31 L 1 -25 L 6 -24"
+            strokeWidth={sw}
+          />
+          {isDark && (
+            <g data-entity="boat-night-lights">
+              <circle cx={-32} cy={-8} r={3.2} fill="#fbbf24" fillOpacity={0.3} stroke="none" />
+              <circle cx={-32} cy={-8} r={1.3} fill="#fef08a" stroke="none" />
+              <path
+                d="M -26 12.5 L 26 12.5"
+                stroke="#fbbf24"
+                strokeWidth={strokePx(0.9, s)}
+                opacity={0.38}
+              />
+            </g>
+          )}
+        </g>
+      ),
+    });
+  });
+
+  scene.harvestBoats.forEach((boat, i) => {
+    const slot = (refs.harvestBoats[i] ??= {
+      group: null,
+      wheel: null,
+      stackSteam: null,
+      pieSteam: null,
+    });
+    const s = baseScale * 0.96;
+    const swMain = strokePx(1.1, s);
+    const swFine = strokePx(0.82, s);
+    harborItems.push({
+      waterlineY: boat.y + 10 * s,
+      orderTieBreaker: harborSeq++,
+      element: (
+        <g
+          key={`harvest-boat-${i}`}
+          ref={(el) => {
+            slot.group = el;
+          }}
+          data-entity="harvest-steamboat"
+        >
+          <path
+            d={SVG_PATHS.harvestBoat.hullAndCabin}
+            fill={paperMaskFill}
+            pathLength={1}
+            className="nyc-ink-path"
+            style={drawDelayStyle(i * 2, 60)}
+            strokeWidth={swMain}
+          />
+          <path
+            d={SVG_PATHS.harvestBoat.pieAndPumpkins}
+            fill={paperMaskFill}
+            stroke={colors.accent}
+            pathLength={1}
+            className="nyc-ink-path"
+            style={drawDelayStyle(i * 2 + 1, 60)}
+            strokeWidth={swFine}
+          />
+          <g
+            ref={(el) => {
+              slot.wheel = el;
+            }}
+          >
+            <path
+              d={SVG_PATHS.harvestBoat.paddleWheelRim}
+              fill={paperMaskFill}
+              strokeWidth={swMain}
+            />
+            <path
+              d={SVG_PATHS.harvestBoat.paddleSpokes}
+              strokeWidth={swFine}
+            />
+          </g>
+          <path
+            ref={(el) => {
+              slot.stackSteam = el;
+            }}
+            d="M -6 -38 C -10 -44 -2 -49 -7 -55 C -11 -60 -4 -64 -8 -69"
+            pathLength={1}
+            strokeDasharray="0.45 0.55"
+            strokeWidth={swFine}
+            opacity={0.78}
+          />
+          <path
+            ref={(el) => {
+              slot.pieSteam = el;
+            }}
+            d="M 26 -15 C 24 -20 29 -24 26 -29 C 23 -33 28 -36 26 -40"
+            pathLength={1}
+            strokeDasharray="0.45 0.55"
+            stroke={colors.accent}
+            strokeWidth={swFine}
+            opacity={0.82}
+          />
+          {isDark && (
+            <g data-entity="boat-night-lights">
+              <path
+                d="M -17 -6 L -12 -6 M -7 -6 L -2 -6 M 3 -6 L 8 -6 M -6 -18 L 2 -18"
+                stroke="#fde68a"
+                strokeWidth={strokePx(1.9, s)}
+                opacity={0.92}
+              />
+              <path
+                d="M -32 12.5 L 34 12.5"
+                stroke="#fbbf24"
+                strokeWidth={strokePx(0.95, s)}
+                opacity={0.42}
+              />
+              <circle cx={40} cy={-1} r={1.25} fill="#4ade80" stroke="none" />
+              <circle cx={-36} cy={-1} r={1.2} fill="#f87171" stroke="none" />
+            </g>
+          )}
+        </g>
+      ),
+    });
+  });
+
+  scene.holidayTreeBoats.forEach((boat, i) => {
+    const slot = (refs.holidayTreeBoats[i] ??= {
+      group: null,
+      star: null,
+      steam: null,
+    });
+    const s = baseScale * 0.96;
+    const swMain = strokePx(1.1, s);
+    const swFine = strokePx(0.82, s);
+    harborItems.push({
+      waterlineY: boat.y + 9 * s,
+      orderTieBreaker: harborSeq++,
+      element: (
+        <g
+          key={`tree-boat-${i}`}
+          ref={(el) => {
+            slot.group = el;
+          }}
+          data-entity="rockefeller-tree-barge"
+        >
+          <path
+            d={SVG_PATHS.holidayTreeBoat.tugAndTow}
+            fill={paperMaskFill}
+            pathLength={1}
+            className="nyc-ink-path"
+            style={drawDelayStyle(i * 2, 60)}
+            strokeWidth={swMain}
+          />
+          <path
+            d={SVG_PATHS.holidayTreeBoat.spruceBoughs}
+            fill={paperMaskFill}
+            stroke="none"
+          />
+          <path
+            d={SVG_PATHS.holidayTreeBoat.spruceBoughs}
+            fill={colors.primary}
+            fillOpacity={0.14}
+            stroke={colors.primary}
+            pathLength={1}
+            className="nyc-ink-path"
+            style={drawDelayStyle(i * 2 + 1, 60)}
+            strokeWidth={swMain}
+          />
+          <path
+            d={SVG_PATHS.holidayTreeBoat.garlandAndWreath}
+            stroke={colors.accent}
+            strokeWidth={swFine}
+          />
+          <g
+            ref={(el) => {
+              slot.star = el;
+            }}
+          >
+            <path
+              d={SVG_PATHS.holidayTreeBoat.starTopper}
+              fill={paperMaskFill}
+              stroke="none"
+            />
+            <path
+              d={SVG_PATHS.holidayTreeBoat.starTopper}
+              fill={colors.accent}
+              fillOpacity={0.28}
+              stroke={colors.accent}
+              strokeWidth={swFine}
+            />
+          </g>
+          <path
+            ref={(el) => {
+              slot.steam = el;
+            }}
+            d="M 26.5 -24 C 23 -30 30 -35 25 -41 C 21 -46 27 -50 23 -55"
+            pathLength={1}
+            strokeDasharray="0.44 0.56"
+            strokeWidth={swFine}
+            opacity={0.75}
+          />
+          {isDark && (
+            <g data-entity="boat-night-lights">
+              <path
+                d="M 30 -7 L 36 -7 M -76 11.5 L -22 11.5 M 14 10.5 L 46 10.5"
+                stroke="#fde68a"
+                strokeWidth={strokePx(1.5, s)}
+                opacity={0.85}
+              />
+              <circle cx={-58} cy={-8} r={1.2} fill="#ff4d4d" stroke="none" />
+              <circle cx={-41} cy={-9} r={1.2} fill="#fbbf24" stroke="none" />
+              <circle cx={-54} cy={-19} r={1.2} fill="#38bdf8" stroke="none" />
+              <circle cx={-44} cy={-20} r={1.2} fill="#4ade80" stroke="none" />
+              <circle cx={-49} cy={-31} r={1.2} fill="#f472b6" stroke="none" />
+              <circle cx={51} cy={-5} r={1.25} fill="#4ade80" stroke="none" />
+            </g>
+          )}
+        </g>
+      ),
+    });
+  });
+
+  scene.winterHarborBoats.forEach((boat, i) => {
+    const slot = (refs.winterHarborBoats[i] ??= {
+      group: null,
+      skater: null,
+      steam1: null,
+      steam2: null,
+    });
+    const s = baseScale * 0.98;
+    const swMain = strokePx(1.1, s);
+    const swFine = strokePx(0.82, s);
+    const keelY = boat.kind === "rinkBarge" ? 10 : 9;
+    harborItems.push({
+      waterlineY: boat.y + keelY * s,
+      orderTieBreaker: harborSeq++,
+      element: (
+        <g
+          key={`winter-boat-${i}`}
+          ref={(el) => {
+            slot.group = el;
+          }}
+          data-entity={`winter-${boat.kind}`}
+        >
+          {boat.kind === "rinkBarge" ? (
+            <>
+              <path
+                d={SVG_PATHS.winterHarbor.rinkBarge.hull}
+                fill={paperMaskFill}
+                pathLength={1}
+                className="nyc-ink-path"
+                style={drawDelayStyle(i * 2, 60)}
+                strokeWidth={swMain}
+              />
+              <g
+                ref={(el) => {
+                  slot.skater = el;
+                }}
+              >
+                <path
+                  d={SVG_PATHS.winterHarbor.rinkBarge.skater}
+                  stroke={colors.primary}
+                  strokeWidth={swMain}
+                />
+              </g>
+              {isDark && (
+                <g data-entity="boat-night-lights">
+                  {[-32, -16, 0, 16, 32].map((bx, bIdx) => (
+                    <circle
+                      key={bIdx}
+                      cx={bx}
+                      cy={bIdx === 2 ? -16 : bIdx === 1 || bIdx === 3 ? -17 : -19}
+                      r={1.35}
+                      fill="#fef08a"
+                      stroke="none"
+                    />
+                  ))}
+                  <path
+                    d="M -40 12.5 L 40 12.5"
+                    stroke="#fbbf24"
+                    strokeWidth={strokePx(0.95, s)}
+                    opacity={0.42}
+                  />
+                </g>
+              )}
+            </>
+          ) : (
+            <>
+              <path
+                d={SVG_PATHS.winterHarbor.cocoaTug.hull}
+                fill={paperMaskFill}
+                pathLength={1}
+                className="nyc-ink-path"
+                style={drawDelayStyle(i * 2, 60)}
+                strokeWidth={swMain}
+              />
+              <path
+                ref={(el) => {
+                  slot.steam1 = el;
+                }}
+                d="M -21 -25 C -25 -31 -17 -36 -22 -43 C -26 -48 -19 -53 -23 -58"
+                pathLength={1}
+                strokeDasharray="0.45 0.55"
+                stroke={colors.accent}
+                strokeWidth={swFine}
+                opacity={0.82}
+              />
+              <path
+                ref={(el) => {
+                  slot.steam2 = el;
+                }}
+                d="M -16 -24 C -13 -30 -19 -35 -15 -41"
+                pathLength={1}
+                strokeDasharray="0.45 0.55"
+                strokeWidth={swFine}
+                opacity={0.72}
+              />
+              {isDark && (
+                <g data-entity="boat-night-lights">
+                  <path
+                    d="M 6 -8 L 14 -8 M -28 11.5 L 36 11.5"
+                    stroke="#fde68a"
+                    strokeWidth={strokePx(1.6, s)}
+                    opacity={0.88}
+                  />
+                  <circle cx={41} cy={-5} r={1.25} fill="#4ade80" stroke="none" />
+                  <circle cx={6.5} cy={-23.5} r={1.3} fill="#fef08a" stroke="none" />
+                </g>
+              )}
+            </>
+          )}
+        </g>
+      ),
+    });
+  });
+
+  harborItems.push(
+    ...collectSpringSummerHarborItems(
+      scene,
+      refs.springSummer,
+      baseScale,
+      isDark,
+      colors,
+      harborSeq,
+    ),
+  );
+  harborItems.sort(
+    (a, b) => a.waterlineY - b.waterlineY || a.orderTieBreaker - b.orderTieBreaker,
+  );
 
   return (
     <>
+      {/* Layer 1 (Back): Skyline-anchored facade lighting, wreaths & waterfront props */}
+      <g data-layer="city-and-waterfront">
+        {renderCityDetailsSvgElements(
+          scene,
+          refs.cityDetails,
+          baseScale,
+          isDark,
+          colors,
+        )}
+      </g>
+
+      {/* Layer 2 (Mid): Sky clouds, birds, aircraft, Kai sky gliders & falling particles */}
+      <g data-layer="sky-and-aerial">
       {/* 1. Upper-sky twinkling compass stars (Christmas) */}
       {scene.twinkleStars.map((star, i) => {
         const s = baseScale * star.scale * 1.15;
@@ -1209,604 +1873,6 @@ export function renderSceneSvgElements(
         );
       })}
 
-      {/* 12. Small River Icebergs (Winter) */}
-      {scene.iceFloes.map((floe, i) => {
-        const s = baseScale * floe.scale * 0.95;
-        const iceStroke = isDark
-          ? "rgba(125, 211, 252, 0.86)"
-          : "rgba(14, 116, 144, 0.78)";
-        return (
-          <g
-            key={`floe-${i}`}
-            ref={(el) => {
-              refs.iceFloes[i] = el;
-            }}
-            data-entity="river-iceberg"
-          >
-            <path
-              d={SVG_PATHS.iceFloes[floe.variant]}
-              fill={paperMaskFill}
-              stroke={iceStroke}
-              pathLength={1}
-              className="nyc-ink-path"
-              style={drawDelayStyle(i, 45)}
-              strokeWidth={strokePx(1.0, s)}
-            />
-          </g>
-        );
-      })}
-
-      {/* 13. Standard NYC Harbor Ships */}
-      {scene.ships.map((ship, i) => {
-        const s = baseScale * 0.85;
-        const nl = SVG_PATHS.shipNightLights[ship.type];
-        return (
-          <g
-            key={`ship-${i}`}
-            ref={(el) => {
-              refs.ships[i] = el;
-            }}
-            data-entity={`ship-${ship.type}`}
-          >
-            <path
-              d={SVG_PATHS.ships[ship.type]}
-              fill={paperMaskFill}
-              fillOpacity={0.45}
-              pathLength={1}
-              className="nyc-ink-path"
-              style={drawDelayStyle(i, 55)}
-              strokeWidth={strokePx(1.05, s)}
-            />
-            {isDark && (
-              <g data-entity="ship-night-lights">
-                <path
-                  d={nl.reflection}
-                  stroke="#fbbf24"
-                  strokeWidth={strokePx(0.9, s)}
-                  opacity={0.42}
-                />
-                <path
-                  d={nl.windows}
-                  stroke="#fde68a"
-                  strokeWidth={strokePx(1.85, s)}
-                  opacity={0.92}
-                />
-                <circle
-                  cx={nl.bowLight[0]}
-                  cy={nl.bowLight[1]}
-                  r={1.25}
-                  fill="#4ade80"
-                  stroke="none"
-                />
-                <circle
-                  cx={nl.sternLight[0]}
-                  cy={nl.sternLight[1]}
-                  r={1.2}
-                  fill="#f87171"
-                  stroke="none"
-                />
-                <circle
-                  cx={nl.mastLight[0]}
-                  cy={nl.mastLight[1]}
-                  r={2.5}
-                  fill="#fef08a"
-                  fillOpacity={0.28}
-                  stroke="none"
-                />
-                <circle
-                  cx={nl.mastLight[0]}
-                  cy={nl.mastLight[1]}
-                  r={1.2}
-                  fill="#fef08a"
-                  stroke="none"
-                />
-              </g>
-            )}
-          </g>
-        );
-      })}
-
-      {/* 13B. Iconic Orange Staten Island Ferry (All Seasons) */}
-      {scene.statenIslandFerrys.map((_, i) => {
-        const slot = (refs.statenIslandFerrys[i] ??= {
-          group: null,
-          wake: null,
-        });
-        const s = baseScale * 0.98;
-        const swMain = strokePx(1.18, s);
-        const swFine = strokePx(0.88, s);
-        const orangeAlpha = Math.min(1, 0.58 + inkMultiplier * 0.45).toFixed(2);
-        const ferryOrangeStroke = isDark
-          ? `rgba(251, 122, 36, ${orangeAlpha})`
-          : `rgba(217, 83, 15, ${orangeAlpha})`;
-        const ferryOrangeWash = isDark
-          ? "rgba(234, 88, 12, 0.34)"
-          : "rgba(249, 115, 22, 0.24)";
-        const windowDayStroke = isDark
-          ? "#fde68a"
-          : `rgba(154, 52, 18, ${orangeAlpha})`;
-        const sif = SVG_PATHS.statenIslandFerry;
-
-        return (
-          <g
-            key={`staten-island-ferry-${i}`}
-            ref={(el) => {
-              slot.group = el;
-            }}
-            data-entity="staten-island-ferry"
-          >
-            {/* Animated trailing harbor wake */}
-            <path
-              ref={(el) => {
-                slot.wake = el;
-              }}
-              d={sif.wakeRipples}
-              pathLength={1}
-              strokeDasharray="0.46 0.54"
-              stroke={isDark ? "rgba(251, 146, 60, 0.52)" : colors.sketch}
-              strokeWidth={strokePx(0.9, s)}
-              opacity={0.78}
-            />
-
-            {/* Opaque paper/night mask behind ferry silhouette */}
-            <path d={sif.hull} fill={paperMaskFill} stroke="none" />
-            <path d={sif.lowerDeck} fill={paperMaskFill} stroke="none" />
-            <path d={sif.upperDeck} fill={paperMaskFill} stroke="none" />
-
-            {/* Signature International Staten Island Ferry Orange hull & passenger decks */}
-            <path
-              d={sif.hull}
-              fill={ferryOrangeWash}
-              stroke={ferryOrangeStroke}
-              pathLength={1}
-              className="nyc-ink-path"
-              style={drawDelayStyle(2, 55)}
-              strokeWidth={swMain}
-            />
-            <path
-              d={sif.rubRailAndPortals}
-              stroke={ferryOrangeStroke}
-              strokeWidth={swFine}
-            />
-            <path
-              d={sif.lowerDeck}
-              fill={ferryOrangeWash}
-              stroke={ferryOrangeStroke}
-              pathLength={1}
-              className="nyc-ink-path"
-              style={drawDelayStyle(3, 55)}
-              strokeWidth={swMain}
-            />
-            <path
-              d={sif.upperDeck}
-              fill={ferryOrangeWash}
-              stroke={ferryOrangeStroke}
-              pathLength={1}
-              className="nyc-ink-path"
-              style={drawDelayStyle(4, 55)}
-              strokeWidth={swMain}
-            />
-            <path
-              d={sif.pilotHousesAndStack}
-              fill={ferryOrangeWash}
-              stroke={ferryOrangeStroke}
-              pathLength={1}
-              className="nyc-ink-path"
-              style={drawDelayStyle(5, 55)}
-              strokeWidth={swFine}
-            />
-
-            {/* Promenade & pilot-house window rows (terracotta ink by day, warm glowing cabin lights at night) */}
-            <path
-              d={sif.lowerWindows}
-              stroke={windowDayStroke}
-              strokeWidth={strokePx(isDark ? 2.1 : 1.35, s)}
-              opacity={isDark ? 0.96 : 0.85}
-            />
-            <path
-              d={sif.upperWindows}
-              stroke={windowDayStroke}
-              strokeWidth={strokePx(isDark ? 1.95 : 1.25, s)}
-              opacity={isDark ? 0.94 : 0.85}
-            />
-            <path
-              d={sif.bridgeWindows}
-              stroke={isDark ? "#fef08a" : windowDayStroke}
-              strokeWidth={strokePx(isDark ? 1.75 : 1.15, s)}
-              opacity={isDark ? 0.96 : 0.85}
-            />
-
-            {/* Night-mode maritime beacons & warm orange-gold harbor water reflections */}
-            {isDark && (
-              <g data-entity="staten-island-ferry-night-lights">
-                <path
-                  d="M -42 12.5 L 42 12.5 M -28 15.2 L 28 15.2"
-                  stroke="#fb923c"
-                  strokeWidth={strokePx(1.05, s)}
-                  opacity={0.5}
-                />
-                <circle
-                  cx={48}
-                  cy={-1}
-                  r={1.35}
-                  fill="#4ade80"
-                  stroke="none"
-                />
-                <circle
-                  cx={-48}
-                  cy={-1}
-                  r={1.3}
-                  fill="#f87171"
-                  stroke="none"
-                />
-                <circle
-                  cx={0}
-                  cy={-34.5}
-                  r={3.2}
-                  fill="#fef08a"
-                  fillOpacity={0.32}
-                  stroke="none"
-                />
-                <circle
-                  cx={0}
-                  cy={-34.5}
-                  r={1.35}
-                  fill="#fef08a"
-                  stroke="none"
-                />
-              </g>
-            )}
-          </g>
-        );
-      })}
-
-      {/* 14A. Charon's Skeleton Ferry (Halloween) */}
-      {scene.charonFerrys.map((_, i) => {
-        const slot = (refs.charonFerrys[i] ??= {
-          group: null,
-          oar: null,
-          arms: null,
-        });
-        const s = baseScale * 0.85;
-        const sw = strokePx(1.05, s);
-        return (
-          <g
-            key={`charon-${i}`}
-            ref={(el) => {
-              slot.group = el;
-            }}
-            data-entity="charon-ferry"
-          >
-            <path
-              d={SVG_PATHS.charonFerry.hull}
-              fill={paperMaskFill}
-              pathLength={1}
-              className="nyc-ink-path"
-              strokeWidth={sw}
-            />
-            <path
-              d={SVG_PATHS.charonFerry.skeleton}
-              pathLength={1}
-              className="nyc-ink-path"
-              strokeWidth={sw}
-            />
-            <g
-              ref={(el) => {
-                slot.oar = el;
-              }}
-            >
-              <path d={SVG_PATHS.charonFerry.oar} strokeWidth={sw} />
-            </g>
-            <path
-              ref={(el) => {
-                slot.arms = el;
-              }}
-              d="M 4 -31 L 1 -25 L 6 -24"
-              strokeWidth={sw}
-            />
-            {isDark && (
-              <g data-entity="boat-night-lights">
-                <circle cx={-32} cy={-8} r={3.2} fill="#fbbf24" fillOpacity={0.3} stroke="none" />
-                <circle cx={-32} cy={-8} r={1.3} fill="#fef08a" stroke="none" />
-                <path
-                  d="M -26 12.5 L 26 12.5"
-                  stroke="#fbbf24"
-                  strokeWidth={strokePx(0.9, s)}
-                  opacity={0.38}
-                />
-              </g>
-            )}
-          </g>
-        );
-      })}
-
-      {/* 14B. Hudson Harvest Pumpkin-Pie Paddlewheel Steamboat (Thanksgiving) */}
-      {scene.harvestBoats.map((_, i) => {
-        const slot = (refs.harvestBoats[i] ??= {
-          group: null,
-          wheel: null,
-          stackSteam: null,
-          pieSteam: null,
-        });
-        const s = baseScale * 0.96;
-        const swMain = strokePx(1.1, s);
-        const swFine = strokePx(0.82, s);
-        return (
-          <g
-            key={`harvest-boat-${i}`}
-            ref={(el) => {
-              slot.group = el;
-            }}
-            data-entity="harvest-steamboat"
-          >
-            <path
-              d={SVG_PATHS.harvestBoat.hullAndCabin}
-              fill={paperMaskFill}
-              pathLength={1}
-              className="nyc-ink-path"
-              style={drawDelayStyle(i * 2, 60)}
-              strokeWidth={swMain}
-            />
-            <path
-              d={SVG_PATHS.harvestBoat.pieAndPumpkins}
-              stroke={colors.accent}
-              pathLength={1}
-              className="nyc-ink-path"
-              style={drawDelayStyle(i * 2 + 1, 60)}
-              strokeWidth={swFine}
-            />
-            <g
-              ref={(el) => {
-                slot.wheel = el;
-              }}
-            >
-              <path
-                d={SVG_PATHS.harvestBoat.paddleWheelRim}
-                fill={paperMaskFill}
-                strokeWidth={swMain}
-              />
-              <path
-                d={SVG_PATHS.harvestBoat.paddleSpokes}
-                strokeWidth={swFine}
-              />
-            </g>
-            <path
-              ref={(el) => {
-                slot.stackSteam = el;
-              }}
-              d="M -6 -38 C -10 -44 -2 -49 -7 -55 C -11 -60 -4 -64 -8 -69"
-              pathLength={1}
-              strokeDasharray="0.45 0.55"
-              strokeWidth={swFine}
-              opacity={0.78}
-            />
-            <path
-              ref={(el) => {
-                slot.pieSteam = el;
-              }}
-              d="M 26 -15 C 24 -20 29 -24 26 -29 C 23 -33 28 -36 26 -40"
-              pathLength={1}
-              strokeDasharray="0.45 0.55"
-              stroke={colors.accent}
-              strokeWidth={swFine}
-              opacity={0.82}
-            />
-            {isDark && (
-              <g data-entity="boat-night-lights">
-                <path
-                  d="M -17 -6 L -12 -6 M -7 -6 L -2 -6 M 3 -6 L 8 -6 M -6 -18 L 2 -18"
-                  stroke="#fde68a"
-                  strokeWidth={strokePx(1.9, s)}
-                  opacity={0.92}
-                />
-                <path
-                  d="M -32 12.5 L 34 12.5"
-                  stroke="#fbbf24"
-                  strokeWidth={strokePx(0.95, s)}
-                  opacity={0.42}
-                />
-                <circle cx={40} cy={-1} r={1.25} fill="#4ade80" stroke="none" />
-                <circle cx={-36} cy={-1} r={1.2} fill="#f87171" stroke="none" />
-              </g>
-            )}
-          </g>
-        );
-      })}
-
-      {/* 14C. Rockefeller Christmas Spruce Tugboat & Barge (Christmas) */}
-      {scene.holidayTreeBoats.map((_, i) => {
-        const slot = (refs.holidayTreeBoats[i] ??= {
-          group: null,
-          star: null,
-          steam: null,
-        });
-        const s = baseScale * 0.96;
-        const swMain = strokePx(1.1, s);
-        const swFine = strokePx(0.82, s);
-        return (
-          <g
-            key={`tree-boat-${i}`}
-            ref={(el) => {
-              slot.group = el;
-            }}
-            data-entity="rockefeller-tree-barge"
-          >
-            <path
-              d={SVG_PATHS.holidayTreeBoat.tugAndTow}
-              fill={paperMaskFill}
-              pathLength={1}
-              className="nyc-ink-path"
-              style={drawDelayStyle(i * 2, 60)}
-              strokeWidth={swMain}
-            />
-            <path
-              d={SVG_PATHS.holidayTreeBoat.spruceBoughs}
-              fill={colors.primary}
-              fillOpacity={0.14}
-              stroke={colors.primary}
-              pathLength={1}
-              className="nyc-ink-path"
-              style={drawDelayStyle(i * 2 + 1, 60)}
-              strokeWidth={swMain}
-            />
-            <path
-              d={SVG_PATHS.holidayTreeBoat.garlandAndWreath}
-              stroke={colors.accent}
-              strokeWidth={swFine}
-            />
-            <g
-              ref={(el) => {
-                slot.star = el;
-              }}
-            >
-              <path
-                d={SVG_PATHS.holidayTreeBoat.starTopper}
-                fill={colors.accent}
-                fillOpacity={0.28}
-                stroke={colors.accent}
-                strokeWidth={swFine}
-              />
-            </g>
-            <path
-              ref={(el) => {
-                slot.steam = el;
-              }}
-              d="M 26.5 -24 C 23 -30 30 -35 25 -41 C 21 -46 27 -50 23 -55"
-              pathLength={1}
-              strokeDasharray="0.44 0.56"
-              strokeWidth={swFine}
-              opacity={0.75}
-            />
-            {isDark && (
-              <g data-entity="boat-night-lights">
-                <path
-                  d="M 30 -7 L 36 -7 M -76 11.5 L -22 11.5 M 14 10.5 L 46 10.5"
-                  stroke="#fde68a"
-                  strokeWidth={strokePx(1.5, s)}
-                  opacity={0.85}
-                />
-                <circle cx={-58} cy={-8} r={1.2} fill="#ff4d4d" stroke="none" />
-                <circle cx={-41} cy={-9} r={1.2} fill="#fbbf24" stroke="none" />
-                <circle cx={-54} cy={-19} r={1.2} fill="#38bdf8" stroke="none" />
-                <circle cx={-44} cy={-20} r={1.2} fill="#4ade80" stroke="none" />
-                <circle cx={-49} cy={-31} r={1.2} fill="#f472b6" stroke="none" />
-                <circle cx={51} cy={-5} r={1.25} fill="#4ade80" stroke="none" />
-              </g>
-            )}
-          </g>
-        );
-      })}
-
-      {/* 14D. Winter Harbor Rink Barge & Hot-Cocoa Tug (Winter) */}
-      {scene.winterHarborBoats.map((boat, i) => {
-        const slot = (refs.winterHarborBoats[i] ??= {
-          group: null,
-          skater: null,
-          steam1: null,
-          steam2: null,
-        });
-        const s = baseScale * 0.98;
-        const swMain = strokePx(1.1, s);
-        const swFine = strokePx(0.82, s);
-        return (
-          <g
-            key={`winter-boat-${i}`}
-            ref={(el) => {
-              slot.group = el;
-            }}
-            data-entity={`winter-${boat.kind}`}
-          >
-            {boat.kind === "rinkBarge" ? (
-              <>
-                <path
-                  d={SVG_PATHS.winterHarbor.rinkBarge.hull}
-                  fill={paperMaskFill}
-                  pathLength={1}
-                  className="nyc-ink-path"
-                  style={drawDelayStyle(i * 2, 60)}
-                  strokeWidth={swMain}
-                />
-                <g
-                  ref={(el) => {
-                    slot.skater = el;
-                  }}
-                >
-                  <path
-                    d={SVG_PATHS.winterHarbor.rinkBarge.skater}
-                    stroke={colors.primary}
-                    strokeWidth={swMain}
-                  />
-                </g>
-                {isDark && (
-                  <g data-entity="boat-night-lights">
-                    {[-32, -16, 0, 16, 32].map((bx, bIdx) => (
-                      <circle
-                        key={bIdx}
-                        cx={bx}
-                        cy={bIdx === 2 ? -16 : bIdx === 1 || bIdx === 3 ? -17 : -19}
-                        r={1.35}
-                        fill="#fef08a"
-                        stroke="none"
-                      />
-                    ))}
-                    <path
-                      d="M -40 12.5 L 40 12.5"
-                      stroke="#fbbf24"
-                      strokeWidth={strokePx(0.95, s)}
-                      opacity={0.42}
-                    />
-                  </g>
-                )}
-              </>
-            ) : (
-              <>
-                <path
-                  d={SVG_PATHS.winterHarbor.cocoaTug.hull}
-                  fill={paperMaskFill}
-                  pathLength={1}
-                  className="nyc-ink-path"
-                  style={drawDelayStyle(i * 2, 60)}
-                  strokeWidth={swMain}
-                />
-                <path
-                  ref={(el) => {
-                    slot.steam1 = el;
-                  }}
-                  d="M -21 -25 C -25 -31 -17 -36 -22 -43 C -26 -48 -19 -53 -23 -58"
-                  pathLength={1}
-                  strokeDasharray="0.45 0.55"
-                  stroke={colors.accent}
-                  strokeWidth={swFine}
-                  opacity={0.82}
-                />
-                <path
-                  ref={(el) => {
-                    slot.steam2 = el;
-                  }}
-                  d="M -16 -24 C -13 -30 -19 -35 -15 -41"
-                  pathLength={1}
-                  strokeDasharray="0.45 0.55"
-                  strokeWidth={swFine}
-                  opacity={0.72}
-                />
-                {isDark && (
-                  <g data-entity="boat-night-lights">
-                    <path
-                      d="M 6 -8 L 14 -8 M -28 11.5 L 36 11.5"
-                      stroke="#fde68a"
-                      strokeWidth={strokePx(1.6, s)}
-                      opacity={0.88}
-                    />
-                    <circle cx={41} cy={-5} r={1.25} fill="#4ade80" stroke="none" />
-                    <circle cx={6.5} cy={-23.5} r={1.3} fill="#fef08a" stroke="none" />
-                  </g>
-                )}
-              </>
-            )}
-          </g>
-        );
-      })}
-
       {/* 15. Tumbling Autumn Leaves (Thanksgiving) */}
       {scene.autumnLeaves.map((leaf, i) => {
         const slot = (refs.autumnLeaves[i] ??= { group: null, inner: null });
@@ -1870,23 +1936,20 @@ export function renderSceneSvgElements(
         );
       })}
 
-      {/* 17. Spring, Summer & Festival Themes */}
-      {renderSpringSummerSvgElements(
+      {/* 17. Spring, Summer & Festival Sky Elements */}
+      {renderSpringSummerAerialSvgElements(
         scene,
         refs.springSummer,
         baseScale,
         isDark,
         colors,
       )}
+      </g>
 
-      {/* 18. Skyline-Anchored City Landmarks & Drone Show */}
-      {renderCityDetailsSvgElements(
-        scene,
-        refs.cityDetails,
-        baseScale,
-        isDark,
-        colors,
-      )}
+      {/* Layer 3 (Forefront): Harbor watercraft Y-sorted from upper bay (back) to lower foreground */}
+      <g data-layer="harbor-forefront">
+        {harborItems.map((item) => item.element)}
+      </g>
     </>
   );
 }

@@ -13,7 +13,7 @@ export interface ThemeInkPalette {
   paperMask: string;
 }
 
-const CSS_PAPER_MASK = "color-mix(in srgb, var(--background) 92%, transparent)";
+const CSS_PAPER_MASK = "var(--background)";
 
 export const THEME_INK_PALETTES: Record<
   DesignThemeId,

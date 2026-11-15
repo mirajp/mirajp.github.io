@@ -1,5 +1,5 @@
 // ============================================================================
-// AI-crafted SVG <path d="..."> line-drawing catalog for NycHero / miraj.dev
+// Hand-crafted SVG <path d="..."> line-drawing catalog for NycHero / miraj.dev
 //
 // Canonical orientation:
 //   Every newly authored sprite faces +X (right) in local space so horizontal
@@ -40,31 +40,31 @@ export const SVG_PATHS = {
   ships: {
     ferry:
       "M -35 0 L 35 0 L 30 10 L -30 10 Z " +
-      "M -30 0 L -25 -12 L 25 -12 L 30 0 " +
-      "M -20 -12 L -15 -20 L 15 -20 L 20 -12 " +
+      "M -30 0 L -25 -12 L 25 -12 L 30 0 Z " +
+      "M -20 -12 L -15 -20 L 15 -20 L 20 -12 Z " +
       "M -15 -6 L -10 -6 M -5 -6 L 0 -6 M 5 -6 L 10 -6 M 15 -6 L 20 -6",
 
     catamaran:
-      "M -35 0 L 25 0 L 35 -10 L 25 -10 Z " +
-      "M -30 0 L -25 -15 L 15 -15 L 25 -10 " +
-      "M -15 -15 L -10 -22 L 5 -22 L 10 -15 " +
+      "M -35 0 L 25 0 L 35 -10 L 25 -10 L 25 0 Z " +
+      "M -30 0 L -25 -15 L 15 -15 L 25 -10 L 25 0 Z " +
+      "M -15 -15 L -10 -22 L 5 -22 L 10 -15 Z " +
       "M -10 -7 L 10 -7",
 
     tugboat:
       "M -20 0 L 15 0 L 20 -5 L 20 5 L -15 5 Z " +
-      "M -5 0 L -5 -12 L 8 -12 L 8 0 " +
-      "M -2 -12 L -2 -18 L 2 -18 L 2 -12 " +
+      "M -5 0 L -5 -12 L 8 -12 L 8 0 Z " +
+      "M -2 -12 L -2 -18 L 2 -18 L 2 -12 Z " +
       "M 2 -6 L 5 -6",
 
     cargo:
       "M -40 0 L 40 0 L 35 6 L -35 6 Z " +
-      "M -30 0 L -30 -10 L -10 -10 L -10 0 " +
-      "M -5 0 L -5 -15 L 15 -15 L 15 0 " +
-      "M 25 0 L 25 -12 L 35 -12 L 35 0 " +
-      "M -35 0 L -35 -18 L -30 -18 L -30 0",
+      "M -30 0 L -30 -10 L -10 -10 L -10 0 Z " +
+      "M -5 0 L -5 -15 L 15 -15 L 15 0 Z " +
+      "M 25 0 L 25 -12 L 35 -12 L 35 0 Z " +
+      "M -35 0 L -35 -18 L -30 -18 L -30 0 Z",
 
     sailboat:
-      "M -15 0 L 15 0 Q 0 8 -15 0 M 0 0 L 0 -35 L 15 -5 L 0 -5",
+      "M -15 0 L 15 0 Q 0 8 -15 0 Z M 0 -5 L 0 -35 L 15 -5 Z M 0 0 L 0 -5",
   },
 
   // Night-mode cabin windows, maritime navigation lights & water reflections for standard ships
@@ -494,11 +494,11 @@ export const SVG_PATHS = {
       // Classic Hudson paddle-steamer facing +X
       "M -38 0 L 44 0 L 36 10 L -34 10 Z " +
       "M -32 5 L 34 5 " +
-      "M -24 0 L -22 -13 L 14 -13 L 17 0 " +
-      "M -14 -13 L -12 -23 L 6 -23 L 8 -13 " +
+      "M -24 0 L -22 -13 L 14 -13 L 17 0 Z " +
+      "M -14 -13 L -12 -23 L 6 -23 L 8 -13 Z " +
       // Twin vintage fluted smokestacks
-      "M -8 -23 L -8 -36 L -4 -36 L -4 -23 M -9 -36 L -3 -36 " +
-      "M 0 -23 L 0 -34 L 4 -34 L 4 -23 M -1 -34 L 5 -34 " +
+      "M -8 -23 L -8 -36 L -4 -36 L -4 -23 Z M -9 -36 L -3 -36 " +
+      "M 0 -23 L 0 -34 L 4 -34 L 4 -23 Z M -1 -34 L 5 -34 " +
       // Windows
       "M -17 -6 L -12 -6 M -7 -6 L -2 -6 M 3 -6 L 8 -6 M -6 -18 L 2 -18",
     pieAndPumpkins:
@@ -622,8 +622,8 @@ export const SVG_PATHS = {
     tugAndTow:
       // NYC Tugboat (right, +X) towing Rockefeller Spruce barge (left, -X)
       "M 8 0 L 48 0 L 54 -6 L 50 8 L 12 8 Z " +
-      "M 18 0 L 20 -13 L 38 -13 L 40 0 " +
-      "M 24 -13 L 24 -22 L 29 -22 L 29 -13 " +
+      "M 18 0 L 20 -13 L 38 -13 L 40 0 Z " +
+      "M 24 -13 L 24 -22 L 29 -22 L 29 -13 Z " +
       "M 23 -20 L 30 -20 M 31 -7 L 36 -7 " +
       // Tire fenders along tug hull
       "M 18 4 A 2 2 0 1 0 22 4 A 2 2 0 1 0 18 4 " +
@@ -756,7 +756,7 @@ export const SVG_PATHS = {
       hull:
         // Floating winter ice-rink barge facing +X
         "M -50 2 L 50 2 L 44 10 L -44 10 Z " +
-        "M -44 2 L -44 -5 L 44 -5 L 44 2 " +
+        "M -44 2 L -44 -5 L 44 -5 L 44 2 Z " +
         // Festoon light posts & draped cable + etched figure-8 rink trace
         "M -40 -5 L -40 -22 M 40 -5 L 40 -22 " +
         "M -40 -20 Q 0 -12 40 -20 " +
@@ -774,8 +774,8 @@ export const SVG_PATHS = {
       hull:
         // Cozy NYC winter tug carrying a giant steaming hot-cocoa mug
         "M -34 0 L 38 0 L 44 -6 L 40 9 L -28 9 Z " +
-        "M -6 0 L -4 -14 L 18 -14 L 20 0 " +
-        "M 4 -14 L 4 -22 L 9 -22 L 9 -14 M 7 -8 L 14 -8 " +
+        "M -6 0 L -4 -14 L 18 -14 L 20 0 Z " +
+        "M 4 -14 L 4 -22 L 9 -22 L 9 -14 Z M 7 -8 L 14 -8 " +
         // Giant ceramic hot-cocoa mug on stern deck (-28..-10)
         "M -27 0 L -27 -18 L -11 -18 L -11 0 Z " +
         "M -27 -14 L -11 -14 " +
