@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en" data-theme="dark" data-accent="blue" data-density="comfortable" data-reduced-motion="false">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3D Basic Studio</title>
+    <meta name="description" content="Basic 3D modeling app, all offline." />
+    <link rel="canonical" href="https://miraj.dev/3d-basic/">
+    <meta name="robots" content="noindex,nofollow" />
+    <script>
+      (function () {
+        try {
+          var raw = localStorage.getItem('3d_basic_settings_v1');
+          var parsed = raw ? JSON.parse(raw) : null;
+          var s = parsed && typeof parsed === 'object' && parsed.settings && typeof parsed.settings === 'object'
+            ? parsed.settings
+            : (parsed && typeof parsed === 'object' ? parsed : {});
+          var themePref = s.theme;
+          var resolvedTheme = 'dark';
+          if (themePref === 'light' || themePref === 'dark') {
+            resolvedTheme = themePref;
+          } else if (themePref === 'system' && window.matchMedia) {
+            resolvedTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          }
+          var accents = { blue: 1, teal: 1, violet: 1, amber: 1 };
+          var accent = accents[s.accentColor] ? s.accentColor : 'blue';
+          var density = s.uiDensity === 'compact' ? 'compact' : 'comfortable';
+          var reduced = s.reducedMotion === true ? 'true' : 'false';
+          var el = document.documentElement;
+          el.dataset.theme = resolvedTheme;
+          el.dataset.accent = accent;
+          el.dataset.density = density;
+          el.dataset.reducedMotion = reduced;
+        } catch (e) {
+          // Ignore storage errors and keep default dark theme attributes.
+        }
+      })();
+    </script>
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230f141e'/%3E%3Cpath d='M16 5L26 10.8V21.2L16 27L6 21.2V10.8L16 5Z' fill='none' stroke='%2338bdf8' stroke-width='2.4' stroke-linejoin='round'/%3E%3Cpath d='M16 16L26 10.8M16 16L6 10.8M16 16V27' stroke='%2338bdf8' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E"
+    />
+    <script type="module" crossorigin src="./assets/index-DwzW79WO.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-E5qJ2z0l.css">
+  </head>
+  <body class="bg-[var(--surface-base)] text-[var(--ink-primary)] antialiased selection:bg-[var(--accent-container)] selection:text-[var(--accent-on-container)] overflow-hidden">
+    <div id="root"></div>
+  </body>
+</html>
